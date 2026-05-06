@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { Customer } from "../models/customer";
 
 const router: IRouter = Router();
@@ -29,7 +29,7 @@ router.get("/customers", async (req, res) => {
 router.post("/customers", async (req, res) => {
   const parsed = CreateCustomerSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: z.prettifyError(parsed.error) });
+    res.status(400).json({ error: parsed.error.issues.map((i) => i.message).join(", ") });
     return;
   }
 

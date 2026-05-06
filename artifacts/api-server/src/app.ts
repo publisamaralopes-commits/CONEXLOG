@@ -38,11 +38,22 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
+mongoose.connection.on("connecting", () => logger.info("Connecting to MongoDB..."));
+mongoose.connection.on("connected", () => logger.info("Connected to MongoDB"));
+mongoose.connection.on("error", (err) => logger.error(err, "MongoDB connection error"));
+mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected"));
+
 mongoose
-  .connect(MONGODB_URI)
-  .then(() => logger.info("Connected to MongoDB"))
+  .connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 15000,
+    tls: true,
+    tlsInsecure: true,
+  })
   .catch((err) => {
-    logger.error(err, "Failed to connect to MongoDB");
+    logger.error(
+      { message: err?.message },
+      "Failed to connect to MongoDB — check MONGODB_URI and IP allowlist in Atlas",
+    );
     process.exit(1);
   });
 
