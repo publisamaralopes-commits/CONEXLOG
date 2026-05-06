@@ -1,44 +1,54 @@
-# [Project name]
+# Customer Management API
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A simple REST API for managing customers — add, list, and delete customers with name and phone number.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080, proxied at `/api`)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `MONGODB_URI` — MongoDB connection string (secret)
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
 - API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
+- DB: MongoDB + Mongoose
+- Validation: Zod v3
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/api-server/src/routes/customers.ts` — customer CRUD routes
+- `artifacts/api-server/src/models/customer.ts` — Mongoose Customer model
+- `lib/api-spec/openapi.yaml` — OpenAPI spec (source of truth for API contracts)
+- `lib/api-zod/src/generated/` — generated Zod schemas
+- `lib/api-client-react/src/generated/` — generated React Query hooks
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Contract-first: OpenAPI spec is defined first, then Zod validators and React Query hooks are generated via Orval
+- MongoDB over PostgreSQL: user explicitly chose MongoDB; Mongoose is used for schema + querying
+- `tlsInsecure: true` used for MongoDB Atlas connection due to Replit SSL environment constraints
+- Zod v3 (from catalog) used for request validation — `z.prettifyError` is not available, errors are joined manually
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- `GET /api/customers` — list all customers (newest first)
+- `POST /api/customers` — add a customer (`{ name, phone }`)
+- `DELETE /api/customers/:id` — delete a customer by ID
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Wants MongoDB (not PostgreSQL) for storage
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- MongoDB Atlas must have `0.0.0.0/0` (Allow from Anywhere) in the Network Access IP allowlist for Replit to connect
+- Do not run `pnpm dev` at the workspace root — use the workflow or `pnpm --filter @workspace/api-server run dev`
+- Always run codegen after changing `lib/api-spec/openapi.yaml`
 
 ## Pointers
 
