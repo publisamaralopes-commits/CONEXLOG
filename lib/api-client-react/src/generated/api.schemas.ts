@@ -8,3 +8,25 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  createdAt: string;
+}
+
+export interface CreateCustomerInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  phone: string;
+}
+
+export interface MessageResponse {
+  message: string;
+}
+
+export interface ErrorResponse {
+  error: string;
+}

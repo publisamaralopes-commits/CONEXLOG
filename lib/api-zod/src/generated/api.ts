@@ -14,3 +14,37 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Returns a list of all customers
+ * @summary List all customers
+ */
+export const ListCustomersResponseItem = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  phone: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const ListCustomersResponse = zod.array(ListCustomersResponseItem);
+
+/**
+ * Creates a new customer with name and phone number
+ * @summary Add a new customer
+ */
+
+export const CreateCustomerBody = zod.object({
+  name: zod.string().min(1),
+  phone: zod.string().min(1),
+});
+
+/**
+ * Deletes a customer by ID
+ * @summary Delete a customer
+ */
+export const DeleteCustomerParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const DeleteCustomerResponse = zod.object({
+  message: zod.string(),
+});
