@@ -1,561 +1,1146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Customer Management</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CONEX — Sistema de Logística</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue-900:#0f2744;
+  --blue-800:#1a3a5c;
+  --blue-700:#1e4976;
+  --blue-600:#1d6fa6;
+  --blue-500:#2563eb;
+  --blue-400:#3b82f6;
+  --blue-100:#dbeafe;
+  --blue-50:#eff6ff;
+  --gray-900:#0f172a;
+  --gray-700:#334155;
+  --gray-500:#64748b;
+  --gray-300:#cbd5e1;
+  --gray-200:#e2e8f0;
+  --gray-100:#f1f5f9;
+  --gray-50:#f8fafc;
+  --green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
+  --sidebar-w:240px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--gray-100);color:var(--gray-900);height:100vh;overflow:hidden}
+.app{display:flex;height:100vh}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f5f7fa;
-      color: #1a1a2e;
-      min-height: 100vh;
-      padding: 32px 16px;
-    }
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,var(--blue-900) 0%,var(--blue-800) 100%);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .25s}
+.sidebar.collapsed{width:56px}
+.sidebar-logo{padding:20px 16px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.1)}
+.logo-icon{width:32px;height:32px;background:var(--blue-500);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.logo-text{color:#fff;font-size:1.2rem;font-weight:800;letter-spacing:.05em;white-space:nowrap}
+.logo-sub{color:rgba(255,255,255,.5);font-size:.65rem;white-space:nowrap;margin-top:1px}
+.sidebar nav{flex:1;padding:12px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.65);font-size:.875rem;font-weight:500;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-item.active{background:var(--blue-500);color:#fff;font-weight:600}
+.nav-icon{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-label{overflow:hidden;white-space:nowrap}
+.sidebar-footer{padding:12px 8px;border-top:1px solid rgba(255,255,255,.1)}
+.sidebar-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:8px 12px;background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;border-radius:6px;font-size:.8rem}
+.sidebar-toggle:hover{color:#fff;background:rgba(255,255,255,.07)}
 
-    .container { max-width: 640px; margin: 0 auto; }
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-size:1.05rem;font-weight:700;color:var(--gray-900)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-badge{background:var(--blue-50);color:var(--blue-500);border-radius:20px;padding:3px 12px;font-size:.78rem;font-weight:600}
+.content{flex:1;overflow-y:auto;padding:24px}
+.section{display:none}
+.section.active{display:block}
 
-    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 8px; color: #1a1a2e; }
+/* ── COMMON UI ── */
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.section-header h2{font-size:1.25rem;font-weight:700;color:var(--gray-900)}
+.section-header p{color:var(--gray-500);font-size:.875rem;margin-top:2px}
+.btn{cursor:pointer;border:none;border-radius:8px;font-size:.875rem;font-weight:600;padding:9px 18px;transition:background .15s,opacity .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--blue-500);color:#fff}
+.btn-primary:hover{background:var(--blue-400)}
+.btn-secondary{background:#fff;color:var(--gray-700);border:1.5px solid var(--gray-300)}
+.btn-secondary:hover{background:var(--gray-50)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{opacity:.88}
+.btn-ghost{background:transparent;color:var(--gray-500);border:1.5px solid var(--gray-200);padding:6px 10px}
+.btn-ghost:hover{background:var(--gray-100)}
+.btn-sm{padding:5px 12px;font-size:.8rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
 
-    .subtitle { color: #666; margin-bottom: 32px; font-size: 0.95rem; }
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:10px;padding:16px 20px;border:1px solid var(--gray-200);display:flex;flex-direction:column;gap:4px}
+.stat-label{font-size:.75rem;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.stat-value{font-size:1.6rem;font-weight:800;color:var(--gray-900);line-height:1}
+.stat-sub{font-size:.75rem;color:var(--gray-500)}
+.stat-card.blue .stat-value{color:var(--blue-500)}
+.stat-card.green .stat-value{color:var(--green)}
+.stat-card.amber .stat-value{color:var(--amber)}
+.stat-card.purple .stat-value{color:var(--purple)}
 
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      padding: 24px;
-      margin-bottom: 24px;
-    }
+/* ── TOOLBAR ── */
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.toolbar input,.toolbar select{padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.875rem;outline:none;background:#fff;color:var(--gray-900)}
+.toolbar input{flex:1;min-width:200px}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--blue-400)}
 
-    .card h2 {
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: #444;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-size: 0.8rem;
-    }
+/* ── TABLE ── */
+.table-wrap{background:#fff;border-radius:10px;border:1px solid var(--gray-200);overflow:hidden}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:.875rem}
+.table-wrap th{background:var(--gray-50);color:var(--gray-500);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;padding:10px 16px;text-align:left;border-bottom:1px solid var(--gray-200)}
+.table-wrap td{padding:12px 16px;border-bottom:1px solid var(--gray-100);color:var(--gray-700);vertical-align:middle}
+.table-wrap tr:last-child td{border-bottom:none}
+.table-wrap tr:hover td{background:var(--gray-50)}
+.td-actions{display:flex;gap:6px}
+.table-empty{text-align:center;color:var(--gray-500);padding:40px!important}
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-      gap: 12px;
-    }
+/* ── STATUS BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;white-space:nowrap}
+.badge-pending{background:#fef3c7;color:#92400e}
+.badge-loading{background:#dbeafe;color:#1e40af}
+.badge-in_transit{background:#ede9fe;color:#5b21b6}
+.badge-delivered{background:#d1fae5;color:#065f46}
+.badge-cancelled{background:#fee2e2;color:#991b1b}
+.badge-scheduled{background:#dbeafe;color:#1e40af}
+.badge-in_progress{background:#ede9fe;color:#5b21b6}
+.badge-completed{background:#d1fae5;color:#065f46}
+.badge-available{background:#d1fae5;color:#065f46}
+.badge-in_use{background:#dbeafe;color:#1e40af}
+.badge-maintenance{background:#fef3c7;color:#92400e}
+.badge-waiting{background:#fef3c7;color:#92400e}
+.badge-admin{background:#fce7f3;color:#9d174d}
+.badge-operator{background:#dbeafe;color:#1e40af}
+.badge-viewer{background:#f3f4f6;color:#374151}
 
-    .card-header h2 { margin-bottom: 0; white-space: nowrap; }
+/* ── OVERLAY / FORM ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.overlay.open{display:flex}
+.overlay-box{background:#fff;border-radius:14px;width:100%;max-width:780px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:90vh}
+.overlay-box.sm{max-width:480px}
+.overlay-head{padding:20px 24px 16px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.overlay-head h3{font-size:1.05rem;font-weight:700}
+.overlay-close{background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:1.2rem;padding:4px;border-radius:4px}
+.overlay-close:hover{background:var(--gray-100);color:var(--gray-900)}
+.overlay-body{padding:24px;overflow-y:auto;flex:1}
+.overlay-foot{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;flex-wrap:wrap}
 
-    .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+/* ── FORM ── */
+.form-section{margin-bottom:24px}
+.form-section-title{font-size:.8rem;font-weight:700;color:var(--blue-600);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.form-section-title::after{content:'';flex:1;height:1px;background:var(--blue-100)}
+.form-grid{display:grid;gap:14px}
+.form-grid-2{grid-template-columns:1fr 1fr}
+.form-grid-3{grid-template-columns:1fr 1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:.8rem;font-weight:600;color:var(--gray-700)}
+.form-group input,.form-group select,.form-group textarea{padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.875rem;outline:none;background:#fff;color:var(--gray-900);transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue-400);background:#fff}
+.form-group input[readonly]{background:var(--gray-50);color:var(--gray-500)}
+.form-group textarea{resize:vertical;min-height:72px;font-family:inherit}
+.form-error{color:var(--red);font-size:.8rem;margin-top:6px}
 
-    input[type="text"] {
-      flex: 1;
-      min-width: 130px;
-      padding: 10px 14px;
-      border: 1.5px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.15s;
-      background: #fafafa;
-    }
+/* ── CNH UPLOAD ── */
+.cnh-area{border:2px dashed var(--gray-300);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:border-color .15s;margin-bottom:14px;position:relative}
+.cnh-area:hover{border-color:var(--blue-400)}
+.cnh-area.has-image{padding:8px;border-style:solid;border-color:var(--blue-200)}
+.cnh-preview-img{max-width:100%;max-height:160px;border-radius:6px;object-fit:contain}
+.cnh-placeholder{color:var(--gray-500);font-size:.875rem;pointer-events:none}
+.cnh-placeholder strong{display:block;color:var(--blue-500);margin-bottom:4px;font-size:.9rem}
 
-    input[type="text"]:focus { border-color: #4f6ef7; background: #fff; }
+/* ── SHIPMENT CARDS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.shipment-card{background:#fff;border-radius:10px;border:1px solid var(--gray-200);padding:16px;display:flex;flex-direction:column;gap:10px}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start}
+.card-order{font-weight:700;color:var(--blue-600);font-size:.95rem}
+.card-route{font-size:.85rem;color:var(--gray-700)}
+.card-route span{color:var(--gray-400);margin:0 4px}
+.card-driver{font-size:.8rem;color:var(--gray-500)}
+.card-location{display:flex;align-items:center;gap:6px;font-size:.82rem;background:var(--blue-50);color:var(--blue-700);padding:6px 10px;border-radius:6px;font-weight:500}
 
-    .search-wrap { position: relative; flex: 1; }
+/* ── REPORTS ── */
+.report-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:24px}
+.report-card{background:#fff;border-radius:10px;border:1px solid var(--gray-200);padding:20px;cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.report-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);border-color:var(--blue-300)}
+.report-card-icon{width:40px;height:40px;border-radius:10px;background:var(--blue-50);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+.report-card h4{font-size:.9rem;font-weight:700;margin-bottom:4px}
+.report-card p{font-size:.8rem;color:var(--gray-500)}
 
-    .search-wrap svg {
-      position: absolute;
-      left: 11px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #aaa;
-      pointer-events: none;
-    }
+/* ── PRINT ── */
+@media print{
+  .sidebar,.topbar,.overlay,.overlay-foot,.no-print{display:none!important}
+  .main{margin:0!important}
+  .content{padding:0!important}
+  body{background:#fff!important;overflow:visible!important;height:auto!important}
+  .app{height:auto!important;overflow:visible!important}
+  #print-order{display:block!important}
+  .section{display:none!important}
+  .section.active{display:none!important}
+}
+#print-order{display:none}
 
-    #search { width: 100%; padding-left: 34px; min-width: 0; }
-
-    .clear-btn {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: #bbb;
-      font-size: 1rem;
-      cursor: pointer;
-      padding: 0 2px;
-      line-height: 1;
-      display: none;
-    }
-
-    .clear-btn:hover { color: #888; }
-
-    button {
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: background 0.15s, opacity 0.15s;
-    }
-
-    .btn-primary { background: #4f6ef7; color: #fff; padding: 10px 20px; }
-    .btn-primary:hover { background: #3a57e8; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .btn-icon {
-      background: transparent;
-      border: 1.5px solid #e0e0e0;
-      color: #666;
-      padding: 5px 9px;
-      font-size: 0.82rem;
-      border-radius: 6px;
-      line-height: 1;
-    }
-
-    .btn-icon:hover { background: #f5f5f5; }
-
-    .btn-save { background: #4f6ef7; color: #fff; padding: 6px 14px; font-size: 0.85rem; }
-    .btn-save:hover { background: #3a57e8; }
-    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .btn-cancel { background: transparent; color: #888; padding: 6px 12px; font-size: 0.85rem; border: 1.5px solid #e0e0e0; }
-    .btn-cancel:hover { background: #f5f5f5; }
-
-    .btn-delete {
-      background: transparent;
-      color: #e53935;
-      padding: 5px 9px;
-      font-size: 0.82rem;
-      border: 1.5px solid #fccfce;
-      border-radius: 6px;
-      line-height: 1;
-    }
-
-    .btn-delete:hover { background: #fff0f0; }
-
-    .error-msg { color: #e53935; font-size: 0.85rem; margin-top: 8px; }
-
-    .customer-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-
-    .customer-item {
-      border-radius: 8px;
-      background: #f9f9fb;
-      border: 1px solid #ebebeb;
-      overflow: hidden;
-      animation: fadeIn 0.2s ease;
-    }
-
-    .customer-item.editing { border-color: #4f6ef7; background: #fff; box-shadow: 0 0 0 3px #eef0fe; }
-
-    .item-view {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      gap: 10px;
-    }
-
-    .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
-
-    .item-edit {
-      padding: 12px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .edit-fields { display: flex; gap: 8px; flex-wrap: wrap; }
-
-    .edit-fields input { flex: 1; min-width: 120px; padding: 8px 12px; font-size: 0.9rem; }
-
-    .edit-actions { display: flex; gap: 8px; }
-
-    .edit-error { color: #e53935; font-size: 0.82rem; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .customer-info strong { display: block; font-size: 0.95rem; font-weight: 600; }
-    .customer-info span { font-size: 0.85rem; color: #888; }
-
-    mark { background: #fff3b0; color: inherit; border-radius: 2px; padding: 0 1px; }
-
-    .empty-state { text-align: center; color: #aaa; font-size: 0.9rem; padding: 24px 0; }
-
-    .count-badge {
-      display: inline-block;
-      background: #eef0fe;
-      color: #4f6ef7;
-      border-radius: 20px;
-      padding: 2px 10px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-
-    .list-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .list-controls-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .sort-group {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .btn-sort {
-      background: transparent;
-      border: 1.5px solid #e0e0e0;
-      color: #666;
-      padding: 5px 10px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      border-radius: 6px;
-      white-space: nowrap;
-      transition: background 0.12s, border-color 0.12s, color 0.12s;
-    }
-
-    .btn-sort:hover { background: #f5f5f5; }
-
-    .btn-sort.active {
-      background: #eef0fe;
-      border-color: #c5cbfc;
-      color: #4f6ef7;
-    }
-
-    .btn-export {
-      background: transparent;
-      border: 1.5px solid #e0e0e0;
-      color: #555;
-      padding: 6px 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-      transition: background 0.12s, border-color 0.12s;
-    }
-
-    .btn-export:hover { background: #f5f5f5; border-color: #ccc; }
-    .btn-export:disabled { opacity: 0.4; cursor: not-allowed; }
-  </style>
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;height:100%;z-index:50}
+  .sidebar:not(.open){width:0;overflow:hidden}
+  .main{width:100%}
+  .form-grid-2,.form-grid-3{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Customer Management</h1>
-    <p class="subtitle">Add, view, and remove your customers.</p>
+<div class="app">
 
-    <div class="card">
-      <h2>Add Customer</h2>
-      <div class="form-row">
-        <input type="text" id="name" placeholder="Full name" autocomplete="off" />
-        <input type="text" id="phone" placeholder="Phone number" autocomplete="off" />
-        <button class="btn-primary" id="addBtn" onclick="addCustomer()">Add</button>
-      </div>
-      <div class="error-msg" id="formError"></div>
-    </div>
-
-    <div class="card">
-      <div class="list-controls">
-        <div class="list-controls-top">
-          <h2 style="font-weight:600;color:#444;text-transform:uppercase;letter-spacing:.05em;font-size:.8rem;white-space:nowrap">
-            Customers <span class="count-badge" id="countBadge">0</span>
-          </h2>
-          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-            <div class="sort-group">
-              <button class="btn-sort active" id="sort-newest" onclick="setSort('newest')">Newest</button>
-              <button class="btn-sort" id="sort-oldest" onclick="setSort('oldest')">Oldest</button>
-              <button class="btn-sort" id="sort-az" onclick="setSort('az')">A → Z</button>
-              <button class="btn-sort" id="sort-za" onclick="setSort('za')">Z → A</button>
-            </div>
-            <button class="btn-export" id="exportBtn" onclick="exportCSV()" title="Download as CSV">
-              <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 15v2h14v-2M10 3v10M6 9l4 4 4-4"/>
-              </svg>
-              Export CSV
-            </button>
-          </div>
-        </div>
-        <div class="search-wrap">
-          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="9" cy="9" r="7"/><line x1="14.5" y1="14.5" x2="19" y2="19"/>
-          </svg>
-          <input type="text" id="search" placeholder="Search by name or phone…" autocomplete="off" oninput="onSearch()" />
-          <button class="clear-btn" id="clearBtn" onclick="clearSearch()" title="Clear">✕</button>
-        </div>
-      </div>
-      <ul class="customer-list" id="customerList">
-        <li class="empty-state">Loading…</li>
-      </ul>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🚛</div>
+    <div class="logo-text-wrap">
+      <div class="logo-text">CONEX</div>
+      <div class="logo-sub">Logística & Transporte</div>
     </div>
   </div>
+  <nav>
+    <button class="nav-item active" data-sec="orders" onclick="navigate('orders')">
+      <span class="nav-icon">📋</span><span class="nav-label">Ordem de Carregamento</span>
+    </button>
+    <button class="nav-item" data-sec="schedule" onclick="navigate('schedule')">
+      <span class="nav-icon">📅</span><span class="nav-label">Programação</span>
+    </button>
+    <button class="nav-item" data-sec="position" onclick="navigate('position')">
+      <span class="nav-icon">📍</span><span class="nav-label">Posição</span>
+    </button>
+    <button class="nav-item" data-sec="vehicles" onclick="navigate('vehicles')">
+      <span class="nav-icon">🚚</span><span class="nav-label">Veículos</span>
+    </button>
+    <button class="nav-item" data-sec="reports" onclick="navigate('reports')">
+      <span class="nav-icon">📊</span><span class="nav-label">Relatórios</span>
+    </button>
+    <button class="nav-item" data-sec="users" onclick="navigate('users')">
+      <span class="nav-icon">👥</span><span class="nav-label">Usuários</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰ <span>Recolher</span></button>
+  </div>
+</aside>
 
-  <script>
-    const API = "/api/customers";
-    let allCustomers = [];
-    let editingId = null;
-    let sortKey = "newest";
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title" id="topbar-title">Ordem de Carregamento</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-badge">CONEX Logística</span>
+    </div>
+  </header>
 
-    function setSort(key) {
-      sortKey = key;
-      document.querySelectorAll(".btn-sort").forEach(b => b.classList.remove("active"));
-      document.getElementById("sort-" + key).classList.add("active");
-      applyFilter();
-    }
+  <div class="content">
 
-    function sortCustomers(list) {
-      const arr = [...list];
-      if (sortKey === "newest") return arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      if (sortKey === "oldest") return arr.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      if (sortKey === "az") return arr.sort((a, b) => a.name.localeCompare(b.name));
-      if (sortKey === "za") return arr.sort((a, b) => b.name.localeCompare(a.name));
-      return arr;
-    }
+    <!-- ═══════════════════════════════════
+         SECTION: ORDEM DE CARREGAMENTO
+    ═══════════════════════════════════ -->
+    <div class="section active" id="sec-orders">
+      <div class="section-header">
+        <div><h2>Ordens de Carregamento</h2><p>Gerencie e emita ordens de carregamento</p></div>
+        <button class="btn btn-primary" onclick="openOrderForm()">+ Nova Ordem</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Total</div><div class="stat-value" id="os-total">0</div></div>
+        <div class="stat-card amber"><div class="stat-label">Pendente</div><div class="stat-value" id="os-pending">0</div></div>
+        <div class="stat-card purple"><div class="stat-label">Em Trânsito</div><div class="stat-value" id="os-transit">0</div></div>
+        <div class="stat-card green"><div class="stat-label">Entregue</div><div class="stat-value" id="os-delivered">0</div></div>
+      </div>
+      <div class="toolbar">
+        <input type="text" id="order-search" placeholder="Buscar por nº, motorista, destino…" oninput="renderOrders()">
+        <select id="order-status-filter" onchange="renderOrders()">
+          <option value="">Todos os status</option>
+          <option value="pending">Pendente</option>
+          <option value="loading">Carregando</option>
+          <option value="in_transit">Em Trânsito</option>
+          <option value="delivered">Entregue</option>
+          <option value="cancelled">Cancelado</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Nº Ordem</th><th>Status</th><th>Motorista</th><th>Placa</th>
+            <th>Origem</th><th>Destino</th><th>Data</th><th class="no-print">Ações</th>
+          </tr></thead>
+          <tbody id="orders-tbody"><tr><td colspan="8" class="table-empty">Carregando…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-    async function loadCustomers() {
-      try {
-        const res = await fetch(API);
-        allCustomers = await res.json();
-        applyFilter();
-      } catch {
-        document.getElementById("customerList").innerHTML =
-          '<li class="empty-state">Failed to load customers.</li>';
-      }
-    }
+    <!-- ═══════════════════════════════════
+         SECTION: PROGRAMAÇÃO
+    ═══════════════════════════════════ -->
+    <div class="section" id="sec-schedule">
+      <div class="section-header">
+        <div><h2>Programação</h2><p>Agende e gerencie cargas programadas</p></div>
+        <button class="btn btn-primary" onclick="openScheduleForm()">+ Nova Programação</button>
+      </div>
+      <div class="toolbar">
+        <input type="text" id="sched-search" placeholder="Buscar…" oninput="renderSchedules()">
+        <select id="sched-status-filter" onchange="renderSchedules()">
+          <option value="">Todos</option>
+          <option value="scheduled">Agendado</option>
+          <option value="in_progress">Em Andamento</option>
+          <option value="completed">Concluído</option>
+          <option value="cancelled">Cancelado</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Descrição</th><th>Data</th><th>Motorista</th><th>Placa</th>
+            <th>Origem</th><th>Destino</th><th>Status</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="sched-tbody"><tr><td colspan="8" class="table-empty">Carregando…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-    function onSearch() {
-      const val = document.getElementById("search").value;
-      document.getElementById("clearBtn").style.display = val ? "block" : "none";
-      applyFilter();
-    }
+    <!-- ═══════════════════════════════════
+         SECTION: POSIÇÃO
+    ═══════════════════════════════════ -->
+    <div class="section" id="sec-position">
+      <div class="section-header">
+        <div><h2>Posição</h2><p>Rastreamento e status de cargas em campo</p></div>
+        <button class="btn btn-primary" onclick="openShipmentForm()">+ Novo Rastreamento</button>
+      </div>
+      <div class="toolbar">
+        <input type="text" id="ship-search" placeholder="Buscar por nº ordem, motorista…" oninput="renderShipments()">
+        <select id="ship-status-filter" onchange="renderShipments()">
+          <option value="">Todos</option>
+          <option value="waiting">Aguardando</option>
+          <option value="loading">Carregando</option>
+          <option value="in_transit">Em Trânsito</option>
+          <option value="delivered">Entregue</option>
+        </select>
+      </div>
+      <div class="cards-grid" id="shipments-grid"><p style="color:var(--gray-400)">Carregando…</p></div>
+    </div>
 
-    function clearSearch() {
-      document.getElementById("search").value = "";
-      document.getElementById("clearBtn").style.display = "none";
-      applyFilter();
-      document.getElementById("search").focus();
-    }
+    <!-- ═══════════════════════════════════
+         SECTION: VEÍCULOS
+    ═══════════════════════════════════ -->
+    <div class="section" id="sec-vehicles">
+      <div class="section-header">
+        <div><h2>Veículos</h2><p>Gestão da frota e placas</p></div>
+        <button class="btn btn-primary" onclick="openVehicleForm()">+ Novo Veículo</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card green"><div class="stat-label">Disponível</div><div class="stat-value" id="vs-available">0</div></div>
+        <div class="stat-card blue"><div class="stat-label">Em Uso</div><div class="stat-value" id="vs-in_use">0</div></div>
+        <div class="stat-card amber"><div class="stat-label">Manutenção</div><div class="stat-value" id="vs-maintenance">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Frota</div><div class="stat-value" id="vs-total">0</div></div>
+      </div>
+      <div class="toolbar">
+        <input type="text" id="veh-search" placeholder="Buscar por placa, modelo…" oninput="renderVehicles()">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Placa</th><th>Tipo</th><th>Modelo</th><th>Ano</th><th>Capacidade</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="veh-tbody"><tr><td colspan="7" class="table-empty">Carregando…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-    function applyFilter() {
-      const q = document.getElementById("search").value.trim().toLowerCase();
-      const filtered = q
-        ? allCustomers.filter(c => c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))
-        : allCustomers;
-      renderCustomers(sortCustomers(filtered), q);
-    }
+    <!-- ═══════════════════════════════════
+         SECTION: RELATÓRIOS
+    ═══════════════════════════════════ -->
+    <div class="section" id="sec-reports">
+      <div class="section-header">
+        <div><h2>Relatórios</h2><p>Geração de relatórios e exportações</p></div>
+      </div>
+      <div class="stats-grid" id="rep-stats"></div>
+      <div class="report-cards">
+        <div class="report-card" onclick="exportReportCSV('orders')">
+          <div class="report-card-icon">📋</div>
+          <h4>Ordens de Carregamento</h4>
+          <p>Exportar todas as ordens em CSV</p>
+        </div>
+        <div class="report-card" onclick="exportReportCSV('vehicles')">
+          <div class="report-card-icon">🚚</div>
+          <h4>Frota de Veículos</h4>
+          <p>Exportar dados da frota em CSV</p>
+        </div>
+        <div class="report-card" onclick="exportReportCSV('schedules')">
+          <div class="report-card-icon">📅</div>
+          <h4>Programações</h4>
+          <p>Exportar programações em CSV</p>
+        </div>
+        <div class="report-card" onclick="exportReportCSV('shipments')">
+          <div class="report-card-icon">📍</div>
+          <h4>Rastreamentos</h4>
+          <p>Exportar posições e status em CSV</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nº Ordem</th><th>Motorista</th><th>Placa</th><th>Origem</th><th>Destino</th><th>Status</th><th>Data</th></tr></thead>
+          <tbody id="rep-tbody"><tr><td colspan="7" class="table-empty">Carregando…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-    function highlight(text, query) {
-      if (!query) return escHtml(text);
-      const escaped = escHtml(text);
-      const escapedQ = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      return escaped.replace(new RegExp(escapedQ, "gi"), m => `<mark>${m}</mark>`);
-    }
+    <!-- ═══════════════════════════════════
+         SECTION: USUÁRIOS
+    ═══════════════════════════════════ -->
+    <div class="section" id="sec-users">
+      <div class="section-header">
+        <div><h2>Usuários</h2><p>Controle de acesso e permissões</p></div>
+        <button class="btn btn-primary" onclick="openUserForm()">+ Novo Usuário</button>
+      </div>
+      <div class="toolbar">
+        <input type="text" id="usr-search" placeholder="Buscar por nome ou e-mail…" oninput="renderUsers()">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Criado em</th><th>Ações</th></tr></thead>
+          <tbody id="usr-tbody"><tr><td colspan="6" class="table-empty">Carregando…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-    function renderCustomers(customers, query = "") {
-      const list = document.getElementById("customerList");
-      document.getElementById("countBadge").textContent = allCustomers.length;
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
 
-      if (!customers || customers.length === 0) {
-        const msg = query
-          ? `No customers match "<strong>${escHtml(query)}</strong>".`
-          : "No customers yet. Add one above.";
-        list.innerHTML = `<li class="empty-state">${msg}</li>`;
-        return;
-      }
+<!-- ═══════════════════════════════════
+     OVERLAY: ORDER FORM
+═══════════════════════════════════ -->
+<div class="overlay" id="order-overlay">
+<div class="overlay-box">
+  <div class="overlay-head">
+    <h3 id="order-form-title">Nova Ordem de Carregamento</h3>
+    <button class="overlay-close" onclick="closeOrderForm()">✕</button>
+  </div>
+  <div class="overlay-body">
+    <input type="hidden" id="of-id">
 
-      list.innerHTML = customers.map(c => {
-        const isEditing = editingId === c.id;
-        return `
-        <li class="customer-item${isEditing ? " editing" : ""}" id="c-${c.id}">
-          <div class="item-view" ${isEditing ? 'style="display:none"' : ""}>
-            <div class="customer-info">
-              <strong>${highlight(c.name, query)}</strong>
-              <span>${highlight(c.phone, query)}</span>
-            </div>
-            <div class="item-actions">
-              <button class="btn-icon" title="Edit" onclick="startEdit('${c.id}')">✏️</button>
-              <button class="btn-delete" title="Remove" onclick="deleteCustomer('${c.id}')">Remove</button>
-            </div>
-          </div>
-          <div class="item-edit" ${isEditing ? "" : 'style="display:none"'}>
-            <div class="edit-fields">
-              <input type="text" id="edit-name-${c.id}" value="${escHtml(c.name)}" placeholder="Full name" />
-              <input type="text" id="edit-phone-${c.id}" value="${escHtml(c.phone)}" placeholder="Phone number"
-                onkeydown="if(event.key==='Enter') saveEdit('${c.id}'); if(event.key==='Escape') cancelEdit();" />
-            </div>
-            <div class="edit-actions">
-              <button class="btn-save" onclick="saveEdit('${c.id}')">Save</button>
-              <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
-              <span class="edit-error" id="edit-err-${c.id}"></span>
-            </div>
-          </div>
-        </li>`;
-      }).join("");
+    <!-- Info geral -->
+    <div class="form-section">
+      <div class="form-section-title">Identificação</div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label>Nº da Ordem</label>
+          <input type="text" id="of-number" readonly placeholder="Auto-gerado ao salvar">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="of-status">
+            <option value="pending">Pendente</option>
+            <option value="loading">Carregando</option>
+            <option value="in_transit">Em Trânsito</option>
+            <option value="delivered">Entregue</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+        </div>
+      </div>
+    </div>
 
-      if (editingId) {
-        const nameInput = document.getElementById(`edit-name-${editingId}`);
-        if (nameInput) { nameInput.focus(); nameInput.select(); }
-      }
-    }
+    <!-- Motorista -->
+    <div class="form-section">
+      <div class="form-section-title">Dados do Motorista</div>
+      <div class="cnh-area" id="cnh-area" onclick="document.getElementById('cnh-input').click()">
+        <img id="cnh-img" class="cnh-preview-img" style="display:none" alt="CNH">
+        <div class="cnh-placeholder" id="cnh-placeholder">
+          <strong>📷 Upload da CNH</strong>
+          Clique para selecionar foto da Carteira Nacional de Habilitação
+        </div>
+        <input type="file" id="cnh-input" accept="image/*" style="display:none" onchange="handleCNH(this)">
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group"><label>Nome *</label><input type="text" id="of-dname" placeholder="Nome completo"></div>
+        <div class="form-group"><label>CPF *</label><input type="text" id="of-dcpf" placeholder="000.000.000-00"></div>
+        <div class="form-group"><label>Telefone *</label><input type="text" id="of-dphone" placeholder="(00) 00000-0000"></div>
+        <div class="form-group"><label>Nº CNH *</label><input type="text" id="of-dcnh" placeholder="Número da CNH"></div>
+        <div class="form-group"><label>Validade CNH *</label><input type="date" id="of-dexp"></div>
+      </div>
+    </div>
 
-    function startEdit(id) {
-      editingId = id;
-      applyFilter();
-    }
+    <!-- Veículo -->
+    <div class="form-section">
+      <div class="form-section-title">Dados do Veículo</div>
+      <div class="form-grid form-grid-3">
+        <div class="form-group"><label>Placa *</label><input type="text" id="of-vplate" placeholder="AAA-0000" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select id="of-vtype">
+            <option>Truck</option><option>Bitruck</option><option>Carreta</option>
+            <option>Toco</option><option>Van</option><option>Utilitário</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Modelo *</label><input type="text" id="of-vmodel" placeholder="Ex: Volvo FH 460"></div>
+      </div>
+    </div>
 
-    function cancelEdit() {
-      editingId = null;
-      applyFilter();
-    }
+    <!-- Carga -->
+    <div class="form-section">
+      <div class="form-section-title">Dados da Carga</div>
+      <div class="form-group" style="margin-bottom:14px"><label>Descrição *</label><input type="text" id="of-cdesc" placeholder="Descrição da mercadoria"></div>
+      <div class="form-grid form-grid-3" style="margin-bottom:14px">
+        <div class="form-group"><label>Peso (kg) *</label><input type="text" id="of-cweight" placeholder="0"></div>
+        <div class="form-group"><label>Volume (m³)</label><input type="text" id="of-cvol" placeholder="0"></div>
+      </div>
+      <div class="form-grid form-grid-2" style="margin-bottom:14px">
+        <div class="form-group"><label>Origem *</label><input type="text" id="of-corigin" placeholder="Cidade / Estado"></div>
+        <div class="form-group"><label>Destino *</label><input type="text" id="of-cdest" placeholder="Cidade / Estado"></div>
+      </div>
+      <div class="form-group"><label>Observações</label><textarea id="of-cnotes" placeholder="Instruções especiais, cuidados com a carga…"></textarea></div>
+    </div>
 
-    async function saveEdit(id) {
-      const nameEl = document.getElementById(`edit-name-${id}`);
-      const phoneEl = document.getElementById(`edit-phone-${id}`);
-      const errEl = document.getElementById(`edit-err-${id}`);
+    <div class="form-error" id="order-form-err"></div>
+  </div>
+  <div class="overlay-foot">
+    <button class="btn btn-secondary" onclick="closeOrderForm()">Cancelar</button>
+    <button class="btn btn-secondary" id="btn-print-order" style="display:none" onclick="printOrder()">🖨️ Imprimir PDF</button>
+    <button class="btn btn-primary" id="btn-save-order" onclick="saveOrder()">Salvar Ordem</button>
+  </div>
+</div>
+</div>
 
-      const name = nameEl.value.trim();
-      const phone = phoneEl.value.trim();
+<!-- OVERLAY: VEHICLE FORM -->
+<div class="overlay" id="veh-overlay">
+<div class="overlay-box sm">
+  <div class="overlay-head"><h3 id="veh-form-title">Novo Veículo</h3><button class="overlay-close" onclick="closeVehicleForm()">✕</button></div>
+  <div class="overlay-body">
+    <input type="hidden" id="vf-id">
+    <div class="form-grid form-grid-2">
+      <div class="form-group"><label>Placa *</label><input type="text" id="vf-plate" placeholder="AAA-0000" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="form-group"><label>Tipo *</label>
+        <select id="vf-type"><option>Truck</option><option>Bitruck</option><option>Carreta</option><option>Toco</option><option>Van</option><option>Utilitário</option></select>
+      </div>
+      <div class="form-group"><label>Modelo *</label><input type="text" id="vf-model" placeholder="Marca / Modelo"></div>
+      <div class="form-group"><label>Ano *</label><input type="text" id="vf-year" placeholder="2024"></div>
+      <div class="form-group"><label>Capacidade *</label><input type="text" id="vf-cap" placeholder="Ex: 15.000 kg"></div>
+      <div class="form-group"><label>Status</label>
+        <select id="vf-status"><option value="available">Disponível</option><option value="in_use">Em Uso</option><option value="maintenance">Manutenção</option></select>
+      </div>
+    </div>
+    <div class="form-error" id="veh-form-err"></div>
+  </div>
+  <div class="overlay-foot">
+    <button class="btn btn-secondary" onclick="closeVehicleForm()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveVehicle()">Salvar</button>
+  </div>
+</div>
+</div>
 
-      if (!name || !phone) {
-        errEl.textContent = "Both fields are required.";
-        return;
-      }
+<!-- OVERLAY: SCHEDULE FORM -->
+<div class="overlay" id="sched-overlay">
+<div class="overlay-box sm">
+  <div class="overlay-head"><h3 id="sched-form-title">Nova Programação</h3><button class="overlay-close" onclick="closeScheduleForm()">✕</button></div>
+  <div class="overlay-body">
+    <input type="hidden" id="sf-id">
+    <div class="form-grid" style="gap:14px">
+      <div class="form-group"><label>Descrição *</label><input type="text" id="sf-desc" placeholder="Descrição do carregamento"></div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group"><label>Data *</label><input type="date" id="sf-date"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="sf-status"><option value="scheduled">Agendado</option><option value="in_progress">Em Andamento</option><option value="completed">Concluído</option><option value="cancelled">Cancelado</option></select>
+        </div>
+        <div class="form-group"><label>Motorista *</label><input type="text" id="sf-driver" placeholder="Nome do motorista"></div>
+        <div class="form-group"><label>Placa *</label><input type="text" id="sf-plate" placeholder="AAA-0000" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="form-group"><label>Origem *</label><input type="text" id="sf-origin" placeholder="Origem"></div>
+        <div class="form-group"><label>Destino *</label><input type="text" id="sf-dest" placeholder="Destino"></div>
+      </div>
+      <div class="form-group"><label>Carga *</label><input type="text" id="sf-cargo" placeholder="Descrição da carga"></div>
+      <div class="form-group"><label>Nº Ordem (opcional)</label><input type="text" id="sf-order" placeholder="OC-000001"></div>
+    </div>
+    <div class="form-error" id="sched-form-err"></div>
+  </div>
+  <div class="overlay-foot">
+    <button class="btn btn-secondary" onclick="closeScheduleForm()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveSchedule()">Salvar</button>
+  </div>
+</div>
+</div>
 
-      const saveBtn = nameEl.closest(".item-edit").querySelector(".btn-save");
-      saveBtn.disabled = true;
-      errEl.textContent = "";
+<!-- OVERLAY: SHIPMENT FORM -->
+<div class="overlay" id="ship-overlay">
+<div class="overlay-box sm">
+  <div class="overlay-head"><h3 id="ship-form-title">Novo Rastreamento</h3><button class="overlay-close" onclick="closeShipmentForm()">✕</button></div>
+  <div class="overlay-body">
+    <input type="hidden" id="shf-id">
+    <div class="form-grid form-grid-2" style="gap:14px">
+      <div class="form-group"><label>Nº Ordem *</label><input type="text" id="shf-order" placeholder="OC-000001"></div>
+      <div class="form-group"><label>Status</label>
+        <select id="shf-status"><option value="waiting">Aguardando</option><option value="loading">Carregando</option><option value="in_transit">Em Trânsito</option><option value="delivered">Entregue</option></select>
+      </div>
+      <div class="form-group"><label>Motorista *</label><input type="text" id="shf-driver" placeholder="Nome do motorista"></div>
+      <div class="form-group"><label>Placa *</label><input type="text" id="shf-plate" placeholder="AAA-0000" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="form-group"><label>Origem *</label><input type="text" id="shf-origin" placeholder="Cidade de origem"></div>
+      <div class="form-group"><label>Destino *</label><input type="text" id="shf-dest" placeholder="Cidade de destino"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Localização Atual *</label><input type="text" id="shf-loc" placeholder="Ex: Rodovia BR-116, km 230"></div>
+      <div class="form-group"><label>Previsão de Chegada</label><input type="date" id="shf-eta"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Observações</label><textarea id="shf-notes" rows="2" placeholder="Ocorrências, atualizações…"></textarea></div>
+    </div>
+    <div class="form-error" id="ship-form-err"></div>
+  </div>
+  <div class="overlay-foot">
+    <button class="btn btn-secondary" onclick="closeShipmentForm()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveShipment()">Salvar</button>
+  </div>
+</div>
+</div>
 
-      try {
-        const res = await fetch(`${API}/${id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, phone }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          errEl.textContent = data.error || "Failed to save.";
-          saveBtn.disabled = false;
-          return;
-        }
-        editingId = null;
-        const idx = allCustomers.findIndex(c => c.id === id);
-        if (idx !== -1) allCustomers[idx] = data;
-        applyFilter();
-      } catch {
-        errEl.textContent = "Network error.";
-        saveBtn.disabled = false;
-      }
-    }
+<!-- OVERLAY: USER FORM -->
+<div class="overlay" id="usr-overlay">
+<div class="overlay-box sm">
+  <div class="overlay-head"><h3 id="usr-form-title">Novo Usuário</h3><button class="overlay-close" onclick="closeUserForm()">✕</button></div>
+  <div class="overlay-body">
+    <input type="hidden" id="uf-id">
+    <div class="form-grid" style="gap:14px">
+      <div class="form-group"><label>Nome *</label><input type="text" id="uf-name" placeholder="Nome completo"></div>
+      <div class="form-group"><label>E-mail *</label><input type="email" id="uf-email" placeholder="email@empresa.com.br"></div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group"><label>Perfil</label>
+          <select id="uf-role"><option value="admin">Administrador</option><option value="operator">Operador</option><option value="viewer">Visualizador</option></select>
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select id="uf-active"><option value="true">Ativo</option><option value="false">Inativo</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="form-error" id="usr-form-err"></div>
+  </div>
+  <div class="overlay-foot">
+    <button class="btn btn-secondary" onclick="closeUserForm()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveUser()">Salvar</button>
+  </div>
+</div>
+</div>
 
-    async function addCustomer() {
-      const nameEl = document.getElementById("name");
-      const phoneEl = document.getElementById("phone");
-      const errEl = document.getElementById("formError");
-      const btn = document.getElementById("addBtn");
+<!-- PRINT TEMPLATE (hidden, shown on print) -->
+<div id="print-order"></div>
 
-      const name = nameEl.value.trim();
-      const phone = phoneEl.value.trim();
+<script>
+const API = '/api';
+const state = { orders:[], vehicles:[], schedules:[], shipments:[], users:[], cnhBase64: null };
 
-      errEl.textContent = "";
-      if (!name || !phone) { errEl.textContent = "Both name and phone are required."; return; }
+/* ── NAVIGATION ── */
+const sectionTitles = {
+  orders:'Ordem de Carregamento', schedule:'Programação', position:'Posição',
+  vehicles:'Veículos', reports:'Relatórios', users:'Usuários'
+};
+function navigate(sec) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-'+sec).classList.add('active');
+  document.querySelector(`[data-sec="${sec}"]`).classList.add('active');
+  document.getElementById('topbar-title').textContent = sectionTitles[sec];
+  if(sec==='orders') loadOrders();
+  if(sec==='schedule') loadSchedules();
+  if(sec==='position') loadShipments();
+  if(sec==='vehicles') loadVehicles();
+  if(sec==='reports') loadReports();
+  if(sec==='users') loadUsers();
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('collapsed')}
 
-      btn.disabled = true;
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, phone }),
-        });
-        const data = await res.json();
-        if (!res.ok) { errEl.textContent = data.error || "Failed to add customer."; return; }
-        nameEl.value = "";
-        phoneEl.value = "";
-        await loadCustomers();
-      } catch {
-        errEl.textContent = "Network error. Please try again.";
-      } finally {
-        btn.disabled = false;
-      }
-    }
+/* ── BADGE ── */
+function badge(val, map){ return `<span class="badge badge-${val}">${map[val]||val}</span>`; }
+const orderStatus = {pending:'Pendente',loading:'Carregando',in_transit:'Em Trânsito',delivered:'Entregue',cancelled:'Cancelado'};
+const vehicleStatus = {available:'Disponível',in_use:'Em Uso',maintenance:'Manutenção'};
+const schedStatus = {scheduled:'Agendado',in_progress:'Em Andamento',completed:'Concluído',cancelled:'Cancelado'};
+const shipStatus = {waiting:'Aguardando',loading:'Carregando',in_transit:'Em Trânsito',delivered:'Entregue'};
+const userRole = {admin:'Administrador',operator:'Operador',viewer:'Visualizador'};
 
-    async function deleteCustomer(id) {
-      const item = document.getElementById("c-" + id);
-      if (item) item.style.opacity = "0.4";
-      try {
-        await fetch(`${API}/${id}`, { method: "DELETE" });
-        if (editingId === id) editingId = null;
-        await loadCustomers();
-      } catch {
-        if (item) item.style.opacity = "1";
-      }
-    }
+function fmtDate(d){ return d ? new Date(d).toLocaleDateString('pt-BR') : '-'; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    function exportCSV() {
-      const btn = document.getElementById("exportBtn");
-      if (!allCustomers.length) return;
-      btn.disabled = true;
+/* ═══════════════════════════════════
+   ORDENS
+═══════════════════════════════════ */
+async function loadOrders(){
+  try{ const r=await fetch(API+'/orders'); state.orders=await r.json(); renderOrders(); } catch(e){ console.error(e); }
+}
+function renderOrders(){
+  const q=document.getElementById('order-search').value.trim().toLowerCase();
+  const sf=document.getElementById('order-status-filter').value;
+  let list=state.orders.filter(o=>{
+    const match=!q||(o.orderNumber||'').toLowerCase().includes(q)||(o.driver?.name||'').toLowerCase().includes(q)||(o.cargo?.destination||'').toLowerCase().includes(q);
+    return match&&(!sf||o.status===sf);
+  });
+  // stats
+  document.getElementById('os-total').textContent=state.orders.length;
+  document.getElementById('os-pending').textContent=state.orders.filter(o=>o.status==='pending').length;
+  document.getElementById('os-transit').textContent=state.orders.filter(o=>o.status==='in_transit').length;
+  document.getElementById('os-delivered').textContent=state.orders.filter(o=>o.status==='delivered').length;
+  const tb=document.getElementById('orders-tbody');
+  if(!list.length){ tb.innerHTML=`<tr><td colspan="8" class="table-empty">Nenhuma ordem encontrada.</td></tr>`; return; }
+  tb.innerHTML=list.map(o=>`
+    <tr>
+      <td><strong>${esc(o.orderNumber)}</strong></td>
+      <td>${badge(o.status,orderStatus)}</td>
+      <td>${esc(o.driver?.name)}</td>
+      <td>${esc(o.vehicle?.plate)}</td>
+      <td>${esc(o.cargo?.origin)}</td>
+      <td>${esc(o.cargo?.destination)}</td>
+      <td>${fmtDate(o.createdAt)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editOrder('${o.id}')">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--blue-500)" onclick="printOrderById('${o.id}')">🖨️</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteOrder('${o.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+}
+function openOrderForm(){
+  document.getElementById('of-id').value='';
+  document.getElementById('order-form-title').textContent='Nova Ordem de Carregamento';
+  document.getElementById('of-number').value='';
+  document.getElementById('of-status').value='pending';
+  ['of-dname','of-dcpf','of-dphone','of-dcnh','of-dexp','of-vplate','of-vmodel','of-cdesc','of-cweight','of-cvol','of-corigin','of-cdest','of-cnotes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('of-vtype').value='Truck';
+  document.getElementById('cnh-img').style.display='none';
+  document.getElementById('cnh-placeholder').style.display='';
+  document.getElementById('btn-print-order').style.display='none';
+  document.getElementById('order-form-err').textContent='';
+  state.cnhBase64=null;
+  document.getElementById('order-overlay').classList.add('open');
+}
+function editOrder(id){
+  const o=state.orders.find(x=>x.id===id); if(!o) return;
+  document.getElementById('of-id').value=o.id;
+  document.getElementById('order-form-title').textContent='Editar Ordem — '+o.orderNumber;
+  document.getElementById('of-number').value=o.orderNumber||'';
+  document.getElementById('of-status').value=o.status||'pending';
+  document.getElementById('of-dname').value=o.driver?.name||'';
+  document.getElementById('of-dcpf').value=o.driver?.cpf||'';
+  document.getElementById('of-dphone').value=o.driver?.phone||'';
+  document.getElementById('of-dcnh').value=o.driver?.cnhNumber||'';
+  document.getElementById('of-dexp').value=o.driver?.cnhExpiry||'';
+  document.getElementById('of-vplate').value=o.vehicle?.plate||'';
+  document.getElementById('of-vtype').value=o.vehicle?.type||'Truck';
+  document.getElementById('of-vmodel').value=o.vehicle?.model||'';
+  document.getElementById('of-cdesc').value=o.cargo?.description||'';
+  document.getElementById('of-cweight').value=o.cargo?.weight||'';
+  document.getElementById('of-cvol').value=o.cargo?.volume||'';
+  document.getElementById('of-corigin').value=o.cargo?.origin||'';
+  document.getElementById('of-cdest').value=o.cargo?.destination||'';
+  document.getElementById('of-cnotes').value=o.cargo?.notes||'';
+  state.cnhBase64 = o.driver?.cnhImage||null;
+  const img=document.getElementById('cnh-img');
+  if(state.cnhBase64){ img.src=state.cnhBase64; img.style.display='block'; document.getElementById('cnh-placeholder').style.display='none'; }
+  else{ img.style.display='none'; document.getElementById('cnh-placeholder').style.display=''; }
+  document.getElementById('btn-print-order').style.display='';
+  document.getElementById('order-form-err').textContent='';
+  document.getElementById('order-overlay').classList.add('open');
+}
+function closeOrderForm(){ document.getElementById('order-overlay').classList.remove('open'); }
+function handleCNH(input){
+  const file=input.files[0]; if(!file) return;
+  const canvas=document.createElement('canvas');
+  const img=new Image(); img.src=URL.createObjectURL(file);
+  img.onload=()=>{
+    const maxW=800,scale=Math.min(1,maxW/img.width);
+    canvas.width=img.width*scale; canvas.height=img.height*scale;
+    canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+    state.cnhBase64=canvas.toDataURL('image/jpeg',0.82);
+    const prev=document.getElementById('cnh-img');
+    prev.src=state.cnhBase64; prev.style.display='block';
+    document.getElementById('cnh-placeholder').style.display='none';
+    document.getElementById('cnh-area').classList.add('has-image');
+    URL.revokeObjectURL(img.src);
+  };
+}
+async function saveOrder(){
+  const id=document.getElementById('of-id').value;
+  const err=document.getElementById('order-form-err');
+  const payload={
+    status:document.getElementById('of-status').value,
+    driver:{ name:document.getElementById('of-dname').value.trim(), cpf:document.getElementById('of-dcpf').value.trim(),
+      phone:document.getElementById('of-dphone').value.trim(), cnhNumber:document.getElementById('of-dcnh').value.trim(),
+      cnhExpiry:document.getElementById('of-dexp').value, cnhImage:state.cnhBase64||undefined },
+    vehicle:{ plate:document.getElementById('of-vplate').value.trim(), type:document.getElementById('of-vtype').value, model:document.getElementById('of-vmodel').value.trim() },
+    cargo:{ description:document.getElementById('of-cdesc').value.trim(), weight:document.getElementById('of-cweight').value.trim(),
+      volume:document.getElementById('of-cvol').value.trim()||undefined,
+      origin:document.getElementById('of-corigin').value.trim(), destination:document.getElementById('of-cdest').value.trim(),
+      notes:document.getElementById('of-cnotes').value.trim()||undefined }
+  };
+  const btn=document.getElementById('btn-save-order'); btn.disabled=true; err.textContent='';
+  try{
+    const url=id?`${API}/orders/${id}`:`${API}/orders`;
+    const r=await fetch(url,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await r.json();
+    if(!r.ok){ err.textContent=data.error||'Erro ao salvar.'; return; }
+    closeOrderForm(); await loadOrders();
+  } catch(e){ err.textContent='Erro de rede.'; }
+  finally{ btn.disabled=false; }
+}
+async function deleteOrder(id){
+  if(!confirm('Excluir esta ordem?')) return;
+  await fetch(`${API}/orders/${id}`,{method:'DELETE'});
+  await loadOrders();
+}
 
-      const q = document.getElementById("search").value.trim().toLowerCase();
-      const rows = sortCustomers(
-        q ? allCustomers.filter(c => c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))
-          : allCustomers
-      );
+/* ── PRINT ORDER ── */
+function printOrderById(id){ const o=state.orders.find(x=>x.id===id); if(o) doPrintOrder(o); }
+function printOrder(){ const id=document.getElementById('of-id').value; if(id) printOrderById(id); }
+function doPrintOrder(o){
+  const cnhImg=o.driver?.cnhImage?`<img src="${o.driver.cnhImage}" style="max-width:200px;max-height:120px;border-radius:6px;border:1px solid #ddd">`:' —';
+  document.getElementById('print-order').innerHTML=`
+    <div style="font-family:sans-serif;padding:32px;max-width:800px;margin:0 auto;color:#1a1a2e">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #2563eb;padding-bottom:16px;margin-bottom:20px">
+        <div><div style="font-size:22px;font-weight:800;color:#2563eb">🚛 CONEX</div><div style="font-size:11px;color:#666">Logística & Transporte</div></div>
+        <div style="text-align:right"><div style="font-size:18px;font-weight:800">${esc(o.orderNumber)}</div><div style="font-size:11px;color:#666">ORDEM DE CARREGAMENTO</div><div style="font-size:11px;color:#666">${fmtDate(o.createdAt)}</div></div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px">
+        <tr style="background:#eff6ff"><th colspan="4" style="padding:8px;text-align:left;font-size:11px;text-transform:uppercase;color:#2563eb;letter-spacing:.05em">DADOS DO MOTORISTA</th></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600;width:20%">Nome</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.driver?.name)}</td><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600;width:20%">CPF</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.driver?.cpf)}</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Telefone</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.driver?.phone)}</td><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Nº CNH</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.driver?.cnhNumber)}</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Validade CNH</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.driver?.cnhExpiry)}</td><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Foto CNH</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${cnhImg}</td></tr>
+        <tr style="background:#eff6ff"><th colspan="4" style="padding:8px;text-align:left;font-size:11px;text-transform:uppercase;color:#2563eb;letter-spacing:.05em">DADOS DO VEÍCULO</th></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Placa</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.vehicle?.plate)}</td><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Tipo</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.vehicle?.type)}</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Modelo</td><td style="padding:6px 8px;border:1px solid #e2e8f0" colspan="3">${esc(o.vehicle?.model)}</td></tr>
+        <tr style="background:#eff6ff"><th colspan="4" style="padding:8px;text-align:left;font-size:11px;text-transform:uppercase;color:#2563eb;letter-spacing:.05em">DADOS DA CARGA</th></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Descrição</td><td style="padding:6px 8px;border:1px solid #e2e8f0" colspan="3">${esc(o.cargo?.description)}</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Peso</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.cargo?.weight)} kg</td><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Volume</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.cargo?.volume)||'—'} m³</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Origem</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.cargo?.origin)}</td><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Destino</td><td style="padding:6px 8px;border:1px solid #e2e8f0">${esc(o.cargo?.destination)}</td></tr>
+        ${o.cargo?.notes?`<tr><td style="padding:6px 8px;border:1px solid #e2e8f0;font-weight:600">Obs.</td><td style="padding:6px 8px;border:1px solid #e2e8f0" colspan="3">${esc(o.cargo.notes)}</td></tr>`:''}
+      </table>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px">
+        <div style="border-top:1px solid #888;padding-top:8px;text-align:center;font-size:11px;color:#666">Assinatura do Motorista</div>
+        <div style="border-top:1px solid #888;padding-top:8px;text-align:center;font-size:11px;color:#666">Responsável / Expedição</div>
+      </div>
+    </div>`;
+  window.print();
+}
 
-      const csvEscape = v => `"${String(v).replace(/"/g, '""')}"`;
-      const header = ["Name", "Phone", "Added"];
-      const lines = [
-        header.join(","),
-        ...rows.map(c => [
-          csvEscape(c.name),
-          csvEscape(c.phone),
-          csvEscape(new Date(c.createdAt).toLocaleString()),
-        ].join(","))
-      ];
+/* ═══════════════════════════════════
+   PROGRAMAÇÃO
+═══════════════════════════════════ */
+async function loadSchedules(){
+  try{ const r=await fetch(API+'/schedules'); state.schedules=await r.json(); renderSchedules(); } catch(e){ console.error(e); }
+}
+function renderSchedules(){
+  const q=document.getElementById('sched-search').value.trim().toLowerCase();
+  const sf=document.getElementById('sched-status-filter').value;
+  let list=state.schedules.filter(s=>{
+    const match=!q||(s.description||'').toLowerCase().includes(q)||(s.driverName||'').toLowerCase().includes(q);
+    return match&&(!sf||s.status===sf);
+  });
+  const tb=document.getElementById('sched-tbody');
+  if(!list.length){ tb.innerHTML=`<tr><td colspan="8" class="table-empty">Nenhuma programação encontrada.</td></tr>`; return; }
+  tb.innerHTML=list.map(s=>`
+    <tr>
+      <td>${esc(s.description)}</td>
+      <td>${esc(s.scheduledDate)}</td>
+      <td>${esc(s.driverName)}</td>
+      <td>${esc(s.vehiclePlate)}</td>
+      <td>${esc(s.origin)}</td>
+      <td>${esc(s.destination)}</td>
+      <td>${badge(s.status,schedStatus)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editSchedule('${s.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteSchedule('${s.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+}
+function openScheduleForm(){ clearSchedForm(); document.getElementById('sched-overlay').classList.add('open'); }
+function closeScheduleForm(){ document.getElementById('sched-overlay').classList.remove('open'); }
+function clearSchedForm(){
+  ['sf-id','sf-desc','sf-date','sf-driver','sf-plate','sf-origin','sf-dest','sf-cargo','sf-order'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('sf-status').value='scheduled';
+  document.getElementById('sched-form-title').textContent='Nova Programação';
+  document.getElementById('sched-form-err').textContent='';
+}
+function editSchedule(id){
+  const s=state.schedules.find(x=>x.id===id); if(!s) return;
+  document.getElementById('sf-id').value=s.id;
+  document.getElementById('sched-form-title').textContent='Editar Programação';
+  document.getElementById('sf-desc').value=s.description||'';
+  document.getElementById('sf-date').value=s.scheduledDate||'';
+  document.getElementById('sf-driver').value=s.driverName||'';
+  document.getElementById('sf-plate').value=s.vehiclePlate||'';
+  document.getElementById('sf-origin').value=s.origin||'';
+  document.getElementById('sf-dest').value=s.destination||'';
+  document.getElementById('sf-cargo').value=s.cargo||'';
+  document.getElementById('sf-order').value=s.orderNumber||'';
+  document.getElementById('sf-status').value=s.status||'scheduled';
+  document.getElementById('sched-overlay').classList.add('open');
+}
+async function saveSchedule(){
+  const id=document.getElementById('sf-id').value;
+  const err=document.getElementById('sched-form-err');
+  const payload={
+    description:document.getElementById('sf-desc').value.trim(),
+    scheduledDate:document.getElementById('sf-date').value,
+    driverName:document.getElementById('sf-driver').value.trim(),
+    vehiclePlate:document.getElementById('sf-plate').value.trim(),
+    origin:document.getElementById('sf-origin').value.trim(),
+    destination:document.getElementById('sf-dest').value.trim(),
+    cargo:document.getElementById('sf-cargo').value.trim(),
+    status:document.getElementById('sf-status').value,
+    orderNumber:document.getElementById('sf-order').value.trim()||undefined,
+  };
+  try{
+    const r=await fetch(id?`${API}/schedules/${id}`:`${API}/schedules`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await r.json();
+    if(!r.ok){ err.textContent=data.error||'Erro.'; return; }
+    closeScheduleForm(); await loadSchedules();
+  } catch(e){ err.textContent='Erro de rede.'; }
+}
+async function deleteSchedule(id){ if(!confirm('Excluir?')) return; await fetch(`${API}/schedules/${id}`,{method:'DELETE'}); await loadSchedules(); }
 
-      const blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `customers-${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      setTimeout(() => { btn.disabled = false; }, 800);
-    }
+/* ═══════════════════════════════════
+   POSIÇÃO / SHIPMENTS
+═══════════════════════════════════ */
+async function loadShipments(){
+  try{ const r=await fetch(API+'/shipments'); state.shipments=await r.json(); renderShipments(); } catch(e){ console.error(e); }
+}
+function renderShipments(){
+  const q=document.getElementById('ship-search').value.trim().toLowerCase();
+  const sf=document.getElementById('ship-status-filter').value;
+  let list=state.shipments.filter(s=>{
+    const match=!q||(s.orderNumber||'').toLowerCase().includes(q)||(s.driverName||'').toLowerCase().includes(q);
+    return match&&(!sf||s.status===sf);
+  });
+  const grid=document.getElementById('shipments-grid');
+  if(!list.length){ grid.innerHTML=`<p style="color:var(--gray-400);padding:24px">Nenhum rastreamento encontrado.</p>`; return; }
+  grid.innerHTML=list.map(s=>`
+    <div class="shipment-card">
+      <div class="card-header">
+        <div class="card-order">${esc(s.orderNumber)}</div>
+        ${badge(s.status,shipStatus)}
+      </div>
+      <div class="card-route">${esc(s.origin)} <span>→</span> ${esc(s.destination)}</div>
+      <div class="card-driver">🧑 ${esc(s.driverName)} &nbsp;|&nbsp; 🚛 ${esc(s.vehiclePlate)}</div>
+      <div class="card-location">📍 ${esc(s.currentLocation)}</div>
+      ${s.estimatedArrival?`<div style="font-size:.78rem;color:var(--gray-500)">Previsão: ${esc(s.estimatedArrival)}</div>`:''}
+      <div class="td-actions" style="margin-top:4px">
+        <button class="btn btn-ghost btn-sm" onclick="editShipment('${s.id}')">✏️ Atualizar</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteShipment('${s.id}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+function openShipmentForm(){ clearShipForm(); document.getElementById('ship-overlay').classList.add('open'); }
+function closeShipmentForm(){ document.getElementById('ship-overlay').classList.remove('open'); }
+function clearShipForm(){
+  ['shf-id','shf-order','shf-driver','shf-plate','shf-origin','shf-dest','shf-loc','shf-eta','shf-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('shf-status').value='waiting';
+  document.getElementById('ship-form-title').textContent='Novo Rastreamento';
+  document.getElementById('ship-form-err').textContent='';
+}
+function editShipment(id){
+  const s=state.shipments.find(x=>x.id===id); if(!s) return;
+  document.getElementById('shf-id').value=s.id;
+  document.getElementById('ship-form-title').textContent='Atualizar Posição';
+  document.getElementById('shf-order').value=s.orderNumber||'';
+  document.getElementById('shf-driver').value=s.driverName||'';
+  document.getElementById('shf-plate').value=s.vehiclePlate||'';
+  document.getElementById('shf-origin').value=s.origin||'';
+  document.getElementById('shf-dest').value=s.destination||'';
+  document.getElementById('shf-loc').value=s.currentLocation||'';
+  document.getElementById('shf-status').value=s.status||'waiting';
+  document.getElementById('shf-eta').value=s.estimatedArrival||'';
+  document.getElementById('shf-notes').value=s.notes||'';
+  document.getElementById('ship-overlay').classList.add('open');
+}
+async function saveShipment(){
+  const id=document.getElementById('shf-id').value;
+  const err=document.getElementById('ship-form-err');
+  const payload={
+    orderNumber:document.getElementById('shf-order').value.trim(),
+    driverName:document.getElementById('shf-driver').value.trim(),
+    vehiclePlate:document.getElementById('shf-plate').value.trim(),
+    origin:document.getElementById('shf-origin').value.trim(),
+    destination:document.getElementById('shf-dest').value.trim(),
+    currentLocation:document.getElementById('shf-loc').value.trim(),
+    status:document.getElementById('shf-status').value,
+    estimatedArrival:document.getElementById('shf-eta').value||undefined,
+    notes:document.getElementById('shf-notes').value.trim()||undefined,
+  };
+  try{
+    const r=await fetch(id?`${API}/shipments/${id}`:`${API}/shipments`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await r.json();
+    if(!r.ok){ err.textContent=data.error||'Erro.'; return; }
+    closeShipmentForm(); await loadShipments();
+  } catch(e){ err.textContent='Erro de rede.'; }
+}
+async function deleteShipment(id){ if(!confirm('Remover rastreamento?')) return; await fetch(`${API}/shipments/${id}`,{method:'DELETE'}); await loadShipments(); }
 
-    function escHtml(str) {
-      return String(str)
-        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-    }
+/* ═══════════════════════════════════
+   VEÍCULOS
+═══════════════════════════════════ */
+async function loadVehicles(){
+  try{ const r=await fetch(API+'/vehicles'); state.vehicles=await r.json(); renderVehicles(); } catch(e){ console.error(e); }
+}
+function renderVehicles(){
+  const q=document.getElementById('veh-search').value.trim().toLowerCase();
+  let list=state.vehicles.filter(v=>!q||(v.plate||'').toLowerCase().includes(q)||(v.vehicleModel||'').toLowerCase().includes(q));
+  ['available','in_use','maintenance'].forEach(s=>{ document.getElementById('vs-'+s).textContent=state.vehicles.filter(v=>v.status===s).length; });
+  document.getElementById('vs-total').textContent=state.vehicles.length;
+  const tb=document.getElementById('veh-tbody');
+  if(!list.length){ tb.innerHTML=`<tr><td colspan="7" class="table-empty">Nenhum veículo cadastrado.</td></tr>`; return; }
+  tb.innerHTML=list.map(v=>`
+    <tr>
+      <td><strong>${esc(v.plate)}</strong></td>
+      <td>${esc(v.type)}</td>
+      <td>${esc(v.vehicleModel)}</td>
+      <td>${esc(v.year)}</td>
+      <td>${esc(v.capacity)}</td>
+      <td>${badge(v.status,vehicleStatus)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editVehicle('${v.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteVehicle('${v.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+}
+function openVehicleForm(){ clearVehForm(); document.getElementById('veh-overlay').classList.add('open'); }
+function closeVehicleForm(){ document.getElementById('veh-overlay').classList.remove('open'); }
+function clearVehForm(){
+  ['vf-id','vf-plate','vf-model','vf-year','vf-cap'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('vf-type').value='Truck';
+  document.getElementById('vf-status').value='available';
+  document.getElementById('veh-form-title').textContent='Novo Veículo';
+  document.getElementById('veh-form-err').textContent='';
+}
+function editVehicle(id){
+  const v=state.vehicles.find(x=>x.id===id); if(!v) return;
+  document.getElementById('vf-id').value=v.id;
+  document.getElementById('veh-form-title').textContent='Editar Veículo';
+  document.getElementById('vf-plate').value=v.plate||'';
+  document.getElementById('vf-type').value=v.type||'Truck';
+  document.getElementById('vf-model').value=v.vehicleModel||'';
+  document.getElementById('vf-year').value=v.year||'';
+  document.getElementById('vf-cap').value=v.capacity||'';
+  document.getElementById('vf-status').value=v.status||'available';
+  document.getElementById('veh-overlay').classList.add('open');
+}
+async function saveVehicle(){
+  const id=document.getElementById('vf-id').value;
+  const err=document.getElementById('veh-form-err');
+  const payload={
+    plate:document.getElementById('vf-plate').value.trim(),
+    type:document.getElementById('vf-type').value,
+    vehicleModel:document.getElementById('vf-model').value.trim(),
+    year:document.getElementById('vf-year').value.trim(),
+    capacity:document.getElementById('vf-cap').value.trim(),
+    status:document.getElementById('vf-status').value,
+  };
+  try{
+    const r=await fetch(id?`${API}/vehicles/${id}`:`${API}/vehicles`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await r.json();
+    if(!r.ok){ err.textContent=data.error||'Erro.'; return; }
+    closeVehicleForm(); await loadVehicles();
+  } catch(e){ err.textContent='Erro de rede.'; }
+}
+async function deleteVehicle(id){ if(!confirm('Excluir veículo?')) return; await fetch(`${API}/vehicles/${id}`,{method:'DELETE'}); await loadVehicles(); }
 
-    document.getElementById("phone").addEventListener("keydown", e => {
-      if (e.key === "Enter") addCustomer();
-    });
-    document.getElementById("name").addEventListener("keydown", e => {
-      if (e.key === "Enter") document.getElementById("phone").focus();
-    });
+/* ═══════════════════════════════════
+   RELATÓRIOS
+═══════════════════════════════════ */
+async function loadReports(){
+  await Promise.all([loadOrders(), loadVehicles(), loadSchedules(), loadShipments()]);
+  const statsEl=document.getElementById('rep-stats');
+  statsEl.innerHTML=`
+    <div class="stat-card blue"><div class="stat-label">Total Ordens</div><div class="stat-value">${state.orders.length}</div></div>
+    <div class="stat-card green"><div class="stat-label">Entregas Realizadas</div><div class="stat-value">${state.orders.filter(o=>o.status==='delivered').length}</div></div>
+    <div class="stat-card purple"><div class="stat-label">Em Trânsito</div><div class="stat-value">${state.shipments.filter(s=>s.status==='in_transit').length}</div></div>
+    <div class="stat-card amber"><div class="stat-label">Veículos Disponíveis</div><div class="stat-value">${state.vehicles.filter(v=>v.status==='available').length}</div></div>`;
+  const tb=document.getElementById('rep-tbody');
+  if(!state.orders.length){ tb.innerHTML=`<tr><td colspan="7" class="table-empty">Nenhuma ordem.</td></tr>`; return; }
+  tb.innerHTML=state.orders.map(o=>`
+    <tr>
+      <td>${esc(o.orderNumber)}</td><td>${esc(o.driver?.name)}</td><td>${esc(o.vehicle?.plate)}</td>
+      <td>${esc(o.cargo?.origin)}</td><td>${esc(o.cargo?.destination)}</td>
+      <td>${badge(o.status,orderStatus)}</td><td>${fmtDate(o.createdAt)}</td>
+    </tr>`).join('');
+}
+function exportReportCSV(type){
+  let rows=[],header=[];
+  if(type==='orders'){
+    header=['Nº Ordem','Status','Motorista','CPF','Placa','Tipo Veículo','Origem','Destino','Peso','Data'];
+    rows=state.orders.map(o=>[o.orderNumber,orderStatus[o.status]||o.status,o.driver?.name,o.driver?.cpf,o.vehicle?.plate,o.vehicle?.type,o.cargo?.origin,o.cargo?.destination,o.cargo?.weight,fmtDate(o.createdAt)]);
+  } else if(type==='vehicles'){
+    header=['Placa','Tipo','Modelo','Ano','Capacidade','Status'];
+    rows=state.vehicles.map(v=>[v.plate,v.type,v.vehicleModel,v.year,v.capacity,vehicleStatus[v.status]||v.status]);
+  } else if(type==='schedules'){
+    header=['Descrição','Data','Motorista','Placa','Origem','Destino','Carga','Status'];
+    rows=state.schedules.map(s=>[s.description,s.scheduledDate,s.driverName,s.vehiclePlate,s.origin,s.destination,s.cargo,schedStatus[s.status]||s.status]);
+  } else if(type==='shipments'){
+    header=['Nº Ordem','Motorista','Placa','Origem','Destino','Localização Atual','Status'];
+    rows=state.shipments.map(s=>[s.orderNumber,s.driverName,s.vehiclePlate,s.origin,s.destination,s.currentLocation,shipStatus[s.status]||s.status]);
+  }
+  const csv=[header,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`conex-${type}-${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
+}
 
-    loadCustomers();
-  </script>
+/* ═══════════════════════════════════
+   USUÁRIOS
+═══════════════════════════════════ */
+async function loadUsers(){
+  try{ const r=await fetch(API+'/sysusers'); state.users=await r.json(); renderUsers(); } catch(e){ console.error(e); }
+}
+function renderUsers(){
+  const q=document.getElementById('usr-search').value.trim().toLowerCase();
+  let list=state.users.filter(u=>!q||(u.name||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q));
+  const tb=document.getElementById('usr-tbody');
+  if(!list.length){ tb.innerHTML=`<tr><td colspan="6" class="table-empty">Nenhum usuário cadastrado.</td></tr>`; return; }
+  tb.innerHTML=list.map(u=>`
+    <tr>
+      <td>${esc(u.name)}</td>
+      <td>${esc(u.email)}</td>
+      <td>${badge(u.role,userRole)}</td>
+      <td><span class="badge ${u.active?'badge-available':'badge-cancelled'}">${u.active?'Ativo':'Inativo'}</span></td>
+      <td>${fmtDate(u.createdAt)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editUser('${u.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteUser('${u.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+}
+function openUserForm(){ clearUserForm(); document.getElementById('usr-overlay').classList.add('open'); }
+function closeUserForm(){ document.getElementById('usr-overlay').classList.remove('open'); }
+function clearUserForm(){
+  ['uf-id','uf-name','uf-email'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('uf-role').value='operator';
+  document.getElementById('uf-active').value='true';
+  document.getElementById('usr-form-title').textContent='Novo Usuário';
+  document.getElementById('usr-form-err').textContent='';
+}
+function editUser(id){
+  const u=state.users.find(x=>x.id===id); if(!u) return;
+  document.getElementById('uf-id').value=u.id;
+  document.getElementById('usr-form-title').textContent='Editar Usuário';
+  document.getElementById('uf-name').value=u.name||'';
+  document.getElementById('uf-email').value=u.email||'';
+  document.getElementById('uf-role').value=u.role||'operator';
+  document.getElementById('uf-active').value=String(u.active!==false);
+  document.getElementById('usr-overlay').classList.add('open');
+}
+async function saveUser(){
+  const id=document.getElementById('uf-id').value;
+  const err=document.getElementById('usr-form-err');
+  const payload={
+    name:document.getElementById('uf-name').value.trim(),
+    email:document.getElementById('uf-email').value.trim(),
+    role:document.getElementById('uf-role').value,
+    active:document.getElementById('uf-active').value==='true',
+  };
+  try{
+    const r=await fetch(id?`${API}/sysusers/${id}`:`${API}/sysusers`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await r.json();
+    if(!r.ok){ err.textContent=data.error||'Erro.'; return; }
+    closeUserForm(); await loadUsers();
+  } catch(e){ err.textContent='Erro de rede.'; }
+}
+async function deleteUser(id){ if(!confirm('Excluir usuário?')) return; await fetch(`${API}/sysusers/${id}`,{method:'DELETE'}); await loadUsers(); }
+
+// Init
+loadOrders();
+</script>
 </body>
 </html>
