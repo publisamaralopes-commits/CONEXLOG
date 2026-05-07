@@ -27,6 +27,13 @@ export interface MessageResponse {
   message: string;
 }
 
+export interface UpdateCustomerInput {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  phone?: string;
+}
+
 export interface ErrorResponse {
   error: string;
 }

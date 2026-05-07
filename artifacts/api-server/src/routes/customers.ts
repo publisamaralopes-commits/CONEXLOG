@@ -9,6 +9,11 @@ const CreateCustomerSchema = z.object({
   phone: z.string().min(1, "Phone is required"),
 });
 
+const UpdateCustomerSchema = z.object({
+  name: z.string().min(1, "Name is required").optional(),
+  phone: z.string().min(1, "Phone is required").optional(),
+});
+
 router.get("/customers", async (req, res) => {
   try {
     const customers = await Customer.find().sort({ createdAt: -1 });
@@ -43,6 +48,36 @@ router.post("/customers", async (req, res) => {
     });
   } catch (err) {
     req.log.error(err, "Failed to create customer");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.patch("/customers/:id", async (req, res) => {
+  const parsed = UpdateCustomerSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues.map((i) => i.message).join(", ") });
+    return;
+  }
+
+  if (Object.keys(parsed.data).length === 0) {
+    res.status(400).json({ error: "Nothing to update" });
+    return;
+  }
+
+  try {
+    const updated = await Customer.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
+    if (!updated) {
+      res.status(404).json({ error: "Customer not found" });
+      return;
+    }
+    res.json({
+      id: updated._id.toString(),
+      name: updated.name,
+      phone: updated.phone,
+      createdAt: updated.createdAt.toISOString(),
+    });
+  } catch (err) {
+    req.log.error(err, "Failed to update customer");
     res.status(500).json({ error: "Internal server error" });
   }
 });

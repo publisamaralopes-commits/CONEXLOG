@@ -38,6 +38,26 @@ export const CreateCustomerBody = zod.object({
 });
 
 /**
+ * Updates a customer's name and/or phone number
+ * @summary Update a customer
+ */
+export const UpdateCustomerParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const UpdateCustomerBody = zod.object({
+  name: zod.string().min(1).optional(),
+  phone: zod.string().min(1).optional(),
+});
+
+export const UpdateCustomerResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  phone: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
  * Deletes a customer by ID
  * @summary Delete a customer
  */

@@ -15,23 +15,11 @@
       padding: 32px 16px;
     }
 
-    .container {
-      max-width: 640px;
-      margin: 0 auto;
-    }
+    .container { max-width: 640px; margin: 0 auto; }
 
-    h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #1a1a2e;
-    }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 8px; color: #1a1a2e; }
 
-    .subtitle {
-      color: #666;
-      margin-bottom: 32px;
-      font-size: 0.95rem;
-    }
+    .subtitle { color: #666; margin-bottom: 32px; font-size: 0.95rem; }
 
     .card {
       background: #fff;
@@ -58,16 +46,9 @@
       gap: 12px;
     }
 
-    .card-header h2 {
-      margin-bottom: 0;
-      white-space: nowrap;
-    }
+    .card-header h2 { margin-bottom: 0; white-space: nowrap; }
 
-    .form-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
     input[type="text"] {
       flex: 1;
@@ -81,15 +62,9 @@
       background: #fafafa;
     }
 
-    input[type="text"]:focus {
-      border-color: #4f6ef7;
-      background: #fff;
-    }
+    input[type="text"]:focus { border-color: #4f6ef7; background: #fff; }
 
-    .search-wrap {
-      position: relative;
-      flex: 1;
-    }
+    .search-wrap { position: relative; flex: 1; }
 
     .search-wrap svg {
       position: absolute;
@@ -100,11 +75,7 @@
       pointer-events: none;
     }
 
-    #search {
-      width: 100%;
-      padding-left: 34px;
-      min-width: 0;
-    }
+    #search { width: 100%; padding-left: 34px; min-width: 0; }
 
     .clear-btn {
       position: absolute;
@@ -132,80 +103,91 @@
       transition: background 0.15s, opacity 0.15s;
     }
 
-    .btn-primary {
-      background: #4f6ef7;
-      color: #fff;
-      padding: 10px 20px;
-    }
-
+    .btn-primary { background: #4f6ef7; color: #fff; padding: 10px 20px; }
     .btn-primary:hover { background: #3a57e8; }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-icon {
+      background: transparent;
+      border: 1.5px solid #e0e0e0;
+      color: #666;
+      padding: 5px 9px;
+      font-size: 0.82rem;
+      border-radius: 6px;
+      line-height: 1;
+    }
+
+    .btn-icon:hover { background: #f5f5f5; }
+
+    .btn-save { background: #4f6ef7; color: #fff; padding: 6px 14px; font-size: 0.85rem; }
+    .btn-save:hover { background: #3a57e8; }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-cancel { background: transparent; color: #888; padding: 6px 12px; font-size: 0.85rem; border: 1.5px solid #e0e0e0; }
+    .btn-cancel:hover { background: #f5f5f5; }
 
     .btn-delete {
       background: transparent;
       color: #e53935;
-      padding: 6px 12px;
+      padding: 5px 9px;
       font-size: 0.82rem;
       border: 1.5px solid #fccfce;
       border-radius: 6px;
-      flex-shrink: 0;
+      line-height: 1;
     }
 
     .btn-delete:hover { background: #fff0f0; }
 
-    .error-msg {
-      color: #e53935;
-      font-size: 0.85rem;
-      margin-top: 8px;
+    .error-msg { color: #e53935; font-size: 0.85rem; margin-top: 8px; }
+
+    .customer-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+    .customer-item {
+      border-radius: 8px;
+      background: #f9f9fb;
+      border: 1px solid #ebebeb;
+      overflow: hidden;
+      animation: fadeIn 0.2s ease;
     }
 
-    .customer-list {
-      list-style: none;
+    .customer-item.editing { border-color: #4f6ef7; background: #fff; box-shadow: 0 0 0 3px #eef0fe; }
+
+    .item-view {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      gap: 10px;
+    }
+
+    .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .item-edit {
+      padding: 12px 16px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    .customer-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-radius: 8px;
-      background: #f9f9fb;
-      border: 1px solid #ebebeb;
-      animation: fadeIn 0.2s ease;
-    }
+    .edit-fields { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .edit-fields input { flex: 1; min-width: 120px; padding: 8px 12px; font-size: 0.9rem; }
+
+    .edit-actions { display: flex; gap: 8px; }
+
+    .edit-error { color: #e53935; font-size: 0.82rem; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-4px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .customer-info strong {
-      display: block;
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
+    .customer-info strong { display: block; font-size: 0.95rem; font-weight: 600; }
+    .customer-info span { font-size: 0.85rem; color: #888; }
 
-    .customer-info span {
-      font-size: 0.85rem;
-      color: #888;
-    }
+    mark { background: #fff3b0; color: inherit; border-radius: 2px; padding: 0 1px; }
 
-    mark {
-      background: #fff3b0;
-      color: inherit;
-      border-radius: 2px;
-      padding: 0 1px;
-    }
-
-    .empty-state {
-      text-align: center;
-      color: #aaa;
-      font-size: 0.9rem;
-      padding: 24px 0;
-    }
+    .empty-state { text-align: center; color: #aaa; font-size: 0.9rem; padding: 24px 0; }
 
     .count-badge {
       display: inline-block;
@@ -237,16 +219,13 @@
 
     <div class="card">
       <div class="card-header">
-        <h2>
-          Customers
-          <span class="count-badge" id="countBadge">0</span>
-        </h2>
+        <h2>Customers <span class="count-badge" id="countBadge">0</span></h2>
         <div class="search-wrap">
           <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="9" cy="9" r="7"/><line x1="14.5" y1="14.5" x2="19" y2="19"/>
           </svg>
           <input type="text" id="search" placeholder="Search by name or phone…" autocomplete="off" oninput="onSearch()" />
-          <button class="clear-btn" id="clearBtn" onclick="clearSearch()" title="Clear search">✕</button>
+          <button class="clear-btn" id="clearBtn" onclick="clearSearch()" title="Clear">✕</button>
         </div>
       </div>
       <ul class="customer-list" id="customerList">
@@ -258,6 +237,7 @@
   <script>
     const API = "/api/customers";
     let allCustomers = [];
+    let editingId = null;
 
     async function loadCustomers() {
       try {
@@ -286,8 +266,7 @@
     function applyFilter() {
       const q = document.getElementById("search").value.trim().toLowerCase();
       const filtered = q
-        ? allCustomers.filter(c =>
-            c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))
+        ? allCustomers.filter(c => c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))
         : allCustomers;
       renderCustomers(filtered, q);
     }
@@ -295,34 +274,104 @@
     function highlight(text, query) {
       if (!query) return escHtml(text);
       const escaped = escHtml(text);
-      const escapedQ = escHtml(query).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const escapedQ = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       return escaped.replace(new RegExp(escapedQ, "gi"), m => `<mark>${m}</mark>`);
     }
 
     function renderCustomers(customers, query = "") {
       const list = document.getElementById("customerList");
-      const badge = document.getElementById("countBadge");
-      const q = document.getElementById("search").value.trim().toLowerCase();
-
-      badge.textContent = allCustomers.length;
+      document.getElementById("countBadge").textContent = allCustomers.length;
 
       if (!customers || customers.length === 0) {
-        const msg = q
-          ? `No customers match "<strong>${escHtml(q)}</strong>".`
+        const msg = query
+          ? `No customers match "<strong>${escHtml(query)}</strong>".`
           : "No customers yet. Add one above.";
         list.innerHTML = `<li class="empty-state">${msg}</li>`;
         return;
       }
 
-      list.innerHTML = customers.map(c => `
-        <li class="customer-item" id="c-${c.id}">
-          <div class="customer-info">
-            <strong>${highlight(c.name, query)}</strong>
-            <span>${highlight(c.phone, query)}</span>
+      list.innerHTML = customers.map(c => {
+        const isEditing = editingId === c.id;
+        return `
+        <li class="customer-item${isEditing ? " editing" : ""}" id="c-${c.id}">
+          <div class="item-view" ${isEditing ? 'style="display:none"' : ""}>
+            <div class="customer-info">
+              <strong>${highlight(c.name, query)}</strong>
+              <span>${highlight(c.phone, query)}</span>
+            </div>
+            <div class="item-actions">
+              <button class="btn-icon" title="Edit" onclick="startEdit('${c.id}')">✏️</button>
+              <button class="btn-delete" title="Remove" onclick="deleteCustomer('${c.id}')">Remove</button>
+            </div>
           </div>
-          <button class="btn-delete" onclick="deleteCustomer('${c.id}')">Remove</button>
-        </li>
-      `).join("");
+          <div class="item-edit" ${isEditing ? "" : 'style="display:none"'}>
+            <div class="edit-fields">
+              <input type="text" id="edit-name-${c.id}" value="${escHtml(c.name)}" placeholder="Full name" />
+              <input type="text" id="edit-phone-${c.id}" value="${escHtml(c.phone)}" placeholder="Phone number"
+                onkeydown="if(event.key==='Enter') saveEdit('${c.id}'); if(event.key==='Escape') cancelEdit();" />
+            </div>
+            <div class="edit-actions">
+              <button class="btn-save" onclick="saveEdit('${c.id}')">Save</button>
+              <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+              <span class="edit-error" id="edit-err-${c.id}"></span>
+            </div>
+          </div>
+        </li>`;
+      }).join("");
+
+      if (editingId) {
+        const nameInput = document.getElementById(`edit-name-${editingId}`);
+        if (nameInput) { nameInput.focus(); nameInput.select(); }
+      }
+    }
+
+    function startEdit(id) {
+      editingId = id;
+      applyFilter();
+    }
+
+    function cancelEdit() {
+      editingId = null;
+      applyFilter();
+    }
+
+    async function saveEdit(id) {
+      const nameEl = document.getElementById(`edit-name-${id}`);
+      const phoneEl = document.getElementById(`edit-phone-${id}`);
+      const errEl = document.getElementById(`edit-err-${id}`);
+
+      const name = nameEl.value.trim();
+      const phone = phoneEl.value.trim();
+
+      if (!name || !phone) {
+        errEl.textContent = "Both fields are required.";
+        return;
+      }
+
+      const saveBtn = nameEl.closest(".item-edit").querySelector(".btn-save");
+      saveBtn.disabled = true;
+      errEl.textContent = "";
+
+      try {
+        const res = await fetch(`${API}/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, phone }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errEl.textContent = data.error || "Failed to save.";
+          saveBtn.disabled = false;
+          return;
+        }
+        editingId = null;
+        const idx = allCustomers.findIndex(c => c.id === id);
+        if (idx !== -1) allCustomers[idx] = data;
+        applyFilter();
+      } catch {
+        errEl.textContent = "Network error.";
+        saveBtn.disabled = false;
+      }
     }
 
     async function addCustomer() {
@@ -335,10 +384,7 @@
       const phone = phoneEl.value.trim();
 
       errEl.textContent = "";
-      if (!name || !phone) {
-        errEl.textContent = "Both name and phone are required.";
-        return;
-      }
+      if (!name || !phone) { errEl.textContent = "Both name and phone are required."; return; }
 
       btn.disabled = true;
       try {
@@ -348,10 +394,7 @@
           body: JSON.stringify({ name, phone }),
         });
         const data = await res.json();
-        if (!res.ok) {
-          errEl.textContent = data.error || "Failed to add customer.";
-          return;
-        }
+        if (!res.ok) { errEl.textContent = data.error || "Failed to add customer."; return; }
         nameEl.value = "";
         phoneEl.value = "";
         await loadCustomers();
@@ -367,6 +410,7 @@
       if (item) item.style.opacity = "0.4";
       try {
         await fetch(`${API}/${id}`, { method: "DELETE" });
+        if (editingId === id) editingId = null;
         await loadCustomers();
       } catch {
         if (item) item.style.opacity = "1";
