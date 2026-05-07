@@ -6,6 +6,8 @@ import fleetRouter from "./fleet";
 import schedulesRouter from "./schedules";
 import shipmentsRouter from "./shipments";
 import sysusersRouter from "./sysusers";
+import lotesRouter from "./lotes";
+import ocRouter from "./oc";
 
 const router: IRouter = Router();
 
@@ -16,5 +18,7 @@ router.use(fleetRouter);
 router.use(schedulesRouter);
 router.use(shipmentsRouter);
 router.use(sysusersRouter);
+router.use(lotesRouter);
+router.use(ocRouter);
 
 export default router;

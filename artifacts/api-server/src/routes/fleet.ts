@@ -11,6 +11,8 @@ const CreateFleetSchema = z.object({
   year: z.string().min(1, "Ano é obrigatório"),
   capacity: z.string().min(1, "Capacidade é obrigatória"),
   status: z.enum(["available", "in_use", "maintenance"]).optional(),
+  statusGR: z.enum(["liberado", "pendente", "gr", "cco", "nenhum"]).optional(),
+  statusCarregamento: z.enum(["manifestado", "porta", "troca_nf", "nenhum"]).optional(),
 });
 
 function fmt(v: InstanceType<typeof Fleet>) {

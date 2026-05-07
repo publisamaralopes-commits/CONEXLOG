@@ -5,14 +5,14 @@ import { Schedule } from "../models/schedule";
 const router: IRouter = Router();
 
 const CreateScheduleSchema = z.object({
-  orderNumber: z.string().optional(),
-  description: z.string().min(1, "Descrição é obrigatória"),
-  origin: z.string().min(1, "Origem é obrigatória"),
-  destination: z.string().min(1, "Destino é obrigatório"),
-  scheduledDate: z.string().min(1, "Data é obrigatória"),
-  driverName: z.string().min(1, "Motorista é obrigatório"),
-  vehiclePlate: z.string().min(1, "Placa é obrigatória"),
-  cargo: z.string().min(1, "Carga é obrigatória"),
+  cliente: z.string().min(1, "Cliente é obrigatório"),
+  retirada: z.string().min(1, "Retirada é obrigatória"),
+  cidadeRetirada: z.string().min(1, "Cidade de retirada é obrigatória"),
+  destinatario: z.string().min(1, "Destinatário é obrigatório"),
+  cidadeDestino: z.string().min(1, "Cidade destino é obrigatória"),
+  terminal: z.string().min(1, "Terminal é obrigatório"),
+  produto: z.string().min(1, "Produto é obrigatório"),
+  numeroPGR: z.string().min(1, "Número PGR é obrigatório"),
   status: z.enum(["scheduled", "in_progress", "completed", "cancelled"]).optional(),
 });
 
@@ -23,7 +23,7 @@ function fmt(v: InstanceType<typeof Schedule>) {
 
 router.get("/schedules", async (req, res) => {
   try {
-    const items = await Schedule.find().sort({ scheduledDate: 1 });
+    const items = await Schedule.find().sort({ createdAt: -1 });
     res.json(items.map(fmt));
   } catch (err) {
     req.log.error(err, "Failed to list schedules");

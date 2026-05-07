@@ -7,6 +7,8 @@ export interface IFleet extends Document {
   year: string;
   capacity: string;
   status: "available" | "in_use" | "maintenance";
+  statusGR: "liberado" | "pendente" | "gr" | "cco" | "nenhum";
+  statusCarregamento: "manifestado" | "porta" | "troca_nf" | "nenhum";
   createdAt: Date;
 }
 
@@ -21,6 +23,16 @@ const FleetSchema = new Schema<IFleet>(
       type: String,
       enum: ["available", "in_use", "maintenance"],
       default: "available",
+    },
+    statusGR: {
+      type: String,
+      enum: ["liberado", "pendente", "gr", "cco", "nenhum"],
+      default: "nenhum",
+    },
+    statusCarregamento: {
+      type: String,
+      enum: ["manifestado", "porta", "troca_nf", "nenhum"],
+      default: "nenhum",
     },
   },
   { timestamps: { createdAt: true, updatedAt: false } },

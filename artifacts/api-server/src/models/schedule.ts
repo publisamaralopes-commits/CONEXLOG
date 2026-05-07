@@ -1,28 +1,28 @@
 import mongoose, { Schema, type Document } from "mongoose";
 
 export interface ISchedule extends Document {
-  orderNumber?: string;
-  description: string;
-  origin: string;
-  destination: string;
-  scheduledDate: string;
-  driverName: string;
-  vehiclePlate: string;
-  cargo: string;
+  cliente: string;
+  retirada: string;
+  cidadeRetirada: string;
+  destinatario: string;
+  cidadeDestino: string;
+  terminal: string;
+  produto: string;
+  numeroPGR: string;
   status: "scheduled" | "in_progress" | "completed" | "cancelled";
   createdAt: Date;
 }
 
 const ScheduleSchema = new Schema<ISchedule>(
   {
-    orderNumber: { type: String },
-    description: { type: String, required: true },
-    origin: { type: String, required: true },
-    destination: { type: String, required: true },
-    scheduledDate: { type: String, required: true },
-    driverName: { type: String, required: true },
-    vehiclePlate: { type: String, required: true },
-    cargo: { type: String, required: true },
+    cliente: { type: String, required: true },
+    retirada: { type: String, required: true },
+    cidadeRetirada: { type: String, required: true },
+    destinatario: { type: String, required: true },
+    cidadeDestino: { type: String, required: true },
+    terminal: { type: String, required: true },
+    produto: { type: String, required: true },
+    numeroPGR: { type: String, required: true },
     status: {
       type: String,
       enum: ["scheduled", "in_progress", "completed", "cancelled"],
