@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Cadastro de Clientes</h2>
+
+<input id="nome" placeholder="Nome">
+<input id="telefone" placeholder="Telefone">
+<button onclick="salvar()">Salvar</button>
+
+<ul id="lista"></ul>
+
+<script>
+async function salvar() {
+  let nome = document.getElementById("nome").value;
+  let telefone = document.getElementById("telefone").value;
+
+  await fetch('/api/customers', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ name: nome, phone: telefone })
+  });
+
+  carregar();
+}
+
+async function carregar() {
+  let res = await fetch('/api/customers');
+  let dados = await res.json();
+
+  let lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  dados.forEach(c => {
+    lista.innerHTML += `
+      <li>
+        ${c.name} - ${c.phone}
+        <button onclick="excluir('${c._id}')">Excluir</button>
+      </li>
+    `;
+  });
+}
+
+async function excluir(id) {
+  await fetch('/api/customers/' + id, { method: 'DELETE' });
+  carregar();
+}
+
+carregar();
+</script>
+
+</body>
+</html>  

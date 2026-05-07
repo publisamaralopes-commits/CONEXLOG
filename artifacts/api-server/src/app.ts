@@ -31,6 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+app.use(express.static("."));
 
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
