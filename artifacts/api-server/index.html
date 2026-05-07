@@ -42,13 +42,25 @@
     }
 
     .card h2 {
-      font-size: 1rem;
       font-weight: 600;
       margin-bottom: 16px;
       color: #444;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       font-size: 0.8rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+
+    .card-header h2 {
+      margin-bottom: 0;
+      white-space: nowrap;
     }
 
     .form-row {
@@ -73,6 +85,43 @@
       border-color: #4f6ef7;
       background: #fff;
     }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      padding-left: 34px;
+      min-width: 0;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #bbb;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0 2px;
+      line-height: 1;
+      display: none;
+    }
+
+    .clear-btn:hover { color: #888; }
 
     button {
       cursor: pointer;
@@ -99,6 +148,7 @@
       font-size: 0.82rem;
       border: 1.5px solid #fccfce;
       border-radius: 6px;
+      flex-shrink: 0;
     }
 
     .btn-delete:hover { background: #fff0f0; }
@@ -143,6 +193,13 @@
       color: #888;
     }
 
+    mark {
+      background: #fff3b0;
+      color: inherit;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
     .empty-state {
       text-align: center;
       color: #aaa;
@@ -179,45 +236,89 @@
     </div>
 
     <div class="card">
-      <h2>
-        Customers
-        <span class="count-badge" id="countBadge">0</span>
-      </h2>
+      <div class="card-header">
+        <h2>
+          Customers
+          <span class="count-badge" id="countBadge">0</span>
+        </h2>
+        <div class="search-wrap">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="9" r="7"/><line x1="14.5" y1="14.5" x2="19" y2="19"/>
+          </svg>
+          <input type="text" id="search" placeholder="Search by name or phone…" autocomplete="off" oninput="onSearch()" />
+          <button class="clear-btn" id="clearBtn" onclick="clearSearch()" title="Clear search">✕</button>
+        </div>
+      </div>
       <ul class="customer-list" id="customerList">
-        <li class="empty-state">Loading...</li>
+        <li class="empty-state">Loading…</li>
       </ul>
     </div>
   </div>
 
   <script>
     const API = "/api/customers";
+    let allCustomers = [];
 
     async function loadCustomers() {
       try {
         const res = await fetch(API);
-        const customers = await res.json();
-        renderCustomers(customers);
+        allCustomers = await res.json();
+        applyFilter();
       } catch {
-        renderCustomers(null);
+        document.getElementById("customerList").innerHTML =
+          '<li class="empty-state">Failed to load customers.</li>';
       }
     }
 
-    function renderCustomers(customers) {
+    function onSearch() {
+      const val = document.getElementById("search").value;
+      document.getElementById("clearBtn").style.display = val ? "block" : "none";
+      applyFilter();
+    }
+
+    function clearSearch() {
+      document.getElementById("search").value = "";
+      document.getElementById("clearBtn").style.display = "none";
+      applyFilter();
+      document.getElementById("search").focus();
+    }
+
+    function applyFilter() {
+      const q = document.getElementById("search").value.trim().toLowerCase();
+      const filtered = q
+        ? allCustomers.filter(c =>
+            c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))
+        : allCustomers;
+      renderCustomers(filtered, q);
+    }
+
+    function highlight(text, query) {
+      if (!query) return escHtml(text);
+      const escaped = escHtml(text);
+      const escapedQ = escHtml(query).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return escaped.replace(new RegExp(escapedQ, "gi"), m => `<mark>${m}</mark>`);
+    }
+
+    function renderCustomers(customers, query = "") {
       const list = document.getElementById("customerList");
       const badge = document.getElementById("countBadge");
+      const q = document.getElementById("search").value.trim().toLowerCase();
+
+      badge.textContent = allCustomers.length;
 
       if (!customers || customers.length === 0) {
-        list.innerHTML = '<li class="empty-state">No customers yet. Add one above.</li>';
-        badge.textContent = "0";
+        const msg = q
+          ? `No customers match "<strong>${escHtml(q)}</strong>".`
+          : "No customers yet. Add one above.";
+        list.innerHTML = `<li class="empty-state">${msg}</li>`;
         return;
       }
 
-      badge.textContent = customers.length;
       list.innerHTML = customers.map(c => `
         <li class="customer-item" id="c-${c.id}">
           <div class="customer-info">
-            <strong>${escHtml(c.name)}</strong>
-            <span>${escHtml(c.phone)}</span>
+            <strong>${highlight(c.name, query)}</strong>
+            <span>${highlight(c.phone, query)}</span>
           </div>
           <button class="btn-delete" onclick="deleteCustomer('${c.id}')">Remove</button>
         </li>
@@ -273,7 +374,9 @@
     }
 
     function escHtml(str) {
-      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      return String(str)
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
 
     document.getElementById("phone").addEventListener("keydown", e => {
