@@ -200,6 +200,46 @@
       margin-left: 8px;
       vertical-align: middle;
     }
+
+    .list-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .list-controls-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .sort-group {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .btn-sort {
+      background: transparent;
+      border: 1.5px solid #e0e0e0;
+      color: #666;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+
+    .btn-sort:hover { background: #f5f5f5; }
+
+    .btn-sort.active {
+      background: #eef0fe;
+      border-color: #c5cbfc;
+      color: #4f6ef7;
+    }
   </style>
 </head>
 <body>
@@ -218,8 +258,18 @@
     </div>
 
     <div class="card">
-      <div class="card-header">
-        <h2>Customers <span class="count-badge" id="countBadge">0</span></h2>
+      <div class="list-controls">
+        <div class="list-controls-top">
+          <h2 style="font-weight:600;color:#444;text-transform:uppercase;letter-spacing:.05em;font-size:.8rem;white-space:nowrap">
+            Customers <span class="count-badge" id="countBadge">0</span>
+          </h2>
+          <div class="sort-group">
+            <button class="btn-sort active" id="sort-newest" onclick="setSort('newest')">Newest</button>
+            <button class="btn-sort" id="sort-oldest" onclick="setSort('oldest')">Oldest</button>
+            <button class="btn-sort" id="sort-az" onclick="setSort('az')">A → Z</button>
+            <button class="btn-sort" id="sort-za" onclick="setSort('za')">Z → A</button>
+          </div>
+        </div>
         <div class="search-wrap">
           <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="9" cy="9" r="7"/><line x1="14.5" y1="14.5" x2="19" y2="19"/>
@@ -238,6 +288,23 @@
     const API = "/api/customers";
     let allCustomers = [];
     let editingId = null;
+    let sortKey = "newest";
+
+    function setSort(key) {
+      sortKey = key;
+      document.querySelectorAll(".btn-sort").forEach(b => b.classList.remove("active"));
+      document.getElementById("sort-" + key).classList.add("active");
+      applyFilter();
+    }
+
+    function sortCustomers(list) {
+      const arr = [...list];
+      if (sortKey === "newest") return arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      if (sortKey === "oldest") return arr.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      if (sortKey === "az") return arr.sort((a, b) => a.name.localeCompare(b.name));
+      if (sortKey === "za") return arr.sort((a, b) => b.name.localeCompare(a.name));
+      return arr;
+    }
 
     async function loadCustomers() {
       try {
@@ -268,7 +335,7 @@
       const filtered = q
         ? allCustomers.filter(c => c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))
         : allCustomers;
-      renderCustomers(filtered, q);
+      renderCustomers(sortCustomers(filtered), q);
     }
 
     function highlight(text, query) {
