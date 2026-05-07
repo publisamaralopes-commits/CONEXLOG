@@ -240,6 +240,24 @@
       border-color: #c5cbfc;
       color: #4f6ef7;
     }
+
+    .btn-export {
+      background: transparent;
+      border: 1.5px solid #e0e0e0;
+      color: #555;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .btn-export:hover { background: #f5f5f5; border-color: #ccc; }
+    .btn-export:disabled { opacity: 0.4; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -263,11 +281,19 @@
           <h2 style="font-weight:600;color:#444;text-transform:uppercase;letter-spacing:.05em;font-size:.8rem;white-space:nowrap">
             Customers <span class="count-badge" id="countBadge">0</span>
           </h2>
-          <div class="sort-group">
-            <button class="btn-sort active" id="sort-newest" onclick="setSort('newest')">Newest</button>
-            <button class="btn-sort" id="sort-oldest" onclick="setSort('oldest')">Oldest</button>
-            <button class="btn-sort" id="sort-az" onclick="setSort('az')">A → Z</button>
-            <button class="btn-sort" id="sort-za" onclick="setSort('za')">Z → A</button>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+            <div class="sort-group">
+              <button class="btn-sort active" id="sort-newest" onclick="setSort('newest')">Newest</button>
+              <button class="btn-sort" id="sort-oldest" onclick="setSort('oldest')">Oldest</button>
+              <button class="btn-sort" id="sort-az" onclick="setSort('az')">A → Z</button>
+              <button class="btn-sort" id="sort-za" onclick="setSort('za')">Z → A</button>
+            </div>
+            <button class="btn-export" id="exportBtn" onclick="exportCSV()" title="Download as CSV">
+              <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 15v2h14v-2M10 3v10M6 9l4 4 4-4"/>
+              </svg>
+              Export CSV
+            </button>
           </div>
         </div>
         <div class="search-wrap">
@@ -482,6 +508,38 @@
       } catch {
         if (item) item.style.opacity = "1";
       }
+    }
+
+    function exportCSV() {
+      const btn = document.getElementById("exportBtn");
+      if (!allCustomers.length) return;
+      btn.disabled = true;
+
+      const q = document.getElementById("search").value.trim().toLowerCase();
+      const rows = sortCustomers(
+        q ? allCustomers.filter(c => c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))
+          : allCustomers
+      );
+
+      const csvEscape = v => `"${String(v).replace(/"/g, '""')}"`;
+      const header = ["Name", "Phone", "Added"];
+      const lines = [
+        header.join(","),
+        ...rows.map(c => [
+          csvEscape(c.name),
+          csvEscape(c.phone),
+          csvEscape(new Date(c.createdAt).toLocaleString()),
+        ].join(","))
+      ];
+
+      const blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `customers-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setTimeout(() => { btn.disabled = false; }, 800);
     }
 
     function escHtml(str) {
