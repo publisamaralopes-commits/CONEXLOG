@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Management</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1a1a2e;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.8rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 130px;
+      padding: 10px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+      background: #fafafa;
+    }
+
+    input[type="text"]:focus {
+      border-color: #4f6ef7;
+      background: #fff;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn-primary {
+      background: #4f6ef7;
+      color: #fff;
+      padding: 10px 20px;
+    }
+
+    .btn-primary:hover { background: #3a57e8; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-delete {
+      background: transparent;
+      color: #e53935;
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      border: 1.5px solid #fccfce;
+      border-radius: 6px;
+    }
+
+    .btn-delete:hover { background: #fff0f0; }
+
+    .error-msg {
+      color: #e53935;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+
+    .customer-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .customer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #f9f9fb;
+      border: 1px solid #ebebeb;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .customer-info strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .customer-info span {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.9rem;
+      padding: 24px 0;
+    }
+
+    .count-badge {
+      display: inline-block;
+      background: #eef0fe;
+      color: #4f6ef7;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Customer Management</h1>
+    <p class="subtitle">Add, view, and remove your customers.</p>
+
+    <div class="card">
+      <h2>Add Customer</h2>
+      <div class="form-row">
+        <input type="text" id="name" placeholder="Full name" autocomplete="off" />
+        <input type="text" id="phone" placeholder="Phone number" autocomplete="off" />
+        <button class="btn-primary" id="addBtn" onclick="addCustomer()">Add</button>
+      </div>
+      <div class="error-msg" id="formError"></div>
+    </div>
+
+    <div class="card">
+      <h2>
+        Customers
+        <span class="count-badge" id="countBadge">0</span>
+      </h2>
+      <ul class="customer-list" id="customerList">
+        <li class="empty-state">Loading...</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const API = "/api/customers";
+
+    async function loadCustomers() {
+      try {
+        const res = await fetch(API);
+        const customers = await res.json();
+        renderCustomers(customers);
+      } catch {
+        renderCustomers(null);
+      }
+    }
+
+    function renderCustomers(customers) {
+      const list = document.getElementById("customerList");
+      const badge = document.getElementById("countBadge");
+
+      if (!customers || customers.length === 0) {
+        list.innerHTML = '<li class="empty-state">No customers yet. Add one above.</li>';
+        badge.textContent = "0";
+        return;
+      }
+
+      badge.textContent = customers.length;
+      list.innerHTML = customers.map(c => `
+        <li class="customer-item" id="c-${c.id}">
+          <div class="customer-info">
+            <strong>${escHtml(c.name)}</strong>
+            <span>${escHtml(c.phone)}</span>
+          </div>
+          <button class="btn-delete" onclick="deleteCustomer('${c.id}')">Remove</button>
+        </li>
+      `).join("");
+    }
+
+    async function addCustomer() {
+      const nameEl = document.getElementById("name");
+      const phoneEl = document.getElementById("phone");
+      const errEl = document.getElementById("formError");
+      const btn = document.getElementById("addBtn");
+
+      const name = nameEl.value.trim();
+      const phone = phoneEl.value.trim();
+
+      errEl.textContent = "";
+      if (!name || !phone) {
+        errEl.textContent = "Both name and phone are required.";
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, phone }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errEl.textContent = data.error || "Failed to add customer.";
+          return;
+        }
+        nameEl.value = "";
+        phoneEl.value = "";
+        await loadCustomers();
+      } catch {
+        errEl.textContent = "Network error. Please try again.";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function deleteCustomer(id) {
+      const item = document.getElementById("c-" + id);
+      if (item) item.style.opacity = "0.4";
+      try {
+        await fetch(`${API}/${id}`, { method: "DELETE" });
+        await loadCustomers();
+      } catch {
+        if (item) item.style.opacity = "1";
+      }
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    document.getElementById("phone").addEventListener("keydown", e => {
+      if (e.key === "Enter") addCustomer();
+    });
+    document.getElementById("name").addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("phone").focus();
+    });
+
+    loadCustomers();
+  </script>
+</body>
+</html>
