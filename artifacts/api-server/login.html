@@ -115,7 +115,7 @@ async function doLogin(e){
     const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
     const data=await r.json();
     if(!r.ok){err.textContent=data.error||'Credenciais incorretas';err.classList.add('show');return;}
-    window.location.href='/api/';
+    window.location.href='/';
   }catch(ex){err.textContent='Erro de conexão. Tente novamente.';err.classList.add('show');}
   finally{btn.disabled=false;btn.textContent='Entrar no Sistema';}
 }

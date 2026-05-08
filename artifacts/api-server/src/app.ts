@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import express, { type Express, type ErrorRequestHandler } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
@@ -11,6 +13,12 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { SysUser } from "./models/sysuser";
 import { runBackup } from "./lib/backup";
+
+// ── Static root: always resolves to artifacts/api-server/ regardless of CWD ──
+// In the esbuild bundle, import.meta.url points to dist/index.mjs
+// so _dirname = dist/, and STATIC_ROOT = artifacts/api-server/
+const _dirname = path.dirname(fileURLToPath(import.meta.url));
+const STATIC_ROOT = path.resolve(_dirname, "..");
 
 // ── MONGODB_URI must be present before anything else ─────────────────────────
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -41,37 +49,50 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: MONGODB_URI,
-    ttl: 8 * 60 * 60,           // 8 hours — matches cookie maxAge
+    ttl: 8 * 60 * 60,
     autoRemove: "native",
-    touchAfter: 24 * 3600,      // re-save session at most once per day unless data changes
+    touchAfter: 24 * 3600,
     crypto: { secret: process.env.SESSION_SECRET || "conex-logistics-secret-key-2024" },
   }),
   cookie: {
     httpOnly: true,
     secure: IS_PROD,
     sameSite: IS_PROD ? "strict" : "lax",
-    maxAge: 8 * 60 * 60 * 1000, // 8 hours
+    maxAge: 8 * 60 * 60 * 1000,
   },
 }));
 
 // ── Rate limiting — brute-force protection on login ───────────────────────────
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15-minute window
-  max: 20,                   // max 20 attempts per IP per window
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { error: "Muitas tentativas de login. Aguarde 15 minutos e tente novamente." },
-  skip: () => !IS_PROD,      // only enforce in production
+  skip: () => !IS_PROD,
 });
 
 app.use(cors());
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
-// ── Login page ────────────────────────────────────────────────────────────────
-app.get("/api/login", (_req, res) => {
-  res.sendFile("login.html", { root: "." });
+// ── Frontend: root ("/") ──────────────────────────────────────────────────────
+// Authenticated users land on the dashboard; unauthenticated are sent to login.
+app.get("/", (req, res) => {
+  if (req.session?.userId) {
+    res.sendFile("index.html", { root: STATIC_ROOT });
+  } else {
+    res.redirect("/login");
+  }
 });
+
+// ── Frontend: login page ──────────────────────────────────────────────────────
+app.get("/login", (_req, res) => {
+  res.sendFile("login.html", { root: STATIC_ROOT });
+});
+
+// Backward-compatible aliases (bookmarks, existing sessions)
+app.get("/api/login", (_req, res) => res.redirect("/login"));
 
 // ── Apply rate limiter to login endpoint ──────────────────────────────────────
 app.use("/api/auth/login", loginLimiter);
@@ -83,21 +104,21 @@ app.use("/api", router);
 app.use("/api", (req, res, next) => {
   if (!req.session?.userId) {
     if (req.method === "GET" && !req.path.includes(".")) {
-      res.redirect("/api/login");
+      res.redirect("/login");
       return;
     }
     res.status(401).json({ error: "Não autenticado" });
     return;
   }
   next();
-}, express.static("."));
+}, express.static(STATIC_ROOT));
 
 // ── 404 handler for unknown API routes ───────────────────────────────────────
 app.use("/api/{*path}", (req, res) => {
   res.status(404).json({ error: `Rota não encontrada: ${req.method} ${req.path}` });
 });
 
-// ── Global error handler (must be 4-arg for Express to treat as error middleware) ──
+// ── Global error handler ──────────────────────────────────────────────────────
 const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   const status = (err as { status?: number; statusCode?: number }).status
     ?? (err as { status?: number; statusCode?: number }).statusCode
@@ -138,7 +159,6 @@ async function seedDefaultAdmin() {
 }
 
 async function dropStaleIndexes() {
-  // sysusers: drop legacy email_1 index
   try {
     const col = mongoose.connection.collection("sysusers");
     const indexes = await col.indexes();
@@ -149,7 +169,6 @@ async function dropStaleIndexes() {
   } catch (err) {
     logger.warn({ err }, "Could not drop stale sysusers index — may not exist");
   }
-  // fleets: drop legacy plate_1 index (renamed to placaCavalo)
   try {
     const fleetCol = mongoose.connection.collection("fleets");
     const fleetIndexes = await fleetCol.indexes();
@@ -167,8 +186,6 @@ mongoose.connection.on("connecting", () => logger.info("Connecting to MongoDB...
 mongoose.connection.on("connected", () => {
   logger.info("Connected to MongoDB");
   dropStaleIndexes().then(() => seedDefaultAdmin());
-
-  // Daily backup at 02:00 server time
   cron.schedule("0 2 * * *", () => {
     logger.info("Starting scheduled daily backup...");
     runBackup();

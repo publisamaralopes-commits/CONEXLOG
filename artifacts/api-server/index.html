@@ -774,7 +774,7 @@ function hideErr(id){const e=document.getElementById(id);e.textContent='';e.clas
 async function initAuth(){
   try{
     const r=await fetch(API+'/auth/me');
-    if(!r.ok){window.location.href='/api/login';return;}
+    if(!r.ok){window.location.href='/login';return;}
     S.me=await r.json();
     document.getElementById('user-name').textContent=S.me.name;
     document.getElementById('user-role').textContent=roleM[S.me.role]||S.me.role;
@@ -784,11 +784,11 @@ async function initAuth(){
       document.getElementById('chpwd-overlay').classList.add('open');
       setTimeout(()=>document.getElementById('cp-current').focus(),150);
     }
-  }catch(e){window.location.href='/api/login';}
+  }catch(e){window.location.href='/login';}
 }
 async function doLogout(){
   await fetch(API+'/auth/logout',{method:'POST'});
-  window.location.href='/api/login';
+  window.location.href='/login';
 }
 async function submitChangePassword(){
   const current=document.getElementById('cp-current').value;
