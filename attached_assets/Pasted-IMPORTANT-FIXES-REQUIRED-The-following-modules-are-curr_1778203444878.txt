@@ -1,0 +1,99 @@
+IMPORTANT FIXES REQUIRED
+
+The following modules are currently NOT working correctly and must be fixed completely.
+
+==================================================
+USERS / LOGIN SYSTEM
+====================
+
+The login and user management system is not functioning correctly.
+
+Fix the entire authentication system.
+
+REQUIREMENTS
+
+* functional login screen
+* working username/password authentication
+* MongoDB user storage
+* session persistence
+* protected routes
+* logout functionality
+* user creation working correctly
+* administrator and employee roles functioning correctly
+* proper permissions by role
+* encrypted passwords
+* stable authentication flow
+
+ADMIN USERS
+
+* full access to all modules
+* manage users
+* edit/delete operational data
+
+EMPLOYEE USERS
+
+* limited operational access
+* cannot access admin-only settings
+
+==================================================
+ORDEM DE CARREGAMENTO MODULE
+============================
+
+The Ordem de Carregamento module is not fully functional.
+
+Fix all OC functionality completely.
+
+REQUIREMENTS
+
+* automatic OC number generation working
+* save OC to MongoDB correctly
+* QR Code generation working
+* public OC page working
+* PDF generation working correctly
+* automatic print dialog functioning
+* all required fields validating properly
+* OCR upload functioning correctly
+* responsive layout
+* edit/delete functionality working
+* stable data persistence
+
+The QR Code must correctly open the OC public page.
+
+==================================================
+MOBILE VERSION / RESPONSIVE DESIGN
+==================================
+
+The mobile version is not functioning properly.
+
+Fix the entire responsive/mobile experience.
+
+MOBILE REQUIREMENTS
+
+* responsive sidebar
+* mobile navigation menu
+* adaptive cards/tables
+* touch-friendly buttons
+* responsive forms
+* optimized spacing for smartphones
+* proper scaling on Android/iPhone
+* dashboard fully usable on mobile
+* no broken layouts
+* no overflow issues
+* smooth mobile experience
+
+The platform must behave like a real professional mobile logistics web application.
+
+==================================================
+GENERAL STABILITY FIXES
+=======================
+
+* fix routing issues
+* fix broken pages
+* fix navigation problems
+* fix loading issues
+* improve performance
+* ensure MongoDB integration stability
+* validate all CRUD operations
+* ensure all modules are fully connected and operational
+
+The entire CONEX platform must now function as a stable, professional, enterprise-grade logistics management system.

@@ -13,9 +13,9 @@ const DriverSchema = z.object({
 
 const VehicleDataSchema = z.object({
   placaCavalo: z.string().min(1, "Placa do cavalo é obrigatória"),
-  carreta1: z.string().min(1, "Carreta 1 é obrigatória"),
-  carreta2: z.string().min(1, "Carreta 2 é obrigatória"),
-  carreta3: z.string().min(1, "Carreta 3 é obrigatória"),
+  carreta1: z.string().optional(),
+  carreta2: z.string().optional(),
+  carreta3: z.string().optional(),
   tipoVeiculo: z.enum(["graneleiro", "cacamba"]),
 });
 

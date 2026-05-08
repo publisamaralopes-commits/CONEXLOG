@@ -237,20 +237,51 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
 }
 #print-area{display:none}
 
+/* Mobile backdrop overlay */
+.mob-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:45;display:none;backdrop-filter:blur(2px);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mob-overlay.show{display:block}
+
+/* Toast notifications */
+.toast-container{position:fixed;bottom:20px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:300px}
+.toast{background:var(--bg-700);border:1px solid var(--border-md);border-radius:10px;padding:10px 14px;font-size:.82rem;color:var(--text-200);box-shadow:0 8px 32px rgba(0,0,0,.5);transform:translateX(120%);transition:transform .3s ease;pointer-events:all;display:flex;align-items:center;gap:8px;word-break:break-word}
+.toast.show{transform:translateX(0)}
+.toast.t-success{border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.08)}
+.toast.t-error{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.08)}
+.toast.t-info{border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.08)}
+
 /* RESPONSIVE */
 @media(max-width:900px){.fg3{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){
-  .sidebar{position:fixed;left:0;top:0;height:100%;z-index:50;transform:translateX(-100%);transition:transform .25s}
-  .sidebar.open{transform:translateX(0);width:240px!important}
+  .sidebar{position:fixed;left:0;top:0;height:100%;z-index:50;transform:translateX(-260px);transition:transform .25s}
+  .sidebar.open{transform:translateX(0);width:260px!important}
   .mob-menu{display:block}
   .main{width:100%}
   .fg2,.fg3{grid-template-columns:1fr}
   .charts-grid{grid-template-columns:1fr}
   .lotes-grid,.mural-grid{grid-template-columns:1fr}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .overlay-box{margin:8px;max-height:calc(100vh - 16px);border-radius:14px}
+  .overlay-body{max-height:calc(100vh - 145px)}
+  .content{padding:12px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .sec-header{flex-direction:column;align-items:flex-start}
+  .sec-header .btn{align-self:stretch;justify-content:center}
+  .toolbar{flex-wrap:wrap}
+  .toolbar input,.toolbar select{min-width:0;flex:1 1 140px}
+  .topbar{padding:0 10px}
+  .topbar-title{font-size:.82rem}
+  .tag-badge{display:none}
+  .btn-logout{font-size:.7rem;padding:3px 8px}
+  .lotes-grid{grid-template-columns:1fr}
+  .counter-btns{gap:6px}
+  .cbtn{padding:4px 14px;font-size:.9rem}
+  .toast-container{bottom:12px;right:8px;left:8px;max-width:100%}
 }
 </style>
 </head>
 <body>
+<div class="mob-overlay" id="mob-overlay" onclick="closeMobSidebar()"></div>
+<div class="toast-container" id="toast-container"></div>
 <div class="app">
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-top">
@@ -476,9 +507,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
     <div class="fg2">
       <div class="fg"><label>Placa do Cavalo *</label><input type="text" id="of-cavalo" placeholder="ABC-0000" oninput="this.value=this.value.toUpperCase()"></div>
       <div class="fg"><label>Tipo de Veículo *</label><select id="of-tipo"><option value="graneleiro">Graneleiro</option><option value="cacamba">Caçamba</option></select></div>
-      <div class="fg"><label>Carreta 1 *</label><input type="text" id="of-carr1" placeholder="ABC-0000" oninput="this.value=this.value.toUpperCase()"></div>
-      <div class="fg"><label>Carreta 2 *</label><input type="text" id="of-carr2" placeholder="ABC-0000" oninput="this.value=this.value.toUpperCase()"></div>
-      <div class="fg"><label>Carreta 3 *</label><input type="text" id="of-carr3" placeholder="ABC-0000" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label>Carreta 1</label><input type="text" id="of-carr1" placeholder="Opcional" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label>Carreta 2</label><input type="text" id="of-carr2" placeholder="Opcional" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label>Carreta 3</label><input type="text" id="of-carr3" placeholder="Opcional" oninput="this.value=this.value.toUpperCase()"></div>
     </div>
     <div class="fsec-title">Dados da Carga</div>
     <div class="fg2">
@@ -713,8 +744,10 @@ function nav(sec){
   else if(sec==='users')loadUsers();
 }
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('collapsed');}
-function toggleMobSidebar(){document.getElementById('sidebar').classList.toggle('open');}
-function closeMobSidebar(){if(window.innerWidth<768)document.getElementById('sidebar').classList.remove('open');}
+function toggleMobSidebar(){const sb=document.getElementById('sidebar');const ov=document.getElementById('mob-overlay');sb.classList.toggle('open');ov.classList.toggle('show',sb.classList.contains('open'));}
+function closeMobSidebar(){if(window.innerWidth<=900){document.getElementById('sidebar').classList.remove('open');document.getElementById('mob-overlay').classList.remove('show');}}
+
+function toast(msg,type,dur){type=type||'t-success';dur=dur||3000;const icons={'t-success':'✅','t-error':'❌','t-info':'ℹ️'};const c=document.getElementById('toast-container');const t=document.createElement('div');t.className='toast '+type;t.innerHTML='<span>'+icons[type]+'</span><span>'+String(msg).replace(/</g,'&lt;')+'</span>';c.appendChild(t);requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('show');});});setTimeout(function(){t.classList.remove('show');setTimeout(function(){t.remove();},350);},dur);}
 
 /* ═══════════ ORDENS ═══════════ */
 async function loadOrders(){
@@ -815,20 +848,43 @@ function editOrder(id){
 function openOCPage(){const id=document.getElementById('of-id').value;const o=S.orders.find(x=>x.id===id);if(o)window.open(getOCUrl(o.orderNumber),'_blank');}
 async function saveOrder(){
   const id=document.getElementById('of-id').value;
+  const c1=document.getElementById('of-carr1').value.trim()||undefined;
+  const c2=document.getElementById('of-carr2').value.trim()||undefined;
+  const c3=document.getElementById('of-carr3').value.trim()||undefined;
   const payload={
     status:document.getElementById('of-status').value,
     driver:{nome:document.getElementById('of-nome').value.trim(),cpf:document.getElementById('of-cpf').value.trim(),cnhNumber:document.getElementById('of-cnh').value.trim(),cnhImage:S.cnhB64||undefined},
-    vehicle:{placaCavalo:document.getElementById('of-cavalo').value.trim(),carreta1:document.getElementById('of-carr1').value.trim(),carreta2:document.getElementById('of-carr2').value.trim(),carreta3:document.getElementById('of-carr3').value.trim(),tipoVeiculo:document.getElementById('of-tipo').value},
+    vehicle:{placaCavalo:document.getElementById('of-cavalo').value.trim(),carreta1:c1,carreta2:c2,carreta3:c3,tipoVeiculo:document.getElementById('of-tipo').value},
     cargo:{produto:document.getElementById('of-produto').value.trim(),peso:document.getElementById('of-peso').value.trim(),cliente:document.getElementById('of-cliente').value.trim(),remetente:document.getElementById('of-remetente').value.trim(),origem:document.getElementById('of-origem').value.trim(),destinatario:document.getElementById('of-destinatario').value.trim(),destino:document.getElementById('of-destino').value.trim()},
   };
+  const btn=document.querySelector('#oc-overlay .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Salvando…';}
   try{
     const r=await fetch(id?`${API}/orders/${id}`:`${API}/orders`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
-    if(!r.ok){showErr('oc-err',d.error||'Erro ao salvar.');return;}
-    closeOCForm();await loadOrders();
-  }catch(e){showErr('oc-err','Erro de rede.');}
+    if(!r.ok){showErr('oc-err',d.error||'Erro ao salvar.');toast(d.error||'Erro ao salvar OC.','t-error');return;}
+    if(!id){
+      S.lastOC=d;const url=getOCUrl(d.orderNumber);
+      document.getElementById('of-num').value=d.orderNumber;
+      document.getElementById('of-id').value=d.id||'';
+      document.getElementById('oc-qr-img').src=getQR(url);
+      document.getElementById('oc-qr-url').textContent=url;
+      document.getElementById('oc-qr-row').style.display='flex';
+      document.getElementById('btn-oc-print').style.display='';
+      document.getElementById('btn-oc-page').style.display='';
+      document.getElementById('oc-form-title').textContent='OC — '+d.orderNumber;
+      toast('OC criada! Número: '+d.orderNumber);
+    }else{toast('OC atualizada com sucesso!');}
+    await loadOrders();
+  }catch(e){showErr('oc-err','Erro de rede.');toast('Erro de rede.','t-error');}
+  finally{if(btn){btn.disabled=false;btn.textContent='Salvar';}}
 }
-async function delOrder(id){if(!confirm('Excluir esta OC?'))return;await fetch(`${API}/orders/${id}`,{method:'DELETE'});await loadOrders();}
+async function delOrder(id){
+  if(!confirm('Excluir esta Ordem de Carregamento?'))return;
+  await fetch(`${API}/orders/${id}`,{method:'DELETE'});
+  toast('OC excluída.','t-info');
+  await loadOrders();
+}
 function printOrderId(id){const o=S.orders.find(x=>x.id===id);if(o)doPrint(o);}
 function printOC(){const id=document.getElementById('of-id').value;printOrderId(id);}
 function doPrint(o){
@@ -931,13 +987,21 @@ function editSchedule(id){
 async function saveSchedule(){
   const id=document.getElementById('sf-id').value;
   const payload={cliente:document.getElementById('sf-cliente').value.trim(),produto:document.getElementById('sf-produto').value.trim(),retirada:document.getElementById('sf-retirada').value.trim(),cidadeRetirada:document.getElementById('sf-cidade-ret').value.trim(),destinatario:document.getElementById('sf-destinatario').value.trim(),cidadeDestino:document.getElementById('sf-cidade-dest').value.trim(),terminal:document.getElementById('sf-terminal').value.trim(),numeroPGR:document.getElementById('sf-pgr').value.trim(),status:document.getElementById('sf-status').value};
+  const btn=document.querySelector('#sc-overlay .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Salvando…';}
   try{
     const r=await fetch(id?`${API}/schedules/${id}`:`${API}/schedules`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const d=await r.json();if(!r.ok){showErr('sc-err',d.error||'Erro.');return;}
-    closeSchedForm();await loadSchedules();
-  }catch(e){showErr('sc-err','Erro de rede.');}
+    const d=await r.json();if(!r.ok){showErr('sc-err',d.error||'Erro.');toast(d.error||'Erro.','t-error');return;}
+    closeSchedForm();toast(id?'Programação atualizada!':'Programação criada!');await loadSchedules();
+  }catch(e){showErr('sc-err','Erro de rede.');toast('Erro de rede.','t-error');}
+  finally{if(btn){btn.disabled=false;btn.textContent='Salvar';}}
 }
-async function delSchedule(id){if(!confirm('Excluir?'))return;await fetch(`${API}/schedules/${id}`,{method:'DELETE'});await loadSchedules();}
+async function delSchedule(id){
+  if(!confirm('Excluir esta programação?'))return;
+  await fetch(`${API}/schedules/${id}`,{method:'DELETE'});
+  toast('Programação excluída.','t-info');
+  await loadSchedules();
+}
 
 /* ═══════════ POSIÇÃO / LOTES ═══════════ */
 async function loadLotes(){
@@ -1020,13 +1084,21 @@ function editLote(id){
 async function saveLote(){
   const id=document.getElementById('lf-id').value;
   const payload={cliente:document.getElementById('lf-cliente').value.trim(),origem:document.getElementById('lf-origem').value.trim(),cidadeOrigem:document.getElementById('lf-cidade-orig').value.trim(),destino:document.getElementById('lf-destino').value.trim(),cidadeDestino:document.getElementById('lf-cidade-dest').value.trim(),valorFrete:document.getElementById('lf-frete').value.trim()||undefined};
+  const btn=document.querySelector('#lt-overlay .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Salvando…';}
   try{
     const r=await fetch(id?`${API}/lotes/${id}`:`${API}/lotes`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const d=await r.json();if(!r.ok){showErr('lt-err',d.error||'Erro.');return;}
-    closeLoteForm();await loadLotes();
-  }catch(e){showErr('lt-err','Erro de rede.');}
+    const d=await r.json();if(!r.ok){showErr('lt-err',d.error||'Erro.');toast(d.error||'Erro.','t-error');return;}
+    closeLoteForm();toast(id?'Lote atualizado!':'Lote criado!');await loadLotes();
+  }catch(e){showErr('lt-err','Erro de rede.');toast('Erro de rede.','t-error');}
+  finally{if(btn){btn.disabled=false;btn.textContent='Salvar';}}
 }
-async function delLote(id){if(!confirm('Excluir este lote?'))return;await fetch(`${API}/lotes/${id}`,{method:'DELETE'});await loadLotes();}
+async function delLote(id){
+  if(!confirm('Excluir este lote?'))return;
+  await fetch(`${API}/lotes/${id}`,{method:'DELETE'});
+  toast('Lote excluído.','t-info');
+  await loadLotes();
+}
 
 /* ═══════════ VEÍCULOS ═══════════ */
 async function loadVehicles(){
@@ -1084,13 +1156,21 @@ function editVehicle(id){
 async function saveVehicle(){
   const id=document.getElementById('vf-id').value;
   const payload={cliente:document.getElementById('vf-cliente').value.trim(),origemDestino:document.getElementById('vf-rota').value.trim(),placaCavalo:document.getElementById('vf-cavalo').value.trim(),placaCarreta1:document.getElementById('vf-carr1').value.trim()||undefined,placaCarreta2:document.getElementById('vf-carr2').value.trim()||undefined,placaCarreta3:document.getElementById('vf-carr3').value.trim()||undefined,statusGR:document.getElementById('vf-sgr').value,statusCarregamento:document.getElementById('vf-scar').value,obs:document.getElementById('vf-obs').value.trim()||undefined};
+  const btn=document.querySelector('#vh-overlay .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Salvando…';}
   try{
     const r=await fetch(id?`${API}/vehicles/${id}`:`${API}/vehicles`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const d=await r.json();if(!r.ok){showErr('vh-err',d.error||'Erro.');return;}
-    closeVehForm();await loadVehicles();
-  }catch(e){showErr('vh-err','Erro de rede.');}
+    const d=await r.json();if(!r.ok){showErr('vh-err',d.error||'Erro.');toast(d.error||'Erro.','t-error');return;}
+    closeVehForm();toast(id?'Veículo atualizado!':'Veículo adicionado!');await loadVehicles();
+  }catch(e){showErr('vh-err','Erro de rede.');toast('Erro de rede.','t-error');}
+  finally{if(btn){btn.disabled=false;btn.textContent='Salvar';}}
 }
-async function delVehicle(id){if(!confirm('Excluir?'))return;await fetch(`${API}/vehicles/${id}`,{method:'DELETE'});await loadVehicles();}
+async function delVehicle(id){
+  if(!confirm('Excluir este veículo?'))return;
+  await fetch(`${API}/vehicles/${id}`,{method:'DELETE'});
+  toast('Veículo excluído.','t-info');
+  await loadVehicles();
+}
 
 /* ═══════════ MURAL ═══════════ */
 async function loadMural(){
@@ -1137,13 +1217,21 @@ function editMural(id){
 async function saveMural(){
   const id=document.getElementById('mf-id').value;
   const payload={titulo:document.getElementById('mf-titulo').value.trim(),conteudo:document.getElementById('mf-conteudo').value.trim(),tipo:document.getElementById('mf-tipo').value,urgente:document.getElementById('mf-urgente').value==='true',pinado:document.getElementById('mf-pinado').value==='true'};
+  const btn=document.querySelector('#mu-overlay .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Publicando…';}
   try{
     const r=await fetch(id?`${API}/mural/${id}`:`${API}/mural`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const d=await r.json();if(!r.ok){showErr('mu-err',d.error||'Erro.');return;}
-    closeMuralForm();await loadMural();
-  }catch(e){showErr('mu-err','Erro de rede.');}
+    const d=await r.json();if(!r.ok){showErr('mu-err',d.error||'Erro.');toast(d.error||'Erro.','t-error');return;}
+    closeMuralForm();toast(id?'Post atualizado!':'Post publicado no Mural!');await loadMural();
+  }catch(e){showErr('mu-err','Erro de rede.');toast('Erro de rede.','t-error');}
+  finally{if(btn){btn.disabled=false;btn.textContent='Salvar';}}
 }
-async function delMural(id){if(!confirm('Excluir post?'))return;await fetch(`${API}/mural/${id}`,{method:'DELETE'});await loadMural();}
+async function delMural(id){
+  if(!confirm('Excluir este post do Mural?'))return;
+  await fetch(`${API}/mural/${id}`,{method:'DELETE'});
+  toast('Post excluído.','t-info');
+  await loadMural();
+}
 
 /* ═══════════ RELATÓRIOS ═══════════ */
 async function loadReports(){
@@ -1224,13 +1312,21 @@ async function saveUser(){
   const payload={name:document.getElementById('uf-name').value.trim(),username:document.getElementById('uf-username').value.trim(),role:document.getElementById('uf-role').value,active:document.getElementById('uf-active').value==='true'};
   const pwd=document.getElementById('uf-password').value;if(pwd)payload.password=pwd;
   if(!id&&!pwd){showErr('usr-err','Senha obrigatória para novo usuário.');return;}
+  const btn=document.querySelector('#usr-overlay .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Salvando…';}
   try{
     const r=await fetch(id?`${API}/sysusers/${id}`:`${API}/sysusers`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const d=await r.json();if(!r.ok){showErr('usr-err',d.error||'Erro.');return;}
-    closeUserForm();await loadUsers();
-  }catch(e){showErr('usr-err','Erro de rede.');}
+    const d=await r.json();if(!r.ok){showErr('usr-err',d.error||'Erro.');toast(d.error||'Erro.','t-error');return;}
+    closeUserForm();toast(id?'Usuário atualizado!':'Usuário criado com sucesso!');await loadUsers();
+  }catch(e){showErr('usr-err','Erro de rede.');toast('Erro de rede.','t-error');}
+  finally{if(btn){btn.disabled=false;btn.textContent='Salvar';}}
 }
-async function delUser(id){if(!confirm('Excluir usuário?'))return;await fetch(`${API}/sysusers/${id}`,{method:'DELETE'});await loadUsers();}
+async function delUser(id){
+  if(!confirm('Excluir este usuário permanentemente?'))return;
+  await fetch(`${API}/sysusers/${id}`,{method:'DELETE'});
+  toast('Usuário excluído.','t-info');
+  await loadUsers();
+}
 
 // INIT
 initAuth().then(()=>loadOrders());

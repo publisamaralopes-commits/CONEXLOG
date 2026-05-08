@@ -11,9 +11,9 @@ export interface ILoadOrder extends Document {
   };
   vehicle: {
     placaCavalo: string;
-    carreta1: string;
-    carreta2: string;
-    carreta3: string;
+    carreta1?: string;
+    carreta2?: string;
+    carreta3?: string;
     tipoVeiculo: "graneleiro" | "cacamba";
   };
   cargo: {
@@ -45,9 +45,9 @@ const LoadOrderSchema = new Schema<ILoadOrder>(
     },
     vehicle: {
       placaCavalo: { type: String, required: true, uppercase: true },
-      carreta1: { type: String, required: true, uppercase: true },
-      carreta2: { type: String, required: true, uppercase: true },
-      carreta3: { type: String, required: true, uppercase: true },
+      carreta1: { type: String, uppercase: true, default: "" },
+      carreta2: { type: String, uppercase: true, default: "" },
+      carreta3: { type: String, uppercase: true, default: "" },
       tipoVeiculo: { type: String, enum: ["graneleiro", "cacamba"], required: true },
     },
     cargo: {

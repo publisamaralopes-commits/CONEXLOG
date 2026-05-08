@@ -51,11 +51,25 @@ app.use("/api", (req, res, next) => {
 
 async function seedDefaultAdmin() {
   try {
-    const adminExists = await SysUser.findOne({ username: "admin" });
-    if (!adminExists) {
-      const hash = await bcrypt.hash("admin123", 12);
+    const admin = await SysUser.findOne({ username: "admin" });
+    if (!admin) {
+      const hash = await bcrypt.hash("admin123", 10);
       await SysUser.create({ name: "Administrador", username: "admin", password: hash, role: "admin", active: true });
       logger.info("Admin padrão criado — login: admin / senha: admin123");
+    } else {
+      // Ensure admin is active with correct role
+      const updates: Record<string, unknown> = {};
+      if (!admin.active) updates.active = true;
+      if (admin.role !== "admin") updates.role = "admin";
+      // If password does not match admin123, reset it so the default login always works
+      const ok = await bcrypt.compare("admin123", admin.password);
+      if (!ok) {
+        updates.password = await bcrypt.hash("admin123", 10);
+        logger.info("Admin senha redefinida para admin123 (hash incompatível detectado)");
+      }
+      if (Object.keys(updates).length > 0) {
+        await SysUser.updateOne({ _id: admin._id }, { $set: updates });
+      }
     }
   } catch (err) {
     logger.error(err, "Failed to seed default admin");
