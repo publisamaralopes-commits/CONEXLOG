@@ -3,51 +3,54 @@ import { LoadOrder } from "../models/loadOrder";
 
 const router: IRouter = Router();
 
-function statusLabel(s: string) {
-  const map: Record<string, string> = {
-    pending: "Pendente", loading: "Carregando",
-    in_transit: "Em Trânsito", delivered: "Entregue", cancelled: "Cancelado",
-  };
-  return map[s] || s;
-}
+const COMPANY = {
+  name: "TRANSPANORAMA TRANSPORTES S.A.",
+  cnpj: "01.937.440/0012-95",
+  ie: "107040840",
+  address: "V EX JULIO BORGES DE SOUZA",
+  bairro: "N. S. DA SAÚDE",
+  cidade: "ITUMBIARA - GO",
+  cep: "75.520-375",
+  tel: "(44) 3261-0000",
+  logo: "https://www.transpanorama.com.br/wp-content/uploads/2020/10/logo-transpanorama.png",
+};
 
-function statusColor(s: string) {
-  const map: Record<string, string> = {
-    pending: "#f59e0b", loading: "#3b82f6",
-    in_transit: "#8b5cf6", delivered: "#10b981", cancelled: "#ef4444",
-  };
-  return map[s] || "#64748b";
-}
+const statusMap: Record<string, { label: string; color: string }> = {
+  pending: { label: "Pendente", color: "#f59e0b" },
+  loading: { label: "Carregando", color: "#3b82f6" },
+  in_transit: { label: "Em Trânsito", color: "#8b5cf6" },
+  delivered: { label: "Entregue", color: "#10b981" },
+  cancelled: { label: "Cancelado", color: "#ef4444" },
+};
 
 function esc(s: unknown) {
-  return String(s ?? "—")
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return String(s ?? "—").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function fmtDate(d: unknown) {
-  if (!d) return "—";
-  return new Date(String(d)).toLocaleDateString("pt-BR");
+function row(label: string, value: unknown) {
+  return `<tr><td class="lbl">${label}</td><td class="val">${esc(value)}</td></tr>`;
 }
 
 router.get("/oc/:orderNumber", async (req, res) => {
   try {
     const order = await LoadOrder.findOne({ orderNumber: req.params.orderNumber });
     if (!order) {
-      res.status(404).send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>OC não encontrada</title></head>
-<body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#f1f5f9;margin:0">
-<div style="text-align:center"><div style="font-size:64px">📋</div><h2 style="color:#334155">Ordem não encontrada</h2><p style="color:#64748b">${esc(req.params.orderNumber)}</p></div>
-</body></html>`);
+      res.status(404).send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>OC não encontrada</title>
+<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#080e1e;margin:0;color:#fff}
+.box{text-align:center}.icon{font-size:64px}.msg{font-size:1.2rem;color:#60a5fa;margin-top:12px}</style></head>
+<body><div class="box"><div class="icon">📋</div><div class="msg">Ordem ${esc(req.params.orderNumber)} não encontrada</div></div></body></html>`);
       return;
     }
 
     const proto = (req.headers["x-forwarded-proto"] as string) || "https";
     const host = req.headers.host || "localhost";
     const pageUrl = `${proto}://${host}/api/oc/${esc(order.orderNumber)}`;
-    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(pageUrl)}&bgcolor=ffffff&color=1e3a5f`;
+    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(pageUrl)}&bgcolor=0a1628&color=60a5fa`;
+    const st = statusMap[order.status] || { label: order.status, color: "#64748b" };
+    const tipoMap: Record<string, string> = { graneleiro: "Graneleiro", cacamba: "Caçamba" };
     const cnhImg = order.driver?.cnhImage
-      ? `<img src="${order.driver.cnhImage}" style="max-width:160px;max-height:100px;border-radius:6px;border:1px solid #e2e8f0;object-fit:contain" alt="CNH">`
-      : '<span style="color:#94a3b8;font-size:.85rem">Não informada</span>';
+      ? `<img src="${order.driver.cnhImage}" style="max-width:200px;max-height:120px;border-radius:8px;border:1px solid rgba(96,165,250,.3);object-fit:contain" alt="CNH">`
+      : `<span style="color:#475569">Não informada</span>`;
 
     const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -55,102 +58,110 @@ router.get("/oc/:orderNumber", async (req, res) => {
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>OC ${esc(order.orderNumber)} — TRANSPANORAMA</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh}
-.header{background:linear-gradient(135deg,#0f2744 0%,#1e4976 100%);color:#fff;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.header-brand{display:flex;align-items:center;gap:14px}
-.header-icon{width:48px;height:48px;background:#2563eb;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.header-name{font-size:1.3rem;font-weight:800;letter-spacing:.04em}
-.header-sub{font-size:.8rem;opacity:.7;margin-top:2px}
-.oc-num{font-size:1.1rem;font-weight:700;background:rgba(255,255,255,.15);padding:6px 16px;border-radius:8px;letter-spacing:.05em}
-.status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.85rem;font-weight:700;color:#fff}
+body{font-family:'Inter',sans-serif;background:#080e1e;color:#e2e8f0;min-height:100vh}
+.header{background:linear-gradient(135deg,#0d1829 0%,#0f2040 100%);border-bottom:2px solid rgba(96,165,250,.2);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.header-left{display:flex;align-items:center;gap:16px}
+.logo{height:52px;object-fit:contain;filter:brightness(1.1)}
+.brand{font-family:'Poppins',sans-serif}
+.brand-name{font-size:1.1rem;font-weight:700;color:#fff}
+.brand-cnpj{font-size:.7rem;color:#60a5fa;margin-top:2px}
+.brand-addr{font-size:.7rem;color:#94a3b8;margin-top:1px}
+.oc-block{text-align:right}
+.oc-num{font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:800;color:#f97316;letter-spacing:.06em}
+.oc-label{font-size:.65rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:700;color:#fff;margin-top:6px;border:1px solid transparent}
 .container{max-width:860px;margin:0 auto;padding:24px 16px}
-.card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:16px;overflow:hidden}
-.card-head{background:#eff6ff;padding:12px 20px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#1d4ed8;border-bottom:1px solid #dbeafe}
-.card-body{padding:0}
-.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0}
-.info-cell{padding:14px 20px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9}
-.info-cell:last-child{border-right:none}
-.info-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:4px}
-.info-value{font-size:.92rem;font-weight:600;color:#1e293b}
-.qr-section{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:20px;border-top:1px solid #f1f5f9}
-.qr-label{font-size:.75rem;color:#64748b;text-align:center}
-.qr-url{font-size:.7rem;color:#3b82f6;word-break:break-all;text-align:center;max-width:220px}
-.footer{text-align:center;color:#94a3b8;font-size:.75rem;padding:20px;margin-top:8px}
-@media(max-width:600px){.header{flex-direction:column;align-items:flex-start}.info-grid{grid-template-columns:1fr 1fr}}
-@media print{body{background:#fff}.header{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.section-card{background:#0d1829;border:1px solid rgba(59,130,246,.15);border-radius:12px;margin-bottom:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.section-head{background:rgba(30,58,138,.3);padding:10px 20px;font-family:'Poppins',sans-serif;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#60a5fa;border-bottom:1px solid rgba(59,130,246,.15)}
+table.info{width:100%;border-collapse:collapse;font-size:.85rem}
+table.info td{padding:10px 20px;border-bottom:1px solid rgba(255,255,255,.04)}
+table.info td.lbl{width:35%;font-weight:600;color:#94a3b8;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+table.info td.val{color:#f1f5f9;font-weight:500}
+table.info tr:last-child td{border-bottom:none}
+.bottom-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;padding:20px 24px;background:#0d1829;border:1px solid rgba(59,130,246,.15);border-radius:12px}
+.qr-block{text-align:center}
+.qr-block img{border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:6px;background:#0a1628}
+.qr-label{font-size:.68rem;color:#60a5fa;margin-top:6px;font-weight:600}
+.qr-url{font-size:.65rem;color:#475569;word-break:break-all;max-width:180px}
+.footer{text-align:center;color:#334155;font-size:.72rem;padding:20px;margin-top:8px}
+.conex-tag{color:#f97316;font-weight:700}
+@media(max-width:600px){.header{flex-direction:column;align-items:flex-start}.oc-block{text-align:left}}
+@media print{body{background:#fff!important}*{color:#000!important}.section-card{border:1px solid #ddd!important;background:#fff!important}.section-head{background:#f0f4ff!important;color:#1d4ed8!important}}
 </style>
 </head>
 <body>
 <div class="header">
-  <div class="header-brand">
-    <div class="header-icon">🚛</div>
-    <div>
-      <div class="header-name">TRANSPANORAMA</div>
-      <div class="header-sub">Ordem de Carregamento</div>
+  <div class="header-left">
+    <img src="${COMPANY.logo}" class="logo" alt="TRANSPANORAMA" onerror="this.style.display='none'">
+    <div class="brand">
+      <div class="brand-name">${COMPANY.name}</div>
+      <div class="brand-cnpj">CNPJ: ${COMPANY.cnpj} &nbsp;|&nbsp; I.E.: ${COMPANY.ie}</div>
+      <div class="brand-addr">${COMPANY.address}, ${COMPANY.bairro} — ${COMPANY.cidade} | CEP ${COMPANY.cep} | Tel: ${COMPANY.tel}</div>
     </div>
   </div>
-  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+  <div class="oc-block">
+    <div class="oc-label">Ordem de Carregamento</div>
     <div class="oc-num">${esc(order.orderNumber)}</div>
-    <div class="status-pill" style="background:${statusColor(order.status)}">${statusLabel(order.status)}</div>
+    <div><span class="status-pill" style="background:${st.color}22;border-color:${st.color}44;color:${st.color}">${st.label}</span></div>
   </div>
 </div>
 
 <div class="container">
-  <div class="card">
-    <div class="card-head">Dados do Motorista</div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-cell"><div class="info-label">Nome</div><div class="info-value">${esc(order.driver?.name)}</div></div>
-        <div class="info-cell"><div class="info-label">CPF</div><div class="info-value">${esc(order.driver?.cpf)}</div></div>
-        <div class="info-cell"><div class="info-label">Telefone</div><div class="info-value">${esc(order.driver?.phone)}</div></div>
-        <div class="info-cell"><div class="info-label">Nº CNH</div><div class="info-value">${esc(order.driver?.cnhNumber)}</div></div>
-        <div class="info-cell"><div class="info-label">Validade CNH</div><div class="info-value">${esc(order.driver?.cnhExpiry)}</div></div>
-        <div class="info-cell"><div class="info-label">Foto CNH</div><div class="info-value">${cnhImg}</div></div>
-      </div>
-    </div>
+  <div class="section-card">
+    <div class="section-head">Dados do Motorista</div>
+    <table class="info">
+      ${row("Nome", order.driver?.nome)}
+      ${row("CPF", order.driver?.cpf)}
+      ${row("Nº CNH", order.driver?.cnhNumber)}
+      <tr><td class="lbl">Foto CNH</td><td class="val">${cnhImg}</td></tr>
+    </table>
   </div>
 
-  <div class="card">
-    <div class="card-head">Dados do Veículo</div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-cell"><div class="info-label">Placa</div><div class="info-value">${esc(order.vehicle?.plate)}</div></div>
-        <div class="info-cell"><div class="info-label">Tipo</div><div class="info-value">${esc(order.vehicle?.type)}</div></div>
-        <div class="info-cell"><div class="info-label">Modelo</div><div class="info-value">${esc(order.vehicle?.model)}</div></div>
-      </div>
-    </div>
+  <div class="section-card">
+    <div class="section-head">Dados do Veículo</div>
+    <table class="info">
+      ${row("Placa Cavalo", order.vehicle?.placaCavalo)}
+      ${row("Carreta 1", order.vehicle?.carreta1)}
+      ${row("Carreta 2", order.vehicle?.carreta2)}
+      ${row("Carreta 3", order.vehicle?.carreta3)}
+      ${row("Tipo de Veículo", tipoMap[order.vehicle?.tipoVeiculo] || order.vehicle?.tipoVeiculo)}
+    </table>
   </div>
 
-  <div class="card">
-    <div class="card-head">Dados da Carga</div>
-    <div class="card-body">
-      <div class="info-grid">
-        <div class="info-cell" style="grid-column:1/-1"><div class="info-label">Descrição</div><div class="info-value">${esc(order.cargo?.description)}</div></div>
-        <div class="info-cell"><div class="info-label">Origem</div><div class="info-value">${esc(order.cargo?.origin)}</div></div>
-        <div class="info-cell"><div class="info-label">Destino</div><div class="info-value">${esc(order.cargo?.destination)}</div></div>
-        <div class="info-cell"><div class="info-label">Peso</div><div class="info-value">${esc(order.cargo?.weight)} kg</div></div>
-        <div class="info-cell"><div class="info-label">Volume</div><div class="info-value">${esc(order.cargo?.volume) || "—"} m³</div></div>
-        ${order.cargo?.notes ? `<div class="info-cell" style="grid-column:1/-1"><div class="info-label">Observações</div><div class="info-value">${esc(order.cargo.notes)}</div></div>` : ""}
-      </div>
-    </div>
+  <div class="section-card">
+    <div class="section-head">Dados da Carga</div>
+    <table class="info">
+      ${row("Produto", order.cargo?.produto)}
+      ${row("Peso", order.cargo?.peso)}
+      ${row("Cliente", order.cargo?.cliente)}
+      ${row("Remetente", order.cargo?.remetente)}
+      ${row("Origem", order.cargo?.origem)}
+      ${row("Destinatário", order.cargo?.destinatario)}
+      ${row("Destino", order.cargo?.destino)}
+    </table>
   </div>
 
-  <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:20px 24px">
+  <div class="bottom-row">
     <div>
-      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:4px">Emitida em</div>
-      <div style="font-size:.95rem;font-weight:600">${fmtDate(order.createdAt)}</div>
+      <div style="font-size:.7rem;color:#475569;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Emitida em</div>
+      <div style="font-size:1rem;font-weight:600;color:#f1f5f9">${new Date(order.createdAt).toLocaleDateString("pt-BR")}</div>
+      <div style="font-size:.78rem;color:#475569;margin-top:4px">CONEX — Comunicação Integrada</div>
     </div>
-    <div class="qr-section" style="padding:0;border:none">
-      <img src="${qrSrc}" alt="QR Code" style="border:1px solid #e2e8f0;border-radius:8px;padding:6px;background:#fff" width="130" height="130">
-      <div class="qr-label">Escaneie para ver esta OC</div>
+    <div class="qr-block">
+      <img src="${qrSrc}" alt="QR Code" width="130" height="130">
+      <div class="qr-label">Escaneie para verificar</div>
       <div class="qr-url">${pageUrl}</div>
     </div>
   </div>
 </div>
 
-<div class="footer">TRANSPANORAMA Logística &amp; Transporte • Documento gerado automaticamente em ${new Date().toLocaleDateString("pt-BR")}</div>
+<div class="footer">
+  <span class="conex-tag">CONEX</span> — Comunicação Integrada &nbsp;|&nbsp; ${COMPANY.name} &nbsp;|&nbsp;
+  Documento gerado em ${new Date().toLocaleDateString("pt-BR")}
+</div>
 </body>
 </html>`;
 

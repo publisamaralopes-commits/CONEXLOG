@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CONEX — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06091a;
+  --card:#0d1829;
+  --border:rgba(56,189,248,.15);
+  --blue:#3b82f6;
+  --neon:#38bdf8;
+  --orange:#f97316;
+  --text:#f1f5f9;
+  --sub:#94a3b8;
+  --input:#0a1223;
+}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden}
+
+/* Animated grid background */
+.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(56,189,248,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.04) 1px,transparent 1px);background-size:50px 50px;animation:gridMove 20s linear infinite}
+@keyframes gridMove{0%{background-position:0 0}100%{background-position:50px 50px}}
+
+/* Orb glows */
+.orb{position:fixed;border-radius:50%;filter:blur(100px);z-index:0;pointer-events:none}
+.orb1{width:500px;height:500px;background:rgba(59,130,246,.08);top:-150px;left:-150px}
+.orb2{width:400px;height:400px;background:rgba(249,115,22,.06);bottom:-100px;right:-100px}
+.orb3{width:300px;height:300px;background:rgba(56,189,248,.05);top:50%;left:50%;transform:translate(-50%,-50%)}
+
+.card{position:relative;z-index:1;background:rgba(13,24,41,.95);border:1px solid var(--border);border-radius:20px;padding:44px 40px;width:100%;max-width:420px;box-shadow:0 0 60px rgba(0,0,0,.6),0 0 120px rgba(59,130,246,.05),inset 0 1px 0 rgba(255,255,255,.04);backdrop-filter:blur(20px)}
+
+.logo-wrap{text-align:center;margin-bottom:28px}
+.logo-icon{width:64px;height:64px;background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(56,189,248,.1));border:1px solid rgba(56,189,248,.25);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:14px;box-shadow:0 0 30px rgba(56,189,248,.15)}
+.logo-title{font-family:'Poppins',sans-serif;font-size:2rem;font-weight:900;color:var(--text);letter-spacing:.04em}
+.logo-title span{color:var(--neon)}
+.logo-sub{font-size:.78rem;color:var(--sub);margin-top:4px;letter-spacing:.04em}
+.logo-company{font-size:.7rem;color:var(--orange);font-weight:600;margin-top:6px;text-transform:uppercase;letter-spacing:.06em}
+
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+
+.form-label{font-size:.72rem;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:block}
+.input-wrap{position:relative;margin-bottom:16px}
+.input-wrap input{width:100%;background:var(--input);border:1px solid rgba(56,189,248,.12);border-radius:10px;padding:12px 14px;font-size:.92rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
+.input-wrap input::placeholder{color:#334155}
+.input-wrap input:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(56,189,248,.1)}
+.input-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:14px;color:#334155;cursor:pointer;user-select:none}
+
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#f97316,#ea580c);border:none;border-radius:10px;color:#fff;font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.03em;margin-top:4px;box-shadow:0 4px 20px rgba(249,115,22,.25)}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(249,115,22,.35)}
+.btn-login:active{transform:translateY(0);box-shadow:0 2px 12px rgba(249,115,22,.2)}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.err-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px 14px;font-size:.8rem;color:#fca5a5;margin-top:12px;display:none;text-align:center}
+.err-msg.show{display:block}
+
+.hint{text-align:center;margin-top:18px;font-size:.72rem;color:#1e3a5f;background:rgba(56,189,248,.04);border:1px solid rgba(56,189,248,.08);border-radius:8px;padding:8px 12px}
+.hint strong{color:#38bdf866}
+
+.footer{text-align:center;margin-top:24px;font-size:.68rem;color:#1e3a5f;position:relative;z-index:1}
+
+@media(max-width:480px){.card{padding:32px 24px;margin:16px;border-radius:14px}}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="card">
+  <div class="logo-wrap">
+    <div class="logo-icon">🚛</div>
+    <div class="logo-title">C<span>O</span>NEX</div>
+    <div class="logo-sub">Comunicação Integrada</div>
+    <div class="logo-company">TRANSPANORAMA — Sistema de Gestão Logística</div>
+  </div>
+
+  <hr class="divider">
+
+  <form id="login-form" onsubmit="doLogin(event)">
+    <div class="input-wrap">
+      <label class="form-label">Usuário</label>
+      <input type="text" id="username" placeholder="Digite seu usuário" autocomplete="username" required>
+    </div>
+    <div class="input-wrap">
+      <label class="form-label">Senha</label>
+      <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password" required>
+      <span class="input-icon" onclick="togglePwd()" id="pwd-eye">👁</span>
+    </div>
+    <button type="submit" class="btn-login" id="btn-submit">Entrar no Sistema</button>
+    <div class="err-msg" id="err-msg"></div>
+  </form>
+
+  <div class="hint">Login padrão: <strong>admin</strong> / <strong>admin123</strong></div>
+</div>
+
+<div class="footer">CONEX © 2025 — TRANSPANORAMA TRANSPORTES S.A.</div>
+
+<script>
+function togglePwd(){
+  const inp=document.getElementById('password');
+  const eye=document.getElementById('pwd-eye');
+  if(inp.type==='password'){inp.type='text';eye.textContent='🙈';}
+  else{inp.type='password';eye.textContent='👁';}
+}
+async function doLogin(e){
+  e.preventDefault();
+  const btn=document.getElementById('btn-submit');
+  const err=document.getElementById('err-msg');
+  const username=document.getElementById('username').value.trim();
+  const password=document.getElementById('password').value;
+  btn.disabled=true;btn.textContent='Entrando…';err.classList.remove('show');
+  try{
+    const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+    const data=await r.json();
+    if(!r.ok){err.textContent=data.error||'Credenciais incorretas';err.classList.add('show');return;}
+    window.location.href='/api/';
+  }catch(ex){err.textContent='Erro de conexão. Tente novamente.';err.classList.add('show');}
+  finally{btn.disabled=false;btn.textContent='Entrar no Sistema';}
+}
+document.getElementById('username').focus();
+</script>
+</body>
+</html>

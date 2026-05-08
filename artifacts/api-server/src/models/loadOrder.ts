@@ -4,25 +4,26 @@ export interface ILoadOrder extends Document {
   orderNumber: string;
   status: "pending" | "loading" | "in_transit" | "delivered" | "cancelled";
   driver: {
-    name: string;
+    nome: string;
     cpf: string;
-    phone: string;
     cnhNumber: string;
-    cnhExpiry: string;
     cnhImage?: string;
   };
   vehicle: {
-    plate: string;
-    type: string;
-    model: string;
+    placaCavalo: string;
+    carreta1: string;
+    carreta2: string;
+    carreta3: string;
+    tipoVeiculo: "graneleiro" | "cacamba";
   };
   cargo: {
-    description: string;
-    weight: string;
-    volume?: string;
-    origin: string;
-    destination: string;
-    notes?: string;
+    produto: string;
+    peso: string;
+    cliente: string;
+    remetente: string;
+    origem: string;
+    destinatario: string;
+    destino: string;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -37,25 +38,26 @@ const LoadOrderSchema = new Schema<ILoadOrder>(
       default: "pending",
     },
     driver: {
-      name: { type: String, required: true },
+      nome: { type: String, required: true },
       cpf: { type: String, required: true },
-      phone: { type: String, required: true },
       cnhNumber: { type: String, required: true },
-      cnhExpiry: { type: String, required: true },
       cnhImage: { type: String },
     },
     vehicle: {
-      plate: { type: String, required: true, uppercase: true },
-      type: { type: String, required: true },
-      model: { type: String, required: true },
+      placaCavalo: { type: String, required: true, uppercase: true },
+      carreta1: { type: String, required: true, uppercase: true },
+      carreta2: { type: String, required: true, uppercase: true },
+      carreta3: { type: String, required: true, uppercase: true },
+      tipoVeiculo: { type: String, enum: ["graneleiro", "cacamba"], required: true },
     },
     cargo: {
-      description: { type: String, required: true },
-      weight: { type: String, required: true },
-      volume: { type: String },
-      origin: { type: String, required: true },
-      destination: { type: String, required: true },
-      notes: { type: String },
+      produto: { type: String, required: true },
+      peso: { type: String, required: true },
+      cliente: { type: String, required: true },
+      remetente: { type: String, required: true },
+      origem: { type: String, required: true },
+      destinatario: { type: String, required: true },
+      destino: { type: String, required: true },
     },
   },
   { timestamps: true },

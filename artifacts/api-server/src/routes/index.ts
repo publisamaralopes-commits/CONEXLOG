@@ -1,24 +1,28 @@
 import { Router, type IRouter } from "express";
+import { requireAuth } from "../middleware/auth";
 import healthRouter from "./health";
-import customersRouter from "./customers";
+import authRouter from "./auth";
+import ocRouter from "./oc";
 import ordersRouter from "./orders";
 import fleetRouter from "./fleet";
 import schedulesRouter from "./schedules";
-import shipmentsRouter from "./shipments";
-import sysusersRouter from "./sysusers";
 import lotesRouter from "./lotes";
-import ocRouter from "./oc";
+import muralRouter from "./mural";
+import sysusersRouter from "./sysusers";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
-router.use(customersRouter);
+router.use(authRouter);
+router.use(ocRouter);
+
+router.use(requireAuth);
+
 router.use(ordersRouter);
 router.use(fleetRouter);
 router.use(schedulesRouter);
-router.use(shipmentsRouter);
-router.use(sysusersRouter);
 router.use(lotesRouter);
-router.use(ocRouter);
+router.use(muralRouter);
+router.use(sysusersRouter);
 
 export default router;

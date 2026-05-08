@@ -4,15 +4,16 @@ import { Fleet } from "../models/fleet";
 
 const router: IRouter = Router();
 
-const CreateFleetSchema = z.object({
-  plate: z.string().min(1, "Placa é obrigatória"),
-  type: z.string().min(1, "Tipo é obrigatório"),
-  vehicleModel: z.string().min(1, "Modelo é obrigatório"),
-  year: z.string().min(1, "Ano é obrigatório"),
-  capacity: z.string().min(1, "Capacidade é obrigatória"),
-  status: z.enum(["available", "in_use", "maintenance"]).optional(),
+const FleetSchema = z.object({
+  cliente: z.string().min(1, "Cliente é obrigatório"),
+  origemDestino: z.string().min(1, "Origem/Destino é obrigatório"),
+  placaCavalo: z.string().min(1, "Placa do cavalo é obrigatória"),
+  placaCarreta1: z.string().optional(),
+  placaCarreta2: z.string().optional(),
+  placaCarreta3: z.string().optional(),
   statusGR: z.enum(["liberado", "pendente", "gr", "cco", "nenhum"]).optional(),
   statusCarregamento: z.enum(["manifestado", "porta", "troca_nf", "nenhum"]).optional(),
+  obs: z.string().optional(),
 });
 
 function fmt(v: InstanceType<typeof Fleet>) {
@@ -31,7 +32,7 @@ router.get("/vehicles", async (req, res) => {
 });
 
 router.post("/vehicles", async (req, res) => {
-  const parsed = CreateFleetSchema.safeParse(req.body);
+  const parsed = FleetSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.issues.map((i) => i.message).join(", ") });
     return;
@@ -39,25 +40,21 @@ router.post("/vehicles", async (req, res) => {
   try {
     const vehicle = await Fleet.create(parsed.data);
     res.status(201).json(fmt(vehicle));
-  } catch (err: unknown) {
-    if (err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "11000") {
-      res.status(400).json({ error: "Placa já cadastrada" });
-      return;
-    }
+  } catch (err) {
     req.log.error(err, "Failed to create vehicle");
     res.status(500).json({ error: "Erro interno" });
   }
 });
 
 router.patch("/vehicles/:id", async (req, res) => {
-  const parsed = CreateFleetSchema.partial().safeParse(req.body);
+  const parsed = FleetSchema.partial().safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.issues.map((i) => i.message).join(", ") });
     return;
   }
   try {
     const vehicle = await Fleet.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
-    if (!vehicle) { res.status(404).json({ error: "Veículo não encontrado" }); return; }
+    if (!vehicle) { res.status(404).json({ error: "Registro não encontrado" }); return; }
     res.json(fmt(vehicle));
   } catch (err) {
     req.log.error(err, "Failed to update vehicle");
@@ -68,8 +65,8 @@ router.patch("/vehicles/:id", async (req, res) => {
 router.delete("/vehicles/:id", async (req, res) => {
   try {
     const vehicle = await Fleet.findByIdAndDelete(req.params.id);
-    if (!vehicle) { res.status(404).json({ error: "Veículo não encontrado" }); return; }
-    res.json({ message: "Veículo excluído" });
+    if (!vehicle) { res.status(404).json({ error: "Registro não encontrado" }); return; }
+    res.json({ message: "Excluído com sucesso" });
   } catch (err) {
     req.log.error(err, "Failed to delete vehicle");
     res.status(500).json({ error: "Erro interno" });

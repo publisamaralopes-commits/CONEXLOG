@@ -1,0 +1,516 @@
+Refactor and rebuild the current project into a complete professional logistics web system called:
+
+CONEX — Comunicação Integrada
+
+The current prototype was only a starting point.
+Remove old prototype structures and reorganize the entire architecture cleanly and professionally.
+
+==================================================
+VISUAL IDENTITY
+===============
+
+Use the attached visual identity as the main design reference.
+
+STYLE
+
+* futuristic logistics dashboard
+* enterprise transportation system
+* operational control tower appearance
+* modern SaaS platform
+* premium dashboard style
+
+COLOR PALETTE
+
+* dark blue background
+* blue neon highlights
+* orange accent color
+* white/light gray cards
+* green success colors
+* red alert colors
+* yellow warning colors
+
+TYPOGRAPHY
+Use:
+
+* Poppins
+* Inter
+
+UI STYLE
+
+* animated cards
+* smooth transitions
+* rounded components
+* subtle shadows
+* modern professional tables
+* responsive layout
+* enterprise operational dashboard
+* modern sidebar navigation
+
+Apply this identity to:
+
+* login page
+* dashboard
+* Ordem de Carregamento
+* Programação
+* Posição
+* Veículos
+* Relatórios
+* Usuários
+* Mural
+* PDF pages
+* QR Code pages
+
+==================================================
+LOGIN / USERS / ADMIN
+=====================
+
+Create employee authentication system.
+
+LOGIN PAGE
+
+* username
+* password
+
+USERS MODULE
+
+* create employee accounts
+* edit users
+* deactivate users
+* password protection
+* session authentication
+* MongoDB integration
+
+USER TYPES
+
+* Administrador
+* Funcionário
+
+ADMINISTRATOR PERMISSIONS
+Administrator users can:
+
+* create/edit/delete users
+* access all modules
+* edit system settings
+* manage mural posts
+* manage operational data
+* access reports
+* change statuses
+
+EMPLOYEE PERMISSIONS
+Employees can:
+
+* access operational modules
+* create/update records
+* view information
+
+==================================================
+GENERAL REQUIREMENTS
+====================
+
+* MongoDB integration
+* CRUD operations
+* edit/delete functionality
+* scalable architecture
+* organized folders/components
+* responsive design
+* enterprise-level structure
+* optimized codebase
+* maintain all modules integrated
+
+==================================================
+MOBILE SUPPORT
+==============
+
+The entire CONEX system must be fully responsive and optimized for mobile devices.
+
+The system must work properly on:
+
+* smartphones
+* tablets
+* desktop
+
+MOBILE REQUIREMENTS
+
+* responsive sidebar menu
+* touch-friendly buttons
+* adaptive tables/cards
+* optimized forms
+* modern mobile dashboard experience
+
+The platform should feel like a professional logistics mobile web app.
+
+==================================================
+ORDEM DE CARREGAMENTO MODULE
+============================
+
+Generate a random OC number automatically.
+
+HEADER
+Use this Transpanorama logo:
+
+https://www.transpanorama.com.br/wp-content/uploads/2020/10/logo-transpanorama.png
+
+Show:
+CONEX — Comunicação Integrada
+
+Show:
+
+* OC number
+* date and time
+
+COMPANY INFORMATION
+
+TRANSPANORAMA TRANSPORTES S.A.
+CNPJ: 01.937.440/0012-95
+I.E.: 107040840
+
+Endereço:
+V EX JULIO BORGES DE SOUZA
+Bairro: N. S. DA SAÚDE
+
+Cidade:
+ITUMBIARA - GO
+
+CEP:
+75.520-375
+
+Telefone:
+(44) 3261-0000
+
+Apply these company details to:
+
+* Ordem de Carregamento page header
+* generated PDF header
+* print layout
+* public QR Code OC page
+
+TRANSPORTADORA
+Fixed:
+TRANSPANORAMA
+
+MOTORISTA DATA
+
+* Nome
+* CPF
+* Número da CNH
+
+DADOS DO VEÍCULO
+
+* Placa do Cavalo
+* Carreta 1
+* Carreta 2
+* Carreta 3
+
+All vehicle fields are mandatory.
+
+TIPO DE VEÍCULO
+Selectable:
+
+* Graneleiro
+* Caçamba
+
+DADOS DA CARGA
+
+* Produto
+* Peso
+* Cliente
+* Remetente
+* Origem
+* Destinatário
+* Destino
+
+FEATURES
+
+* MongoDB save
+* OCR CNH upload
+* QR Code generation
+* PDF generation
+* automatic print dialog
+* validation for required fields
+* responsive layout
+
+QR CODE SYSTEM
+Generate unique QR Codes for every OC.
+
+The QR Code must open a public OC page.
+
+Create routes like:
+/oc/OC-123456
+
+The public OC page must display:
+
+* OC number
+* transportadora
+* motorista data
+* vehicle data
+* cargo data
+* origin
+* destination
+* status
+
+PDF LAYOUT
+
+* A4 professional layout
+* enterprise transportation document style
+* modern tables
+* borders and spacing
+* clean typography
+* blue/white styling
+* optional observations/signature section
+
+==================================================
+PROGRAMAÇÃO MODULE
+==================
+
+Keep the entire PROGRAMAÇÃO module active and fully integrated with the PGR management system.
+
+The PGR field is extremely important operationally and must remain visible and editable in the system.
+
+FIELDS
+
+* Cliente
+* Retirada
+* Cidade da Retirada
+* Destinatário
+* Cidade Destino
+* Terminal
+* Produto
+* Número PGR
+
+PGR RULES
+
+* PGR number must be manually entered
+* must allow editing/update
+* searchable by PGR number
+* visible in reports
+* visible in operational dashboards
+* maintain MongoDB integration
+
+FEATURES
+
+* MongoDB save
+* edit/delete
+* filters/search
+* responsive dashboard
+* professional layout
+
+The PGR management must remain an important operational control feature inside the CONEX platform.
+
+==================================================
+POSIÇÃO MODULE
+==============
+
+Create a logistics position control module organized by LOTES.
+
+Each lote must generate an automatic number.
+
+Example:
+LOTE-123456
+
+Each lote must contain:
+
+* Cliente
+* Origem
+* Cidade Origem
+* Destino
+* Cidade Destino
+* Valor do Frete (optional)
+
+Instead of individual truck records, the lote must contain quantity counters.
+
+Example structure:
+
+LOTE-123456
+Cliente: XXXXX
+Origem: XXXXX
+Cidade Origem: XXXXX
+Destino: XXXXX
+Cidade Destino: XXXXX
+
+Veículos:
+
+* 3 Na Porta
+* 2 Em Trânsito
+* 1 Carregado
+
+STATUS TYPES
+
+* Na Porta
+* Em Trânsito
+* Carregado
+
+FEATURES
+
+* automatic lote generation
+* editable vehicle quantities
+* automatic status colors
+* operational logistics dashboard style
+* MongoDB integration
+* edit/delete
+* filters/search
+* responsive layout
+
+STATUS COLORS
+
+* Em Trânsito → blue
+* Na Porta → yellow
+* Carregado → green
+
+==================================================
+VEÍCULOS MODULE
+===============
+
+Internal operational organization dashboard.
+
+Each record must contain:
+
+* Cliente
+* Origem x Destino
+* Placas
+
+STATUS GR OPTIONS
+
+* CCO
+* GR
+* Pendente
+* Liberado
+
+STATUS CARREGAMENTO OPTIONS
+
+* Porta
+* Troca de NF
+* Manifestado
+
+Additional field:
+
+* OBS (observações)
+
+FEATURES
+
+* continuously add load records
+* MongoDB integration
+* filters/search
+* responsive operational dashboard
+* edit/delete
+
+STATUS COLORS
+
+STATUS GR
+
+* Liberado → green
+* Pendente → red
+* GR → yellow
+* CCO → blue
+
+STATUS CARREGAMENTO
+
+* Manifestado → green
+* Porta → yellow
+* Troca de NF → red
+
+PENDING ALERTS
+
+* highlight pending rows
+* warning icons
+* alert styles for pending issues
+* make operational issues visually obvious
+
+==================================================
+MURAL MODULE
+============
+
+Create a "Mural de Compartilhamento" module for internal communication and important operational information.
+
+The mural must allow users to post important notices and updates.
+
+FEATURES
+
+* create announcements/posts
+* edit/delete announcements
+* pin important notices
+* highlight urgent messages
+* show date/time of posts
+* show user who posted
+* search/filter posts
+* MongoDB integration
+
+POST TYPES
+
+* Informações Operacionais
+* Avisos
+* Pendências
+* Comunicados Internos
+* Alertas
+
+VISUAL STYLE
+
+* modern communication board
+* logistics operations dashboard style
+* cards layout
+* highlighted urgent alerts
+* responsive design
+
+COLORS
+
+* urgent alerts → red
+* warnings → yellow
+* informational posts → blue
+* completed/resolved → green
+
+==================================================
+RELATÓRIOS MODULE
+=================
+
+Create a professional analytics and reporting dashboard.
+
+The reports module must display operational metrics and charts for logistics management.
+
+REPORT FEATURES
+
+Operational KPIs:
+
+* total trucks in transit
+* total trucks at gate
+* total loaded trucks
+* pending operations
+* released operations
+
+FILTERS
+
+* today
+* current week
+* current month
+* custom date range
+
+CHARTS
+
+* bar charts
+* pie charts
+* line charts
+* KPI summary cards
+
+EXAMPLES
+
+* weekly operational volume
+* trucks by status
+* loads by customer
+* operational productivity
+* pending vs completed operations
+
+PDF EXPORT
+
+* generate professional PDF reports
+* printable executive report layout
+* include charts and KPIs in PDF
+* company branding in reports
+* modern dashboard design
+
+VISUAL STYLE
+
+* executive logistics dashboard
+* enterprise analytics appearance
+* responsive charts
+* modern data visualization
+* operational control tower style
+
+The entire platform must behave like a real professional enterprise transportation and logistics management system with modern UX/UI, responsive mobile support, operational dashboards, executive reports, and scalable architecture.

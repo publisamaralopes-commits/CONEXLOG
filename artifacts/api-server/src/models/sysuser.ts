@@ -2,8 +2,9 @@ import mongoose, { Schema, type Document } from "mongoose";
 
 export interface ISysUser extends Document {
   name: string;
-  email: string;
-  role: "admin" | "operator" | "viewer";
+  username: string;
+  password: string;
+  role: "admin" | "employee";
   active: boolean;
   createdAt: Date;
 }
@@ -11,8 +12,9 @@ export interface ISysUser extends Document {
 const SysUserSchema = new Schema<ISysUser>(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    role: { type: String, enum: ["admin", "operator", "viewer"], default: "operator" },
+    username: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ["admin", "employee"], default: "employee" },
     active: { type: Boolean, default: true },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
