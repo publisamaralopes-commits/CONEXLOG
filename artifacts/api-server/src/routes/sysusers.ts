@@ -10,6 +10,7 @@ const CreateUserSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   username: z.string().min(3, "Usuário deve ter no mínimo 3 caracteres"),
   password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+  cargo: z.string().optional(),
   role: z.enum(["admin", "employee"]).optional(),
   active: z.boolean().optional(),
 });
@@ -18,14 +19,31 @@ const UpdateUserSchema = z.object({
   name: z.string().min(1).optional(),
   username: z.string().min(3).optional(),
   password: z.string().min(6).optional(),
+  cargo: z.string().optional(),
   role: z.enum(["admin", "employee"]).optional(),
   active: z.boolean().optional(),
 });
 
 function fmt(u: InstanceType<typeof SysUser>) {
   const o = u.toObject();
-  return { id: u._id.toString(), name: o.name, username: o.username, role: o.role, active: o.active, createdAt: o.createdAt };
+  return { id: u._id.toString(), name: o.name, username: o.username, cargo: o.cargo ?? "", role: o.role, active: o.active, createdAt: o.createdAt };
 }
+
+// Verify admin password before sensitive operations
+router.post("/sysusers/verify-admin", requireAdmin, async (req, res) => {
+  const { password } = req.body as { password?: string };
+  if (!password) { res.status(400).json({ error: "Senha obrigatória" }); return; }
+  try {
+    const user = await SysUser.findById(req.session.userId);
+    if (!user) { res.status(404).json({ error: "Usuário não encontrado" }); return; }
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) { res.status(403).json({ error: "Senha incorreta" }); return; }
+    res.json({ ok: true });
+  } catch (err) {
+    req.log.error(err, "Failed to verify admin password");
+    res.status(500).json({ error: "Erro interno" });
+  }
+});
 
 router.get("/sysusers", requireAdmin, async (req, res) => {
   try {

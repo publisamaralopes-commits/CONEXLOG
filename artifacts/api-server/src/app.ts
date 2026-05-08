@@ -82,8 +82,24 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
+async function dropStaleIndexes() {
+  try {
+    const col = mongoose.connection.collection("sysusers");
+    const indexes = await col.indexes();
+    if (indexes.some((i: Record<string, unknown>) => i["key"] && typeof i["key"] === "object" && "email" in (i["key"] as object))) {
+      await col.dropIndex("email_1");
+      logger.info("Dropped stale email_1 index from sysusers");
+    }
+  } catch (err) {
+    logger.warn({ err }, "Could not drop stale sysusers index — may not exist");
+  }
+}
+
 mongoose.connection.on("connecting", () => logger.info("Connecting to MongoDB..."));
-mongoose.connection.on("connected", () => { logger.info("Connected to MongoDB"); seedDefaultAdmin(); });
+mongoose.connection.on("connected", () => {
+  logger.info("Connected to MongoDB");
+  dropStaleIndexes().then(() => seedDefaultAdmin());
+});
 mongoose.connection.on("error", (err) => logger.error(err, "MongoDB connection error"));
 mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected"));
 

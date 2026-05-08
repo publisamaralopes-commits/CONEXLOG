@@ -1,0 +1,96 @@
+URGENT FIX — USER CREATION / ADMIN PERMISSIONS
+
+The employee creation system is failing with internal server errors.
+
+Fix the entire user creation flow.
+
+==================================================
+USER CREATION ERROR
+===================
+
+Currently:
+
+* creating a new employee returns internal server error
+* users are not being saved correctly
+* admin management is unstable
+
+Fix completely.
+
+VERIFY:
+
+* MongoDB user schema
+* backend validation
+* API routes
+* password encryption
+* frontend form submission
+* role assignment
+* duplicate username handling
+
+==================================================
+ADMIN-ONLY USER MANAGEMENT
+==========================
+
+IMPORTANT SECURITY RULE:
+
+Only administrator accounts can create new employees.
+
+Implement strict admin-only access control.
+
+REQUIREMENTS
+
+* only admins can access "Usuários" module
+* only admins can create employees
+* only admins can edit/delete users
+* employees cannot manage accounts
+* protect routes on frontend and backend
+* validate admin role in API requests
+
+==================================================
+ADMIN PASSWORD CONFIRMATION
+===========================
+
+Before creating a new employee:
+
+Require the administrator password confirmation.
+
+FLOW:
+
+1. Admin clicks "Novo Funcionário"
+2. System asks for current admin password
+3. Validate password
+4. Only after validation allow employee creation
+
+==================================================
+EMPLOYEE CREATION FORM
+======================
+
+Fields:
+
+* Nome
+* Usuário
+* Senha
+* Cargo/Função
+* Tipo de usuário
+
+  * Administrador
+  * Funcionário
+
+FEATURES
+
+* encrypted password storage
+* username uniqueness validation
+* success/error feedback
+* responsive modal/form
+* stable MongoDB save
+
+==================================================
+GENERAL SECURITY IMPROVEMENTS
+=============================
+
+* remove any exposed credentials
+* improve authentication protection
+* validate sessions properly
+* prevent unauthorized actions
+* secure admin routes
+
+The CONEX platform must behave like a secure professional enterprise system with proper permission hierarchy.

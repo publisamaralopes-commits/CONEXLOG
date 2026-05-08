@@ -460,14 +460,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
     <div class="section" id="sec-users">
       <div class="sec-header">
         <div><h2>Usuários</h2><p>Gestão de acessos e permissões</p></div>
-        <button class="btn btn-orange" onclick="openUserForm()">+ Novo Usuário</button>
+        <button class="btn btn-orange" onclick="openUserForm()">+ Novo Funcionário</button>
       </div>
       <div class="toolbar">
         <input type="text" id="usr-search" placeholder="Buscar por nome ou usuário…" oninput="renderUsers()">
       </div>
       <div class="tbl-wrap"><table><thead><tr>
-        <th>Nome</th><th>Usuário</th><th>Perfil</th><th>Status</th><th>Criado em</th><th>Ações</th>
-      </tr></thead><tbody id="usr-tbody"><tr><td colspan="6" class="tbl-empty">Carregando…</td></tr></tbody></table></div>
+        <th>Nome</th><th>Usuário</th><th>Cargo</th><th>Perfil</th><th>Status</th><th>Criado em</th><th>Ações</th>
+      </tr></thead><tbody id="usr-tbody"><tr><td colspan="7" class="tbl-empty">Carregando…</td></tr></tbody></table></div>
     </div>
 
   </div>
@@ -652,17 +652,34 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
 </div>
 </div>
 
+<!-- ═══ OVERLAY: ADMIN CONFIRM ═══ -->
+<div class="overlay" id="admin-confirm-overlay">
+<div class="overlay-box sm" style="max-width:400px">
+  <div class="overlay-head"><h3>Confirmar Identidade</h3><button class="overlay-close" onclick="closeAdminConfirm()">✕</button></div>
+  <div class="overlay-body">
+    <p style="font-size:.82rem;color:var(--text-400);margin-bottom:14px;line-height:1.5">Por segurança, confirme sua senha de administrador antes de criar um novo funcionário.</p>
+    <div class="fg"><label>Sua senha *</label><input type="password" id="ac-password" placeholder="Senha de administrador" autocomplete="current-password" onkeydown="if(event.key==='Enter')confirmAdminAndOpen()"></div>
+    <div class="form-err" id="ac-err"></div>
+  </div>
+  <div class="overlay-foot">
+    <button class="btn btn-ghost" onclick="closeAdminConfirm()">Cancelar</button>
+    <button class="btn btn-primary" id="btn-ac-confirm" onclick="confirmAdminAndOpen()">Confirmar</button>
+  </div>
+</div>
+</div>
+
 <!-- ═══ OVERLAY: USER ═══ -->
 <div class="overlay" id="usr-overlay">
 <div class="overlay-box sm">
-  <div class="overlay-head"><h3 id="usr-form-title">Novo Usuário</h3><button class="overlay-close" onclick="closeUserForm()">✕</button></div>
+  <div class="overlay-head"><h3 id="usr-form-title">Novo Funcionário</h3><button class="overlay-close" onclick="closeUserForm()">✕</button></div>
   <div class="overlay-body">
     <input type="hidden" id="uf-id">
-    <div class="fg"><label>Nome *</label><input type="text" id="uf-name" placeholder="Nome completo"></div>
-    <div class="fg"><label>Usuário (login) *</label><input type="text" id="uf-username" placeholder="Nome de usuário"></div>
-    <div class="fg"><label>Senha *</label><input type="password" id="uf-password" placeholder="Mínimo 6 caracteres"></div>
+    <div class="fg"><label>Nome completo *</label><input type="text" id="uf-name" placeholder="Nome completo"></div>
+    <div class="fg"><label>Usuário (login) *</label><input type="text" id="uf-username" placeholder="Sem espaços, ex: joao.silva" autocomplete="off"></div>
+    <div class="fg"><label>Senha *</label><input type="password" id="uf-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+    <div class="fg"><label>Cargo / Função</label><input type="text" id="uf-cargo" placeholder="Ex: Motorista, Auxiliar, Despachante"></div>
     <div class="fg2">
-      <div class="fg"><label>Perfil</label><select id="uf-role">
+      <div class="fg"><label>Tipo de usuário</label><select id="uf-role">
         <option value="employee">Funcionário</option><option value="admin">Administrador</option>
       </select></div>
       <div class="fg"><label>Status</label><select id="uf-active">
@@ -673,7 +690,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
   </div>
   <div class="overlay-foot">
     <button class="btn btn-ghost" onclick="closeUserForm()">Cancelar</button>
-    <button class="btn btn-primary" onclick="saveUser()">Salvar</button>
+    <button class="btn btn-primary" onclick="saveUser()">Salvar Funcionário</button>
   </div>
 </div>
 </div>
@@ -1335,17 +1352,22 @@ function exportAllCSV(){
 
 /* ═══════════ USUÁRIOS ═══════════ */
 async function loadUsers(){
-  try{const r=await fetch(API+'/sysusers');S.users=await r.json();}catch(e){console.error(e);}
+  try{
+    const r=await fetch(API+'/sysusers');
+    if(!r.ok){S.users=[];renderUsers();return;}
+    S.users=await r.json();
+  }catch(e){S.users=[];}
   renderUsers();
 }
 function renderUsers(){
   const q=document.getElementById('usr-search').value.toLowerCase();
   const list=S.users.filter(u=>!q||(u.name||'').toLowerCase().includes(q)||(u.username||'').toLowerCase().includes(q));
   const tb=document.getElementById('usr-tbody');
-  if(!list.length){tb.innerHTML=`<tr><td colspan="6" class="tbl-empty">Nenhum usuário.</td></tr>`;return;}
+  if(!list.length){tb.innerHTML=`<tr><td colspan="7" class="tbl-empty">Nenhum funcionário cadastrado.</td></tr>`;return;}
   tb.innerHTML=list.map(u=>`<tr>
     <td><strong style="color:var(--text-100)">${esc(u.name)}</strong></td>
     <td style="font-family:monospace;color:var(--neon)">${esc(u.username)}</td>
+    <td style="color:var(--text-300)">${esc(u.cargo||'—')}</td>
     <td>${badge(u.role,roleM)}</td>
     <td><span class="badge ${u.active?'badge-delivered':'badge-cancelled'}">${u.active?'Ativo':'Inativo'}</span></td>
     <td>${fmtD(u.createdAt)}</td>
@@ -1355,40 +1377,90 @@ function renderUsers(){
     </div></td>
   </tr>`).join('');
 }
-function openUserForm(){clearUserForm();document.getElementById('usr-overlay').classList.add('open');}
+// Step 1: admin confirms identity → step 2: user form opens
+function openUserForm(){
+  document.getElementById('ac-password').value='';
+  hideErr('ac-err');
+  document.getElementById('admin-confirm-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('ac-password').focus(),120);
+}
+function closeAdminConfirm(){document.getElementById('admin-confirm-overlay').classList.remove('open');}
+async function confirmAdminAndOpen(){
+  const pwd=document.getElementById('ac-password').value;
+  if(!pwd){showErr('ac-err','Digite sua senha de administrador.');return;}
+  const btn=document.getElementById('btn-ac-confirm');
+  btn.disabled=true;btn.textContent='Verificando…';
+  try{
+    const r=await fetch(`${API}/sysusers/verify-admin`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pwd})});
+    if(!r.ok){const d=await r.json();showErr('ac-err',d.error||'Senha incorreta.');return;}
+    closeAdminConfirm();
+    clearUserForm();
+    document.getElementById('usr-overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('uf-name').focus(),120);
+  }catch(e){showErr('ac-err','Erro de rede.');}
+  finally{btn.disabled=false;btn.textContent='Confirmar';}
+}
 function closeUserForm(){document.getElementById('usr-overlay').classList.remove('open');}
 function clearUserForm(){
-  ['uf-id','uf-name','uf-username','uf-password'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('uf-role').value='employee';document.getElementById('uf-active').value='true';
-  document.getElementById('usr-form-title').textContent='Novo Usuário';hideErr('usr-err');
+  ['uf-id','uf-name','uf-username','uf-password','uf-cargo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('uf-role').value='employee';
+  document.getElementById('uf-active').value='true';
+  document.getElementById('usr-form-title').textContent='Novo Funcionário';
+  hideErr('usr-err');
 }
 function editUser(id){
   const u=S.users.find(x=>x.id===id);if(!u)return;
-  document.getElementById('uf-id').value=u.id;document.getElementById('usr-form-title').textContent='Editar Usuário';
-  document.getElementById('uf-name').value=u.name||'';document.getElementById('uf-username').value=u.username||'';
+  document.getElementById('uf-id').value=u.id;
+  document.getElementById('usr-form-title').textContent='Editar Funcionário';
+  document.getElementById('uf-name').value=u.name||'';
+  document.getElementById('uf-username').value=u.username||'';
   document.getElementById('uf-password').value='';
-  document.getElementById('uf-role').value=u.role||'employee';document.getElementById('uf-active').value=String(u.active!==false);
+  document.getElementById('uf-cargo').value=u.cargo||'';
+  document.getElementById('uf-role').value=u.role||'employee';
+  document.getElementById('uf-active').value=String(u.active!==false);
+  hideErr('usr-err');
   document.getElementById('usr-overlay').classList.add('open');
 }
 async function saveUser(){
   const id=document.getElementById('uf-id').value;
-  const payload={name:document.getElementById('uf-name').value.trim(),username:document.getElementById('uf-username').value.trim(),role:document.getElementById('uf-role').value,active:document.getElementById('uf-active').value==='true'};
-  const pwd=document.getElementById('uf-password').value;if(pwd)payload.password=pwd;
-  if(!id&&!pwd){showErr('usr-err','Senha obrigatória para novo usuário.');return;}
+  const name=document.getElementById('uf-name').value.trim();
+  const username=document.getElementById('uf-username').value.trim();
+  if(!name){showErr('usr-err','Nome é obrigatório.');return;}
+  if(!username){showErr('usr-err','Usuário (login) é obrigatório.');return;}
+  const payload={name,username,
+    cargo:document.getElementById('uf-cargo').value.trim(),
+    role:document.getElementById('uf-role').value,
+    active:document.getElementById('uf-active').value==='true'};
+  const pwd=document.getElementById('uf-password').value;
+  if(pwd) payload.password=pwd;
+  if(!id&&!pwd){showErr('usr-err','Senha obrigatória para novo funcionário.');return;}
   const btn=document.querySelector('#usr-overlay .btn-primary');
   if(btn){btn.disabled=true;btn.textContent='Salvando…';}
   try{
     const r=await fetch(id?`${API}/sysusers/${id}`:`${API}/sysusers`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const d=await r.json();if(!r.ok){showErr('usr-err',d.error||'Erro.');toast(d.error||'Erro.','t-error');return;}
-    closeUserForm();toast(id?'Usuário atualizado!':'Usuário criado com sucesso!');await loadUsers();
+    const d=await r.json();
+    if(!r.ok){showErr('usr-err',d.error||'Erro ao salvar.');toast(d.error||'Erro.','t-error');return;}
+    closeUserForm();
+    toast(id?'Funcionário atualizado!':'Funcionário criado com sucesso!');
+    await loadUsers();
   }catch(e){showErr('usr-err','Erro de rede.');toast('Erro de rede.','t-error');}
-  finally{if(btn){btn.disabled=false;btn.textContent='Salvar';}}
+  finally{if(btn){btn.disabled=false;btn.textContent='Salvar Funcionário';}}
 }
+const _delUserPending={};
 async function delUser(id){
-  if(!confirm('Excluir este usuário permanentemente?'))return;
-  await fetch(`${API}/sysusers/${id}`,{method:'DELETE'});
-  toast('Usuário excluído.','t-info');
-  await loadUsers();
+  if(_delUserPending[id]){
+    clearTimeout(_delUserPending[id]);
+    delete _delUserPending[id];
+    try{
+      const r=await fetch(`${API}/sysusers/${id}`,{method:'DELETE'});
+      if(!r.ok){const d=await r.json().catch(()=>({}));toast(d.error||'Erro ao excluir.','t-error');return;}
+      toast('Funcionário excluído.','t-info');
+      await loadUsers();
+    }catch(e){toast('Erro de rede ao excluir.','t-error');}
+  }else{
+    toast('⚠️ Clique em 🗑️ novamente para confirmar a exclusão.','t-warn');
+    _delUserPending[id]=setTimeout(()=>{delete _delUserPending[id];toast('Exclusão cancelada.','t-info');},4000);
+  }
 }
 
 // INIT
