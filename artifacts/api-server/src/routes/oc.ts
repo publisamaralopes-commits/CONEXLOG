@@ -72,9 +72,10 @@ router.get("/oc/:orderNumber", async (req, res) => {
     ].join("");
 
     // Signature block — shows responsible user name if available
+    // Responsável block: pre-printed name above the line, label below
     const sigResponsavel = order.createdByName
-      ? `<div class="sig-name">${esc(order.createdByName)}</div><div class="sig-label">Responsável / Expedição</div>`
-      : `<div class="sig-label">Responsável / Expedição</div>`;
+      ? `<div class="sig-name">${esc(order.createdByName)}</div>`
+      : `<div style="height:24px"></div>`;
 
     const emitidaEm = new Date(order.createdAt).toLocaleDateString("pt-BR", {
       day: "2-digit", month: "long", year: "numeric",
@@ -127,9 +128,10 @@ table.info tr:last-child td{border-bottom:none}
 .bottom-row{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:22px 24px;background:#0d1829;border:1px solid rgba(99,35,54,.25);border-radius:12px}
 .signatures{display:grid;grid-template-columns:1fr 1fr;gap:32px}
 .sig-box{text-align:center}
-.sig-line-el{border-top:1px solid rgba(255,255,255,.2);margin-top:8px;padding-top:6px}
-.sig-name{font-family:'Poppins',sans-serif;font-size:.9rem;font-weight:700;color:#fcd34d;margin-bottom:4px}
-.sig-label{font-size:.68rem;color:#475569;text-transform:uppercase;letter-spacing:.05em}
+.sig-spacer{height:36px}
+.sig-line-el{border-top:1px solid rgba(255,255,255,.2);padding-top:6px}
+.sig-name{font-family:'Poppins',sans-serif;font-size:.9rem;font-weight:700;color:#fcd34d;margin-bottom:6px}
+.sig-label{font-size:.68rem;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
 .meta-block{margin-top:14px;font-size:.72rem;color:#334155}
 .qr-block{text-align:center;flex-shrink:0}
 .qr-block img{border:4px solid rgba(99,35,54,.4);border-radius:10px;background:#fff;padding:4px}
@@ -224,9 +226,10 @@ table.info tr:last-child td{border-bottom:none}
   }
   .signatures{gap:16px!important}
   .sig-box{padding:0!important}
-  .sig-name{font-size:.78rem!important;color:#7c2d42!important;margin-bottom:2px!important}
-  .sig-label{font-size:.6rem!important;color:#6b7280!important}
-  .sig-line-el{border-top:1px solid #9ca3af!important;margin-top:20px!important;padding-top:4px!important}
+  .sig-spacer{height:22px!important}
+  .sig-name{font-size:.78rem!important;color:#7c2d42!important;margin-bottom:4px!important}
+  .sig-label{font-size:.6rem!important;color:#6b7280!important;margin-top:3px!important}
+  .sig-line-el{border-top:1px solid #9ca3af!important;padding-top:4px!important}
   .meta-block{font-size:.62rem!important;color:#6b7280!important;margin-top:6px!important}
 
   /* QR Code — compact */
@@ -293,13 +296,14 @@ table.info tr:last-child td{border-bottom:none}
     <div>
       <div class="signatures">
         <div class="sig-box">
-          <div class="sig-label">Assinatura do Motorista</div>
+          <div class="sig-spacer"></div>
           <div class="sig-line-el"></div>
-          <div class="sig-name" style="color:#94a3b8;font-size:.75rem;margin-top:4px">${esc(order.driver?.nome)}</div>
+          <div class="sig-label">Assinatura do Motorista</div>
         </div>
         <div class="sig-box">
           ${sigResponsavel}
           <div class="sig-line-el"></div>
+          <div class="sig-label">Responsável pela Ordem</div>
         </div>
       </div>
       <div class="meta-block">
