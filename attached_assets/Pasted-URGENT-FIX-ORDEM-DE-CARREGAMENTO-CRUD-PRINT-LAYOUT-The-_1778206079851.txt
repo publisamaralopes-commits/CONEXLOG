@@ -1,0 +1,92 @@
+URGENT FIX — ORDEM DE CARREGAMENTO CRUD + PRINT LAYOUT
+
+The Ordem de Carregamento module is still not functioning correctly.
+
+==================================================
+DELETE FUNCTION IS BROKEN
+=========================
+
+Currently:
+
+* clicking delete does not remove the OC
+* records remain visible
+* MongoDB is not updating correctly
+
+Fix completely.
+
+REQUIREMENTS
+
+* delete button must work
+* remove OC from MongoDB correctly
+* instantly update UI after deletion
+* show confirmation before deleting
+* prevent stale records
+* validate DELETE API routes
+* validate frontend/backend integration
+
+==================================================
+PRINT/PDF LAYOUT PROBLEM
+========================
+
+The printed Ordem de Carregamento is occupying 2 pages.
+
+This is incorrect.
+
+The entire OC must fit cleanly into ONLY 1 A4 page.
+
+==================================================
+REQUIRED PDF/PRINT CHANGES
+==========================
+
+Make the layout more compact and professional.
+
+Reduce:
+
+* excessive spacing
+* oversized margins
+* large paddings
+* oversized headers
+* unnecessary empty areas
+
+Optimize:
+
+* table spacing
+* font sizing
+* section heights
+* QR Code size
+* logo sizing
+* signature spacing
+
+Keep:
+
+* professional readability
+* elegant enterprise appearance
+* organized logistics document structure
+
+==================================================
+PRINT SETTINGS
+==============
+
+Configure print styling properly.
+
+REQUIREMENTS
+
+* fit perfectly on A4 portrait
+* prevent automatic second page
+* optimize print CSS
+* avoid page breaks
+* ensure all sections stay inside one page
+
+==================================================
+FINAL RESULT
+============
+
+The Ordem de Carregamento must:
+
+* delete correctly
+* print correctly
+* fit on a single page
+* maintain professional enterprise layout
+* remain responsive and stable
+
+This module must feel like a real transportation company operational document system.

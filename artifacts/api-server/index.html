@@ -910,11 +910,22 @@ async function saveOrder(){
   }
   finally{if(btn){btn.disabled=false;btn.textContent='Salvar';}}
 }
+const _delPending={};
 async function delOrder(id){
-  if(!confirm('Excluir esta Ordem de Carregamento?'))return;
-  await fetch(`${API}/orders/${id}`,{method:'DELETE'});
-  toast('OC excluída.','t-info');
-  await loadOrders();
+  // confirm() is blocked in cross-origin iframes — use double-click pattern instead
+  if(_delPending[id]){
+    clearTimeout(_delPending[id]);
+    delete _delPending[id];
+    try{
+      const r=await fetch(`${API}/orders/${id}`,{method:'DELETE'});
+      if(!r.ok){const d=await r.json().catch(()=>({}));toast(d.error||'Erro ao excluir OC.','t-error');return;}
+      toast('OC excluída com sucesso.','t-info');
+      await loadOrders();
+    }catch(e){toast('Erro de rede ao excluir.','t-error');}
+  }else{
+    toast('⚠️ Clique em 🗑️ novamente para confirmar a exclusão.','t-warn');
+    _delPending[id]=setTimeout(()=>{ delete _delPending[id]; toast('Exclusão cancelada.','t-info'); },4000);
+  }
 }
 function printOrderId(id){
   const o=S.orders.find(x=>x.id===id);

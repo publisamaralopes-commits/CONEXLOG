@@ -176,35 +176,66 @@ table.info tr:last-child td{border-bottom:none}
   .btn-print,.btn-share{width:100%;justify-content:center}
 }
 
-/* ── PRINT ── */
+/* ── PRINT — single A4 page ── */
 @media print{
-  body{background:#fff!important;color:#000!important;padding-bottom:0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:A4 portrait;margin:7mm 10mm}
+
+  /* Reset */
+  body{background:#fff!important;color:#000!important;padding-bottom:0!important;
+    font-size:8.5pt!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  /* Header — compact */
   .header{
     background:linear-gradient(135deg,#4a1a28 0%,#632336 100%)!important;
-    border-bottom:3px solid #632336!important;
+    border-bottom:2px solid #632336!important;padding:7px 12px!important;gap:8px!important;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;
   }
-  .header::after{display:none}
-  .brand-name{color:#fff!important}
-  .brand-sub{color:rgba(255,210,220,.9)!important}
-  .brand-addr{color:rgba(255,200,215,.75)!important}
-  .oc-num{color:#fcd34d!important}
-  .oc-label{color:rgba(255,210,220,.8)!important}
-  .card{border:1px solid #e2d0d5!important;background:#fff!important;box-shadow:none!important;break-inside:avoid}
-  .card-head{background:#fdf0f3!important;color:#632336!important;border-bottom:1px solid #e2d0d5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  table.info td.lbl{color:#6b7280!important}
+  .header::after{display:none!important}
+  .logo{height:34px!important}
+  .header-left{gap:10px!important}
+  .brand-name{font-size:.85rem!important;color:#fff!important}
+  .brand-sub{font-size:.6rem!important;color:rgba(255,210,220,.9)!important;margin-top:1px!important}
+  .brand-addr{font-size:.58rem!important;color:rgba(255,200,215,.8)!important;margin-top:1px!important}
+  .oc-num{font-size:1.15rem!important;color:#fcd34d!important;letter-spacing:.04em!important}
+  .oc-label{font-size:.56rem!important;color:rgba(255,210,220,.8)!important;margin-bottom:2px!important}
+  .status-pill{font-size:.65rem!important;padding:2px 9px!important;margin-top:3px!important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  /* Container */
+  .container{padding:5px 0 0!important;max-width:100%!important}
+
+  /* Cards */
+  .card{border:1px solid #ddd!important;background:#fff!important;box-shadow:none!important;
+    margin-bottom:5px!important;border-radius:5px!important;break-inside:avoid}
+  .card-head{
+    background:#fdf0f3!important;color:#632336!important;
+    border-bottom:1px solid #e8d0d6!important;padding:4px 10px!important;
+    font-size:.58rem!important;letter-spacing:.07em!important;gap:4px!important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  table.info td{padding:3.5px 10px!important;font-size:.75rem!important;border-bottom:1px solid #f5eded!important}
+  table.info td.lbl{font-size:.65rem!important;color:#6b7280!important;width:34%!important}
   table.info td.val{color:#111827!important}
-  table.info td{border-bottom:1px solid #f3e8eb!important}
-  .bottom-row{background:#fff!important;border:1px solid #e2d0d5!important}
-  .sig-name{color:#7c2d42!important}
-  .sig-label{color:#6b7280!important}
-  .sig-line-el{border-top:1px solid #9ca3af!important}
-  .meta-block{color:#6b7280!important}
-  .qr-block img{border-color:#e2d0d5!important}
-  .qr-label{color:#632336!important}
-  .qr-url{color:#9ca3af!important}
+
+  /* Bottom row */
+  .bottom-row{
+    background:#fff!important;border:1px solid #ddd!important;border-radius:5px!important;
+    padding:8px 12px!important;gap:14px!important;
+  }
+  .signatures{gap:16px!important}
+  .sig-box{padding:0!important}
+  .sig-name{font-size:.78rem!important;color:#7c2d42!important;margin-bottom:2px!important}
+  .sig-label{font-size:.6rem!important;color:#6b7280!important}
+  .sig-line-el{border-top:1px solid #9ca3af!important;margin-top:20px!important;padding-top:4px!important}
+  .meta-block{font-size:.62rem!important;color:#6b7280!important;margin-top:6px!important}
+
+  /* QR Code — compact */
+  .qr-block img{width:80px!important;height:80px!important;border-color:#e2d0d5!important;border-width:2px!important;padding:2px!important}
+  .qr-label{font-size:.58rem!important;color:#632336!important;margin-top:4px!important}
+  .qr-url{font-size:.52rem!important;color:#9ca3af!important;max-width:90px!important}
+
+  /* Hide non-print elements */
   .action-bar,.footer{display:none!important}
-  .status-pill{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
 </head>
