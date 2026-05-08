@@ -65,7 +65,8 @@ async function seedDefaultAdmin() {
       const ok = await bcrypt.compare("admin123", admin.password);
       if (!ok) {
         updates.password = await bcrypt.hash("admin123", 10);
-        logger.info("Admin senha redefinida para admin123 (hash incompatível detectado)");
+        updates.mustChangePassword = true;
+        logger.info("Admin senha redefinida para admin123 — login obrigatório para troca de senha");
       }
       if (Object.keys(updates).length > 0) {
         await SysUser.updateOne({ _id: admin._id }, { $set: updates });

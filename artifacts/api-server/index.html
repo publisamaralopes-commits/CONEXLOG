@@ -652,6 +652,33 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
 </div>
 </div>
 
+<!-- ═══ OVERLAY: FORCE CHANGE PASSWORD ═══ -->
+<div class="overlay" id="chpwd-overlay" style="z-index:200">
+<div class="overlay-box sm" style="max-width:440px">
+  <div class="overlay-head" style="background:linear-gradient(135deg,rgba(99,35,54,.4),rgba(99,35,54,.2));border-bottom-color:rgba(99,35,54,.4)">
+    <h3 style="color:#fcd34d">🔐 Redefinição de Senha Obrigatória</h3>
+  </div>
+  <div class="overlay-body">
+    <p style="font-size:.82rem;color:var(--text-300);margin-bottom:16px;line-height:1.6;background:rgba(99,35,54,.12);border:1px solid rgba(99,35,54,.25);border-radius:8px;padding:10px 13px">
+      Por segurança, a senha desta conta foi redefinida para o padrão temporário. Defina uma nova senha antes de continuar.
+    </p>
+    <div class="fg"><label>Senha atual (temporária) *</label>
+      <input type="password" id="cp-current" placeholder="Digite a senha temporária" autocomplete="current-password">
+    </div>
+    <div class="fg"><label>Nova senha *</label>
+      <input type="password" id="cp-new" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+    </div>
+    <div class="fg"><label>Confirmar nova senha *</label>
+      <input type="password" id="cp-confirm" placeholder="Repita a nova senha" autocomplete="new-password">
+    </div>
+    <div class="form-err" id="cp-err"></div>
+  </div>
+  <div class="overlay-foot" style="justify-content:stretch">
+    <button class="btn btn-orange" id="btn-chpwd" onclick="submitChangePassword()" style="width:100%;padding:12px">Salvar Nova Senha</button>
+  </div>
+</div>
+</div>
+
 <!-- ═══ OVERLAY: ADMIN CONFIRM ═══ -->
 <div class="overlay" id="admin-confirm-overlay">
 <div class="overlay-box sm" style="max-width:400px">
@@ -728,11 +755,36 @@ async function initAuth(){
     document.getElementById('user-role').textContent=roleM[S.me.role]||S.me.role;
     document.getElementById('user-avatar').textContent=S.me.name[0].toUpperCase();
     if(S.me.role==='admin')document.getElementById('nav-users').style.display='';
+    if(S.me.mustChangePassword){
+      document.getElementById('chpwd-overlay').classList.add('open');
+      setTimeout(()=>document.getElementById('cp-current').focus(),150);
+    }
   }catch(e){window.location.href='/api/login';}
 }
 async function doLogout(){
   await fetch(API+'/auth/logout',{method:'POST'});
   window.location.href='/api/login';
+}
+async function submitChangePassword(){
+  const current=document.getElementById('cp-current').value;
+  const newPwd=document.getElementById('cp-new').value;
+  const confirm=document.getElementById('cp-confirm').value;
+  hideErr('cp-err');
+  if(!current){showErr('cp-err','Digite a senha atual.');return;}
+  if(newPwd.length<8){showErr('cp-err','Nova senha deve ter no mínimo 8 caracteres.');return;}
+  if(newPwd!==confirm){showErr('cp-err','As senhas não coincidem.');return;}
+  if(newPwd===current){showErr('cp-err','A nova senha deve ser diferente da senha atual.');return;}
+  const btn=document.getElementById('btn-chpwd');
+  btn.disabled=true;btn.textContent='Salvando…';
+  try{
+    const r=await fetch(`${API}/auth/change-password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword:current,newPassword:newPwd,confirmPassword:confirm})});
+    const d=await r.json();
+    if(!r.ok){showErr('cp-err',d.error||'Erro ao salvar senha.');return;}
+    document.getElementById('chpwd-overlay').classList.remove('open');
+    S.me.mustChangePassword=false;
+    toast('✅ Senha alterada com sucesso! Bem-vindo ao CONEX.');
+  }catch(e){showErr('cp-err','Erro de rede. Tente novamente.');}
+  finally{btn.disabled=false;btn.textContent='Salvar Nova Senha';}
 }
 
 /* ─ NAV ─ */

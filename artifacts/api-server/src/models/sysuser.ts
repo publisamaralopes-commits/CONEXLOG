@@ -7,6 +7,7 @@ export interface ISysUser extends Document {
   cargo?: string;
   role: "admin" | "employee";
   active: boolean;
+  mustChangePassword: boolean;
   createdAt: Date;
 }
 
@@ -18,6 +19,7 @@ const SysUserSchema = new Schema<ISysUser>(
     cargo: { type: String, default: "" },
     role: { type: String, enum: ["admin", "employee"], default: "employee" },
     active: { type: Boolean, default: true },
+    mustChangePassword: { type: Boolean, default: false },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
