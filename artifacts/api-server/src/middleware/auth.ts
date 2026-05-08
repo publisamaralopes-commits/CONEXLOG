@@ -11,12 +11,9 @@ declare module "express-session" {
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   if (!req.session?.userId) {
-    const acceptsJson = req.headers.accept?.includes("application/json") || req.headers["content-type"]?.includes("application/json");
-    if (acceptsJson || req.method !== "GET") {
-      res.status(401).json({ error: "Não autenticado. Faça login para continuar." });
-    } else {
-      res.redirect("/login");
-    }
+    // All /api routes return JSON — never redirect. The frontend handles
+    // the unauthenticated state by showing the login screen overlay.
+    res.status(401).json({ error: "Não autenticado. Faça login para continuar." });
     return;
   }
   next();

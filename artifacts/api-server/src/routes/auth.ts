@@ -26,6 +26,11 @@ router.post("/auth/login", async (req, res) => {
     req.session.userId = user._id.toString();
     req.session.userName = user.name;
     req.session.userRole = user.role;
+    // Explicitly save the session to MongoDB before responding so the
+    // cookie is valid on the very first subsequent request.
+    await new Promise<void>((resolve, reject) =>
+      req.session.save((err) => (err ? reject(err) : resolve()))
+    );
     res.json({
       id: user._id.toString(),
       name: user.name,

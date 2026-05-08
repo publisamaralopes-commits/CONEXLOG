@@ -22,6 +22,10 @@ const IS_PROD = process.env.NODE_ENV === "production";
 
 const app: Express = express();
 
+// Trust Replit's reverse proxy so rate-limiting, secure cookies, and
+// req.ip all work correctly in production.
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,
@@ -36,8 +40,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET || "conex-logistics-secret-key-2024",
   resave: false,
   saveUninitialized: false,
+  // Pass the same TLS options that Mongoose uses so the MongoStore
+  // connection can reach MongoDB Atlas in Replit's environment.
   store: MongoStore.create({
     mongoUrl: MONGODB_URI,
+    mongoOptions: { tls: true, tlsInsecure: true } as Record<string, unknown>,
     ttl: 8 * 60 * 60,
     autoRemove: "native",
     touchAfter: 24 * 3600,
@@ -46,7 +53,10 @@ app.use(session({
   cookie: {
     httpOnly: true,
     secure: IS_PROD,
-    sameSite: IS_PROD ? "strict" : "lax",
+    // "lax" works correctly behind Replit's reverse proxy; "strict" was
+    // too aggressive and caused sessions to be dropped on cross-context
+    // navigations inside the proxy infrastructure.
+    sameSite: "lax",
     maxAge: 8 * 60 * 60 * 1000,
   },
 }));

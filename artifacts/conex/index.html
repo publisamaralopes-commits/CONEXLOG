@@ -779,6 +779,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
 
 <script>
 const API='/api';
+// Ensure all fetch calls send cookies (required for session auth in
+// cross-context scenarios behind Replit's reverse proxy).
+(()=>{const _f=window.fetch.bind(window);window.fetch=(input,init={})=>_f(input,{...init,credentials:init.credentials||'include'});})()
 const S={orders:[],schedules:[],lotes:[],vehicles:[],mural:[],users:[],cnhB64:null,me:null};
 let charts={status:null,clients:null};
 
