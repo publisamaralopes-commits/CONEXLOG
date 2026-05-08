@@ -64,6 +64,29 @@ router.get("/orders/:id", async (req, res) => {
   }
 });
 
+function cleanVehicle(v: z.infer<typeof VehicleDataSchema>) {
+  return {
+    ...v,
+    carreta1: v.carreta1?.trim() || undefined,
+    carreta2: v.carreta2?.trim() || undefined,
+    carreta3: v.carreta3?.trim() || undefined,
+  };
+}
+
+async function nextOCNumber(): Promise<string> {
+  const last = await LoadOrder.findOne({}, { orderNumber: 1 }).sort({ createdAt: -1 }).lean();
+  let n = 1;
+  if (last?.orderNumber) {
+    const m = last.orderNumber.match(/OC-(\d+)/);
+    if (m) n = parseInt(m[1]) + 1;
+  }
+  const candidate = `OC-${String(n).padStart(6, "0")}`;
+  // Collision-safe: if that number already exists, increment until unique
+  const exists = await LoadOrder.exists({ orderNumber: candidate });
+  if (exists) return `OC-${String(n + 1).padStart(6, "0")}`;
+  return candidate;
+}
+
 router.post("/orders", async (req, res) => {
   const parsed = CreateOrderSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -71,9 +94,9 @@ router.post("/orders", async (req, res) => {
     return;
   }
   try {
-    const count = await LoadOrder.countDocuments();
-    const orderNumber = `OC-${String(count + 1).padStart(6, "0")}`;
-    const order = await LoadOrder.create({ ...parsed.data, orderNumber });
+    const orderNumber = await nextOCNumber();
+    const data = { ...parsed.data, vehicle: cleanVehicle(parsed.data.vehicle) };
+    const order = await LoadOrder.create({ ...data, orderNumber });
     res.status(201).json(fmt(order));
   } catch (err) {
     req.log.error(err, "Failed to create order");
@@ -88,7 +111,10 @@ router.patch("/orders/:id", async (req, res) => {
     return;
   }
   try {
-    const order = await LoadOrder.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
+    const data = parsed.data.vehicle
+      ? { ...parsed.data, vehicle: cleanVehicle(parsed.data.vehicle as z.infer<typeof VehicleDataSchema>) }
+      : parsed.data;
+    const order = await LoadOrder.findByIdAndUpdate(req.params.id, data, { new: true });
     if (!order) { res.status(404).json({ error: "Ordem não encontrada" }); return; }
     res.json(fmt(order));
   } catch (err) {

@@ -45,9 +45,9 @@ const LoadOrderSchema = new Schema<ILoadOrder>(
     },
     vehicle: {
       placaCavalo: { type: String, required: true, uppercase: true },
-      carreta1: { type: String, uppercase: true, default: "" },
-      carreta2: { type: String, uppercase: true, default: "" },
-      carreta3: { type: String, uppercase: true, default: "" },
+      carreta1: { type: String, uppercase: true },
+      carreta2: { type: String, uppercase: true },
+      carreta3: { type: String, uppercase: true },
       tipoVeiculo: { type: String, enum: ["graneleiro", "cacamba"], required: true },
     },
     cargo: {

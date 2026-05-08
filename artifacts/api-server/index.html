@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>CONEX — Comunicação Integrada</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚛</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -226,16 +227,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
 .chart-card h4{font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:700;color:var(--text-300);margin-bottom:14px}
 .chart-wrap{position:relative;height:200px}
 
-/* PRINT */
-@media print{
-  body{background:#fff!important;overflow:visible!important;height:auto!important}
-  .app{height:auto!important;overflow:visible!important}
-  .sidebar,.topbar,.overlay,.overlay-foot,.no-print{display:none!important}
-  .content{padding:0!important}
-  #print-area{display:block!important}
-  .section{display:none!important}.section.active{display:none!important}
-}
-#print-area{display:none}
+/* PRINT — printing now handled by public OC page */
+@media print{body{display:none}}
 
 /* Mobile backdrop overlay */
 .mob-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:45;display:none;backdrop-filter:blur(2px);cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -522,11 +515,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
       <div class="fg"><label>Destino *</label><input type="text" id="of-destino" placeholder="Cidade / Estado"></div>
     </div>
     <div id="oc-qr-row" style="display:none" class="qr-row">
-      <img id="oc-qr-img" width="80" height="80" alt="QR">
+      <img id="oc-qr-img" width="120" height="120" alt="QR" style="border-radius:8px;border:2px solid rgba(56,189,248,.2);background:#0a1628;padding:4px">
       <div class="qr-info">
-        <div class="qr-tag">QR Code desta OC</div>
-        <div class="qr-url" id="oc-qr-url"></div>
-        <div class="qr-hint">Escaneie para acessar a página pública</div>
+        <div class="qr-tag">✅ OC Salva — QR Code Gerado</div>
+        <div style="font-size:.7rem;color:var(--text-600);margin-bottom:4px">Escaneie para abrir a página pública</div>
+        <div class="qr-url" id="oc-qr-url" style="font-size:.72rem;word-break:break-all;color:var(--neon)"></div>
       </div>
     </div>
     <div class="form-err" id="oc-err"></div>
@@ -684,8 +677,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
   </div>
 </div>
 </div>
-
-<div id="print-area"></div>
 
 <script>
 const API='/api';
@@ -847,36 +838,76 @@ function editOrder(id){
 }
 function openOCPage(){const id=document.getElementById('of-id').value;const o=S.orders.find(x=>x.id===id);if(o)window.open(getOCUrl(o.orderNumber),'_blank');}
 async function saveOrder(){
+  // ── Client-side validation ──
+  const g=id=>document.getElementById(id).value.trim();
+  const errs=[];
+  if(!g('of-nome')) errs.push('Nome do motorista');
+  if(!g('of-cpf'))  errs.push('CPF do motorista');
+  if(!g('of-cnh'))  errs.push('Nº da CNH');
+  if(!g('of-cavalo')) errs.push('Placa do cavalo');
+  if(!g('of-produto')) errs.push('Produto');
+  if(!g('of-peso'))    errs.push('Peso');
+  if(!g('of-cliente')) errs.push('Cliente');
+  if(!g('of-remetente')) errs.push('Remetente');
+  if(!g('of-origem'))    errs.push('Origem');
+  if(!g('of-destinatario')) errs.push('Destinatário');
+  if(!g('of-destino'))      errs.push('Destino');
+  if(errs.length){
+    showErr('oc-err','Campos obrigatórios: '+errs.join(', ')+'.');
+    document.getElementById('oc-err').scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+  showErr('oc-err','');
+
   const id=document.getElementById('of-id').value;
-  const c1=document.getElementById('of-carr1').value.trim()||undefined;
-  const c2=document.getElementById('of-carr2').value.trim()||undefined;
-  const c3=document.getElementById('of-carr3').value.trim()||undefined;
   const payload={
     status:document.getElementById('of-status').value,
-    driver:{nome:document.getElementById('of-nome').value.trim(),cpf:document.getElementById('of-cpf').value.trim(),cnhNumber:document.getElementById('of-cnh').value.trim(),cnhImage:S.cnhB64||undefined},
-    vehicle:{placaCavalo:document.getElementById('of-cavalo').value.trim(),carreta1:c1,carreta2:c2,carreta3:c3,tipoVeiculo:document.getElementById('of-tipo').value},
-    cargo:{produto:document.getElementById('of-produto').value.trim(),peso:document.getElementById('of-peso').value.trim(),cliente:document.getElementById('of-cliente').value.trim(),remetente:document.getElementById('of-remetente').value.trim(),origem:document.getElementById('of-origem').value.trim(),destinatario:document.getElementById('of-destinatario').value.trim(),destino:document.getElementById('of-destino').value.trim()},
+    driver:{
+      nome:g('of-nome'),cpf:g('of-cpf'),cnhNumber:g('of-cnh'),
+      ...(S.cnhB64?{cnhImage:S.cnhB64}:{})
+    },
+    vehicle:{
+      placaCavalo:g('of-cavalo'),tipoVeiculo:document.getElementById('of-tipo').value,
+      ...(g('of-carr1')?{carreta1:g('of-carr1')}:{}),
+      ...(g('of-carr2')?{carreta2:g('of-carr2')}:{}),
+      ...(g('of-carr3')?{carreta3:g('of-carr3')}:{}),
+    },
+    cargo:{
+      produto:g('of-produto'),peso:g('of-peso'),cliente:g('of-cliente'),
+      remetente:g('of-remetente'),origem:g('of-origem'),
+      destinatario:g('of-destinatario'),destino:g('of-destino'),
+    },
   };
   const btn=document.querySelector('#oc-overlay .btn-primary');
   if(btn){btn.disabled=true;btn.textContent='Salvando…';}
   try{
-    const r=await fetch(id?`${API}/orders/${id}`:`${API}/orders`,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const r=await fetch(id?`${API}/orders/${id}`:`${API}/orders`,{
+      method:id?'PATCH':'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
     const d=await r.json();
     if(!r.ok){showErr('oc-err',d.error||'Erro ao salvar.');toast(d.error||'Erro ao salvar OC.','t-error');return;}
     if(!id){
-      S.lastOC=d;const url=getOCUrl(d.orderNumber);
+      // New OC created — show QR code and action buttons, keep form open
+      const url=getOCUrl(d.orderNumber);
       document.getElementById('of-num').value=d.orderNumber;
-      document.getElementById('of-id').value=d.id||'';
+      document.getElementById('of-id').value=d.id||d._id||'';
       document.getElementById('oc-qr-img').src=getQR(url);
       document.getElementById('oc-qr-url').textContent=url;
       document.getElementById('oc-qr-row').style.display='flex';
       document.getElementById('btn-oc-print').style.display='';
       document.getElementById('btn-oc-page').style.display='';
       document.getElementById('oc-form-title').textContent='OC — '+d.orderNumber;
-      toast('OC criada! Número: '+d.orderNumber);
-    }else{toast('OC atualizada com sucesso!');}
+      toast('✅ OC '+d.orderNumber+' criada com sucesso!');
+    }else{
+      toast('OC atualizada com sucesso!');
+    }
     await loadOrders();
-  }catch(e){showErr('oc-err','Erro de rede.');toast('Erro de rede.','t-error');}
+  }catch(e){
+    showErr('oc-err','Erro de rede. Verifique a conexão.');
+    toast('Erro de rede.','t-error');
+  }
   finally{if(btn){btn.disabled=false;btn.textContent='Salvar';}}
 }
 async function delOrder(id){
@@ -885,9 +916,17 @@ async function delOrder(id){
   toast('OC excluída.','t-info');
   await loadOrders();
 }
-function printOrderId(id){const o=S.orders.find(x=>x.id===id);if(o)doPrint(o);}
-function printOC(){const id=document.getElementById('of-id').value;printOrderId(id);}
-function doPrint(o){
+function printOrderId(id){
+  const o=S.orders.find(x=>x.id===id);
+  if(o) window.open(getOCUrl(o.orderNumber)+'?print=1','_blank');
+}
+function printOC(){
+  const num=document.getElementById('of-num').value;
+  if(num){ window.open(getOCUrl(num)+'?print=1','_blank'); return; }
+  const id=document.getElementById('of-id').value;
+  printOrderId(id);
+}
+function doPrint_UNUSED(o){
   const url=getOCUrl(o.orderNumber);const qr=getQR(url);
   const logo='https://www.transpanorama.com.br/wp-content/uploads/2020/10/logo-transpanorama.png';
   const cnh=o.driver?.cnhImage?`<img src="${o.driver.cnhImage}" style="max-width:160px;max-height:100px;object-fit:contain;border-radius:4px;border:1px solid #ddd">`:'—';

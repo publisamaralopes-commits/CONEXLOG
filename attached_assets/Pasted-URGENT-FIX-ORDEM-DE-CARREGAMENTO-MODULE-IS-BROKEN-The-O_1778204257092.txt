@@ -1,0 +1,86 @@
+URGENT FIX — ORDEM DE CARREGAMENTO MODULE IS BROKEN
+
+The Ordem de Carregamento page is visually present but the functionality is not working correctly.
+
+Perform a complete debugging and rebuild of the OC flow.
+
+VERIFY AND FIX ALL OF THESE:
+
+==================================================
+OC NUMBER GENERATION
+====================
+
+* ensure automatic OC number generation works correctly
+* generate unique OC numbers
+* display the OC number immediately on screen
+
+==================================================
+FORM SUBMISSION
+===============
+
+* ensure the form submits correctly
+* ensure all fields are connected properly
+* validate required fields
+* show success/error messages
+
+==================================================
+MONGODB INTEGRATION
+===================
+
+* ensure OC records are saving correctly to MongoDB
+* verify database connection
+* verify schema/model structure
+* ensure persistence after refresh
+
+==================================================
+QR CODE SYSTEM
+==============
+
+* ensure QR Codes generate correctly
+* ensure QR Codes open the correct OC public page
+* ensure routes like /oc/OC-123456 work correctly
+
+==================================================
+PUBLIC OC PAGE
+==============
+
+Create a working public OC page displaying:
+
+* OC number
+* transportadora
+* motorista data
+* vehicle data
+* cargo data
+* origin/destination
+* status
+
+==================================================
+PDF GENERATION
+==============
+
+* fix PDF generation completely
+* ensure jsPDF is functioning
+* ensure all fields appear in the PDF
+* include Transpanorama logo
+* include company information
+* ensure automatic print dialog works
+
+==================================================
+RESPONSIVE FIXES
+================
+
+* ensure the Ordem de Carregamento module works correctly on mobile
+* fix responsive layout issues
+* ensure forms/buttons work on smartphones
+
+==================================================
+GENERAL DEBUGGING
+=================
+
+* inspect browser console for errors
+* inspect API/network errors
+* fix broken routes
+* reconnect frontend and backend correctly
+* validate all CRUD operations
+
+The Ordem de Carregamento module must become fully stable and production-ready.
