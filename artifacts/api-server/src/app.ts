@@ -84,6 +84,7 @@ if (!MONGODB_URI) {
 }
 
 async function dropStaleIndexes() {
+  // sysusers: drop legacy email_1 index
   try {
     const col = mongoose.connection.collection("sysusers");
     const indexes = await col.indexes();
@@ -93,6 +94,17 @@ async function dropStaleIndexes() {
     }
   } catch (err) {
     logger.warn({ err }, "Could not drop stale sysusers index — may not exist");
+  }
+  // fleets: drop legacy plate_1 index (schema was renamed to placaCavalo)
+  try {
+    const fleetCol = mongoose.connection.collection("fleets");
+    const fleetIndexes = await fleetCol.indexes();
+    if (fleetIndexes.some((i: Record<string, unknown>) => i["key"] && typeof i["key"] === "object" && "plate" in (i["key"] as object))) {
+      await fleetCol.dropIndex("plate_1");
+      logger.info("Dropped stale plate_1 index from fleets");
+    }
+  } catch (err) {
+    logger.warn({ err }, "Could not drop stale fleets index — may not exist");
   }
 }
 

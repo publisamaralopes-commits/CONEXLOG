@@ -38,8 +38,14 @@ router.post("/lotes", async (req, res) => {
     return;
   }
   try {
-    const count = await Lote.countDocuments();
-    const loteNumber = `LOTE-${String(count + 1).padStart(6, "0")}`;
+    // Use the highest existing loteNumber to avoid gaps causing duplicate-key collisions
+    const last = await Lote.findOne({}, { loteNumber: 1 }).sort({ loteNumber: -1 }).lean();
+    let nextNum = 1;
+    if (last?.loteNumber) {
+      const m = last.loteNumber.match(/(\d+)$/);
+      if (m) nextNum = parseInt(m[1], 10) + 1;
+    }
+    const loteNumber = `LOTE-${String(nextNum).padStart(6, "0")}`;
     const lote = await Lote.create({ ...parsed.data, loteNumber, nPorta: 0, emTransito: 0, carregado: 0 });
     res.status(201).json(fmt(lote));
   } catch (err) {
