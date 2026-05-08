@@ -8,6 +8,7 @@ export interface ISysUser extends Document {
   role: "admin" | "employee";
   active: boolean;
   mustChangePassword: boolean;
+  lastPasswordChange?: Date | null;
   createdAt: Date;
 }
 
@@ -20,6 +21,7 @@ const SysUserSchema = new Schema<ISysUser>(
     role: { type: String, enum: ["admin", "employee"], default: "employee" },
     active: { type: Boolean, default: true },
     mustChangePassword: { type: Boolean, default: false },
+    lastPasswordChange: { type: Date, default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );

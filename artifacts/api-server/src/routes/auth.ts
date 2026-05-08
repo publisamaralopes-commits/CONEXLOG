@@ -92,6 +92,7 @@ router.post("/auth/change-password", requireAuth, async (req, res) => {
     }
     user.password = await bcrypt.hash(parsed.data.newPassword, 12);
     user.mustChangePassword = false;
+    user.lastPasswordChange = new Date();
     await user.save();
     res.json({ message: "Senha alterada com sucesso" });
   } catch (err) {

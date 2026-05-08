@@ -466,8 +466,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
         <input type="text" id="usr-search" placeholder="Buscar por nome ou usuário…" oninput="renderUsers()">
       </div>
       <div class="tbl-wrap"><table><thead><tr>
-        <th>Nome</th><th>Usuário</th><th>Cargo</th><th>Perfil</th><th>Status</th><th>Criado em</th><th>Ações</th>
-      </tr></thead><tbody id="usr-tbody"><tr><td colspan="7" class="tbl-empty">Carregando…</td></tr></tbody></table></div>
+        <th>Nome</th><th>Usuário</th><th>Cargo</th><th>Perfil</th><th>Status</th><th>Senha</th><th>Criado em</th><th>Ações</th>
+      </tr></thead><tbody id="usr-tbody"><tr><td colspan="8" class="tbl-empty">Carregando…</td></tr></tbody></table></div>
     </div>
 
   </div>
@@ -679,6 +679,27 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
 </div>
 </div>
 
+<!-- ═══ OVERLAY: RESET USER PASSWORD ═══ -->
+<div class="overlay" id="reset-pwd-overlay">
+<div class="overlay-box sm" style="max-width:420px">
+  <div class="overlay-head"><h3>🔑 Redefinir Senha Provisória</h3><button class="overlay-close" onclick="closeResetPwd()">✕</button></div>
+  <div class="overlay-body">
+    <input type="hidden" id="rp-uid">
+    <p id="rp-username-label" style="font-size:.82rem;color:var(--text-300);margin-bottom:14px;padding:8px 12px;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.1);border-radius:8px"></p>
+    <div class="fg">
+      <label>Nova Senha Provisória *</label>
+      <input type="text" id="rp-password" placeholder="Ex: Conex@2025, 123456" autocomplete="off">
+    </div>
+    <p style="font-size:.73rem;color:var(--text-600);margin-top:8px;line-height:1.5">⚠️ O funcionário será solicitado a criar uma senha pessoal no próximo login.</p>
+    <div class="form-err" id="rp-err"></div>
+  </div>
+  <div class="overlay-foot">
+    <button class="btn btn-ghost" onclick="closeResetPwd()">Cancelar</button>
+    <button class="btn btn-orange" id="btn-rp-submit" onclick="submitResetPassword()">Redefinir Senha</button>
+  </div>
+</div>
+</div>
+
 <!-- ═══ OVERLAY: ADMIN CONFIRM ═══ -->
 <div class="overlay" id="admin-confirm-overlay">
 <div class="overlay-box sm" style="max-width:400px">
@@ -703,7 +724,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
     <input type="hidden" id="uf-id">
     <div class="fg"><label>Nome completo *</label><input type="text" id="uf-name" placeholder="Nome completo"></div>
     <div class="fg"><label>Usuário (login) *</label><input type="text" id="uf-username" placeholder="Sem espaços, ex: joao.silva" autocomplete="off"></div>
-    <div class="fg"><label>Senha *</label><input type="password" id="uf-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+    <div class="fg" id="uf-pwd-wrap">
+      <label id="uf-pwd-label">Senha Provisória *</label>
+      <input type="password" id="uf-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+      <div id="uf-pwd-hint" style="font-size:.72rem;color:var(--text-600);margin-top:5px;line-height:1.4">⚠️ O funcionário será obrigado a definir uma senha pessoal no primeiro acesso.</div>
+    </div>
     <div class="fg"><label>Cargo / Função</label><input type="text" id="uf-cargo" placeholder="Ex: Motorista, Auxiliar, Despachante"></div>
     <div class="fg2">
       <div class="fg"><label>Tipo de usuário</label><select id="uf-role">
@@ -1415,16 +1440,23 @@ function renderUsers(){
   const q=document.getElementById('usr-search').value.toLowerCase();
   const list=S.users.filter(u=>!q||(u.name||'').toLowerCase().includes(q)||(u.username||'').toLowerCase().includes(q));
   const tb=document.getElementById('usr-tbody');
-  if(!list.length){tb.innerHTML=`<tr><td colspan="7" class="tbl-empty">Nenhum funcionário cadastrado.</td></tr>`;return;}
+  if(!list.length){tb.innerHTML=`<tr><td colspan="8" class="tbl-empty">Nenhum funcionário cadastrado.</td></tr>`;return;}
   tb.innerHTML=list.map(u=>`<tr>
     <td><strong style="color:var(--text-100)">${esc(u.name)}</strong></td>
     <td style="font-family:monospace;color:var(--neon)">${esc(u.username)}</td>
     <td style="color:var(--text-300)">${esc(u.cargo||'—')}</td>
     <td>${badge(u.role,roleM)}</td>
     <td><span class="badge ${u.active?'badge-delivered':'badge-cancelled'}">${u.active?'Ativo':'Inativo'}</span></td>
+    <td>${u.mustChangePassword
+      ? '<span class="badge badge-pending" title="Aguardando troca de senha">🔑 Pendente</span>'
+      : (u.lastPasswordChange
+        ? `<span class="badge badge-delivered" title="Senha configurada em ${fmtD(u.lastPasswordChange)}">✅ Configurada</span>`
+        : '<span class="badge badge-delivered">✅ OK</span>')
+    }</td>
     <td>${fmtD(u.createdAt)}</td>
     <td><div class="td-actions">
       <button class="btn btn-ghost btn-sm" onclick="editUser('${u.id}')">✏️</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetUserPassword('${u.id}','${esc(u.name)}','${esc(u.username)}')" title="Redefinir senha provisória">🔑</button>
       <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="delUser('${u.id}')">🗑️</button>
     </div></td>
   </tr>`).join('');
@@ -1458,6 +1490,9 @@ function clearUserForm(){
   document.getElementById('uf-role').value='employee';
   document.getElementById('uf-active').value='true';
   document.getElementById('usr-form-title').textContent='Novo Funcionário';
+  // Restore provisória label and hint for new-user mode
+  document.getElementById('uf-pwd-label').textContent='Senha Provisória *';
+  document.getElementById('uf-pwd-hint').style.display='';
   hideErr('usr-err');
 }
 function editUser(id){
@@ -1470,6 +1505,9 @@ function editUser(id){
   document.getElementById('uf-cargo').value=u.cargo||'';
   document.getElementById('uf-role').value=u.role||'employee';
   document.getElementById('uf-active').value=String(u.active!==false);
+  // In edit mode: password is optional — hide the "provisória" hint
+  document.getElementById('uf-pwd-label').textContent='Nova Senha (deixar em branco para manter)';
+  document.getElementById('uf-pwd-hint').style.display='none';
   hideErr('usr-err');
   document.getElementById('usr-overlay').classList.add('open');
 }
@@ -1497,6 +1535,32 @@ async function saveUser(){
     await loadUsers();
   }catch(e){showErr('usr-err','Erro de rede.');toast('Erro de rede.','t-error');}
   finally{if(btn){btn.disabled=false;btn.textContent='Salvar Funcionário';}}
+}
+function resetUserPassword(id,name,username){
+  document.getElementById('rp-uid').value=id;
+  document.getElementById('rp-username-label').textContent=`👤 ${name}  ·  login: ${username}`;
+  document.getElementById('rp-password').value='';
+  hideErr('rp-err');
+  document.getElementById('reset-pwd-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('rp-password').focus(),120);
+}
+function closeResetPwd(){document.getElementById('reset-pwd-overlay').classList.remove('open');}
+async function submitResetPassword(){
+  const id=document.getElementById('rp-uid').value;
+  const pwd=document.getElementById('rp-password').value.trim();
+  hideErr('rp-err');
+  if(pwd.length<6){showErr('rp-err','Senha deve ter no mínimo 6 caracteres.');return;}
+  const btn=document.getElementById('btn-rp-submit');
+  btn.disabled=true;btn.textContent='Redefinindo…';
+  try{
+    const r=await fetch(`${API}/sysusers/${id}/reset-password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({newPassword:pwd})});
+    const d=await r.json();
+    if(!r.ok){showErr('rp-err',d.error||'Erro ao redefinir.');return;}
+    closeResetPwd();
+    toast(d.message||'Senha redefinida com sucesso.');
+    await loadUsers();
+  }catch(e){showErr('rp-err','Erro de rede.');}
+  finally{btn.disabled=false;btn.textContent='Redefinir Senha';}
 }
 const _delUserPending={};
 async function delUser(id){
