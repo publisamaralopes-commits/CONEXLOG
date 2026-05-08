@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "CONEX"
+version = "1.0.0"
+id = "artifacts/conex"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22136
+
+[services.development]
+run = "pnpm --filter @workspace/conex run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/conex", "run", "build" ]
+publicDir = "artifacts/conex/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22136"
+BASE_PATH = "/"

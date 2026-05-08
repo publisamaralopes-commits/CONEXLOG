@@ -1,5 +1,3 @@
-import { fileURLToPath } from "node:url";
-import path from "node:path";
 import express, { type Express, type ErrorRequestHandler } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
@@ -14,13 +12,6 @@ import { logger } from "./lib/logger";
 import { SysUser } from "./models/sysuser";
 import { runBackup } from "./lib/backup";
 
-// ── Static root: always resolves to artifacts/api-server/ regardless of CWD ──
-// In the esbuild bundle, import.meta.url points to dist/index.mjs
-// so _dirname = dist/, and STATIC_ROOT = artifacts/api-server/
-const _dirname = path.dirname(fileURLToPath(import.meta.url));
-const STATIC_ROOT = path.resolve(_dirname, "..");
-
-// ── MONGODB_URI must be present before anything else ─────────────────────────
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
   logger.error("MONGODB_URI environment variable is not set");
@@ -31,7 +22,6 @@ const IS_PROD = process.env.NODE_ENV === "production";
 
 const app: Express = express();
 
-// ── Request logging ───────────────────────────────────────────────────────────
 app.use(
   pinoHttp({
     logger,
@@ -42,7 +32,6 @@ app.use(
   }),
 );
 
-// ── Session with MongoDB-backed persistence ───────────────────────────────────
 app.use(session({
   secret: process.env.SESSION_SECRET || "conex-logistics-secret-key-2024",
   resave: false,
@@ -62,7 +51,6 @@ app.use(session({
   },
 }));
 
-// ── Rate limiting — brute-force protection on login ───────────────────────────
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -72,53 +60,17 @@ const loginLimiter = rateLimit({
   skip: () => !IS_PROD,
 });
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
-// ── Frontend: root ("/") ──────────────────────────────────────────────────────
-// Authenticated users land on the dashboard; unauthenticated are sent to login.
-app.get("/", (req, res) => {
-  if (req.session?.userId) {
-    res.sendFile("index.html", { root: STATIC_ROOT });
-  } else {
-    res.redirect("/login");
-  }
-});
-
-// ── Frontend: login page ──────────────────────────────────────────────────────
-app.get("/login", (_req, res) => {
-  res.sendFile("login.html", { root: STATIC_ROOT });
-});
-
-// Backward-compatible aliases (bookmarks, existing sessions)
-app.get("/api/login", (_req, res) => res.redirect("/login"));
-
-// ── Apply rate limiter to login endpoint ──────────────────────────────────────
 app.use("/api/auth/login", loginLimiter);
-
-// ── Application routes ────────────────────────────────────────────────────────
 app.use("/api", router);
 
-// ── Static files (authenticated) + session guard ─────────────────────────────
-app.use("/api", (req, res, next) => {
-  if (!req.session?.userId) {
-    if (req.method === "GET" && !req.path.includes(".")) {
-      res.redirect("/login");
-      return;
-    }
-    res.status(401).json({ error: "Não autenticado" });
-    return;
-  }
-  next();
-}, express.static(STATIC_ROOT));
-
-// ── 404 handler for unknown API routes ───────────────────────────────────────
 app.use("/api/{*path}", (req, res) => {
   res.status(404).json({ error: `Rota não encontrada: ${req.method} ${req.path}` });
 });
 
-// ── Global error handler ──────────────────────────────────────────────────────
 const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   const status = (err as { status?: number; statusCode?: number }).status
     ?? (err as { status?: number; statusCode?: number }).statusCode
@@ -131,7 +83,6 @@ const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
 };
 app.use(errorHandler);
 
-// ── Startup routines ──────────────────────────────────────────────────────────
 async function seedDefaultAdmin() {
   try {
     const admin = await SysUser.findOne({ username: "admin" });
@@ -147,7 +98,7 @@ async function seedDefaultAdmin() {
       if (!ok) {
         updates.password = await bcrypt.hash("admin123", 10);
         updates.mustChangePassword = true;
-        logger.info("Admin senha redefinida para admin123 — login obrigatório para troca de senha");
+        logger.info("Admin senha redefinida para admin123");
       }
       if (Object.keys(updates).length > 0) {
         await SysUser.updateOne({ _id: admin._id }, { $set: updates });
@@ -167,7 +118,7 @@ async function dropStaleIndexes() {
       logger.info("Dropped stale email_1 index from sysusers");
     }
   } catch (err) {
-    logger.warn({ err }, "Could not drop stale sysusers index — may not exist");
+    logger.warn({ err }, "Could not drop stale sysusers index");
   }
   try {
     const fleetCol = mongoose.connection.collection("fleets");
@@ -177,11 +128,10 @@ async function dropStaleIndexes() {
       logger.info("Dropped stale plate_1 index from fleets");
     }
   } catch (err) {
-    logger.warn({ err }, "Could not drop stale fleets index — may not exist");
+    logger.warn({ err }, "Could not drop stale fleets index");
   }
 }
 
-// ── MongoDB connection events ─────────────────────────────────────────────────
 mongoose.connection.on("connecting", () => logger.info("Connecting to MongoDB..."));
 mongoose.connection.on("connected", () => {
   logger.info("Connected to MongoDB");
@@ -193,12 +143,12 @@ mongoose.connection.on("connected", () => {
   logger.info("Daily backup scheduled at 02:00");
 });
 mongoose.connection.on("error", (err) => logger.error(err, "MongoDB connection error"));
-mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected — sessions persisted in store"));
+mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected"));
 
 mongoose
   .connect(MONGODB_URI, { serverSelectionTimeoutMS: 15000, tls: true, tlsInsecure: true })
   .catch((err) => {
-    logger.error({ message: err?.message }, "Failed to connect to MongoDB — check MONGODB_URI and IP allowlist");
+    logger.error({ message: err?.message }, "Failed to connect to MongoDB");
     process.exit(1);
   });
 
