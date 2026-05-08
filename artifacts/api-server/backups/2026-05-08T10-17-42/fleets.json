@@ -1,0 +1,33 @@
+[
+  {
+    "_id": "69fd366c1198df546c6f412b",
+    "cliente": "CARGILL",
+    "origemDestino": "ANAPOLIS X SAO PAULO",
+    "placaCavalo": "AAA111",
+    "statusGR": "pendente",
+    "statusCarregamento": "porta",
+    "createdAt": "2026-05-08T01:03:40.560Z",
+    "__v": 0
+  },
+  {
+    "_id": "69fd56f5ec13fa8a027dad5c",
+    "cliente": "Cargill",
+    "origemDestino": "Uberlândia → Itumbiara",
+    "placaCavalo": "BRA2E19",
+    "statusGR": "pendente",
+    "statusCarregamento": "porta",
+    "createdAt": "2026-05-08T03:22:29.955Z",
+    "__v": 0
+  },
+  {
+    "_id": "69fd5749ec13fa8a027dad5f",
+    "cliente": "CARGILL",
+    "origemDestino": "ANAPOLIS X SAO PAULO",
+    "placaCavalo": "AAA111",
+    "statusGR": "liberado",
+    "statusCarregamento": "manifestado",
+    "createdAt": "2026-05-08T03:23:53.175Z",
+    "__v": 0,
+    "obs": "Biometria"
+  }
+]

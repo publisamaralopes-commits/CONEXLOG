@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "69fd4e70ba4b60e7557b8b5a",
+    "titulo": "Bem vindo ao Conex",
+    "conteudo": "Aqui nossa comunicação será mais facil e rapido!",
+    "tipo": "comunicado",
+    "pinado": true,
+    "urgente": false,
+    "autor": "SAMARA",
+    "autorId": "69fca3bb92693aa9a873caae",
+    "createdAt": "2026-05-08T02:46:08.833Z",
+    "__v": 0
+  }
+]

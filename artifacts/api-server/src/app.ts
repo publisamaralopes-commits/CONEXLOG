@@ -1,15 +1,29 @@
-import express, { type Express } from "express";
+import express, { type Express, type ErrorRequestHandler } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import session from "express-session";
+import MongoStore from "connect-mongo";
+import rateLimit from "express-rate-limit";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import cron from "node-cron";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { SysUser } from "./models/sysuser";
+import { runBackup } from "./lib/backup";
+
+// ── MONGODB_URI must be present before anything else ─────────────────────────
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  logger.error("MONGODB_URI environment variable is not set");
+  process.exit(1);
+}
+
+const IS_PROD = process.env.NODE_ENV === "production";
 
 const app: Express = express();
 
+// ── Request logging ───────────────────────────────────────────────────────────
 app.use(
   pinoHttp({
     logger,
@@ -20,23 +34,52 @@ app.use(
   }),
 );
 
+// ── Session with MongoDB-backed persistence ───────────────────────────────────
 app.use(session({
   secret: process.env.SESSION_SECRET || "conex-logistics-secret-key-2024",
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true, secure: false, maxAge: 8 * 60 * 60 * 1000 },
+  store: MongoStore.create({
+    mongoUrl: MONGODB_URI,
+    ttl: 8 * 60 * 60,           // 8 hours — matches cookie maxAge
+    autoRemove: "native",
+    touchAfter: 24 * 3600,      // re-save session at most once per day unless data changes
+    crypto: { secret: process.env.SESSION_SECRET || "conex-logistics-secret-key-2024" },
+  }),
+  cookie: {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: IS_PROD ? "strict" : "lax",
+    maxAge: 8 * 60 * 60 * 1000, // 8 hours
+  },
 }));
+
+// ── Rate limiting — brute-force protection on login ───────────────────────────
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15-minute window
+  max: 20,                   // max 20 attempts per IP per window
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Muitas tentativas de login. Aguarde 15 minutos e tente novamente." },
+  skip: () => !IS_PROD,      // only enforce in production
+});
 
 app.use(cors());
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
+// ── Login page ────────────────────────────────────────────────────────────────
 app.get("/api/login", (_req, res) => {
   res.sendFile("login.html", { root: "." });
 });
 
+// ── Apply rate limiter to login endpoint ──────────────────────────────────────
+app.use("/api/auth/login", loginLimiter);
+
+// ── Application routes ────────────────────────────────────────────────────────
 app.use("/api", router);
 
+// ── Static files (authenticated) + session guard ─────────────────────────────
 app.use("/api", (req, res, next) => {
   if (!req.session?.userId) {
     if (req.method === "GET" && !req.path.includes(".")) {
@@ -49,6 +92,25 @@ app.use("/api", (req, res, next) => {
   next();
 }, express.static("."));
 
+// ── 404 handler for unknown API routes ───────────────────────────────────────
+app.use("/api/{*path}", (req, res) => {
+  res.status(404).json({ error: `Rota não encontrada: ${req.method} ${req.path}` });
+});
+
+// ── Global error handler (must be 4-arg for Express to treat as error middleware) ──
+const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
+  const status = (err as { status?: number; statusCode?: number }).status
+    ?? (err as { status?: number; statusCode?: number }).statusCode
+    ?? 500;
+  const message = IS_PROD
+    ? "Erro interno do servidor"
+    : ((err as Error).message ?? "Erro desconhecido");
+  req.log?.error(err, "Unhandled route error");
+  res.status(status).json({ error: message });
+};
+app.use(errorHandler);
+
+// ── Startup routines ──────────────────────────────────────────────────────────
 async function seedDefaultAdmin() {
   try {
     const admin = await SysUser.findOne({ username: "admin" });
@@ -57,11 +119,9 @@ async function seedDefaultAdmin() {
       await SysUser.create({ name: "Administrador", username: "admin", password: hash, role: "admin", active: true });
       logger.info("Admin padrão criado — login: admin / senha: admin123");
     } else {
-      // Ensure admin is active with correct role
       const updates: Record<string, unknown> = {};
       if (!admin.active) updates.active = true;
       if (admin.role !== "admin") updates.role = "admin";
-      // If password does not match admin123, reset it so the default login always works
       const ok = await bcrypt.compare("admin123", admin.password);
       if (!ok) {
         updates.password = await bcrypt.hash("admin123", 10);
@@ -77,12 +137,6 @@ async function seedDefaultAdmin() {
   }
 }
 
-const MONGODB_URI = process.env.MONGODB_URI;
-if (!MONGODB_URI) {
-  logger.error("MONGODB_URI environment variable is not set");
-  process.exit(1);
-}
-
 async function dropStaleIndexes() {
   // sysusers: drop legacy email_1 index
   try {
@@ -95,7 +149,7 @@ async function dropStaleIndexes() {
   } catch (err) {
     logger.warn({ err }, "Could not drop stale sysusers index — may not exist");
   }
-  // fleets: drop legacy plate_1 index (schema was renamed to placaCavalo)
+  // fleets: drop legacy plate_1 index (renamed to placaCavalo)
   try {
     const fleetCol = mongoose.connection.collection("fleets");
     const fleetIndexes = await fleetCol.indexes();
@@ -108,13 +162,21 @@ async function dropStaleIndexes() {
   }
 }
 
+// ── MongoDB connection events ─────────────────────────────────────────────────
 mongoose.connection.on("connecting", () => logger.info("Connecting to MongoDB..."));
 mongoose.connection.on("connected", () => {
   logger.info("Connected to MongoDB");
   dropStaleIndexes().then(() => seedDefaultAdmin());
+
+  // Daily backup at 02:00 server time
+  cron.schedule("0 2 * * *", () => {
+    logger.info("Starting scheduled daily backup...");
+    runBackup();
+  });
+  logger.info("Daily backup scheduled at 02:00");
 });
 mongoose.connection.on("error", (err) => logger.error(err, "MongoDB connection error"));
-mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected"));
+mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected — sessions persisted in store"));
 
 mongoose
   .connect(MONGODB_URI, { serverSelectionTimeoutMS: 15000, tls: true, tlsInsecure: true })

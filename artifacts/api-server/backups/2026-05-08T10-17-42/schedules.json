@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "69fcb1adbbe2c48a0530b6ab",
+    "cliente": "CARGILL",
+    "retirada": "CARGILL NOVOS HORIZONTES LTDA",
+    "cidadeRetirada": "ANAPOLIS",
+    "destinatario": "CARGILL NOVOS HORIZONTES LTDA",
+    "cidadeDestino": "PARANAGUA",
+    "terminal": "APPA",
+    "produto": "SOJA",
+    "numeroPGR": "7335",
+    "status": "completed",
+    "createdAt": "2026-05-07T15:37:17.358Z",
+    "__v": 0
+  }
+]

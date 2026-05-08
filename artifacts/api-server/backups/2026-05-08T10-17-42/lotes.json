@@ -1,0 +1,46 @@
+[
+  {
+    "_id": "69fcb147bbe2c48a0530b6a9",
+    "loteNumber": "LOTE-000004",
+    "items": [],
+    "createdAt": "2026-05-07T15:35:35.483Z",
+    "__v": 0,
+    "nPorta": 3,
+    "cidadeDestino": "SANTOS",
+    "cidadeOrigem": "ANAPOLIS",
+    "cliente": "Cargill",
+    "destino": "T39",
+    "origem": "CARGILL",
+    "valorFrete": "302"
+  },
+  {
+    "_id": "69fcb883bbe2c48a0530b6bb",
+    "loteNumber": "LOTE-000005",
+    "items": [],
+    "createdAt": "2026-05-07T16:06:27.348Z",
+    "__v": 0,
+    "cidadeDestino": "santos",
+    "cidadeOrigem": "anapolis",
+    "cliente": "Cargill",
+    "destino": "tec",
+    "origem": "amz",
+    "valorFrete": "150,00",
+    "nPorta": 2,
+    "emTransito": 2,
+    "carregado": 1
+  },
+  {
+    "_id": "69fd56f6ec13fa8a027dad5d",
+    "loteNumber": "LOTE-000006",
+    "cliente": "ADM",
+    "origem": "Armazém Norte",
+    "cidadeOrigem": "Uberlândia",
+    "destino": "Porto Seco",
+    "cidadeDestino": "Itumbiara",
+    "nPorta": 2,
+    "emTransito": 0,
+    "carregado": 1,
+    "createdAt": "2026-05-08T03:22:30.454Z",
+    "__v": 0
+  }
+]

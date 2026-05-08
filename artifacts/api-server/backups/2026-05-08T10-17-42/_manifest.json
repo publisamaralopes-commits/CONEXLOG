@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-05-08T10:17:43.939Z",
+  "collections": [
+    "sysusers",
+    "shipments",
+    "fleets",
+    "schedules",
+    "murals",
+    "customers",
+    "lotes",
+    "loadorders",
+    "sessions"
+  ],
+  "totalDocuments": 22
+}

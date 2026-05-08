@@ -1,0 +1,40 @@
+[
+  {
+    "_id": "69fca3bb92693aa9a873caae",
+    "name": "SAMARA",
+    "email": "samarasilvalopes.05@gmail.com",
+    "role": "admin",
+    "active": true,
+    "createdAt": "2026-05-07T14:37:47.251Z",
+    "__v": 0,
+    "password": "$2b$12$pfE7mPef4yCu0R1gVxUMie1EIVEV//04tA16po4RN459AQW2qCBQW",
+    "username": "samara.lopes",
+    "cargo": "Assistente Operacional"
+  },
+  {
+    "_id": "69fd31901198df546c6f4122",
+    "name": "Administrador",
+    "username": "admin",
+    "password": "$2b$12$roBQT5k8RRMk5BugqU4z6u2J.ZapqfpuDTztDqd2T1TywegvlnpbW",
+    "role": "admin",
+    "active": true,
+    "createdAt": "2026-05-08T00:42:56.596Z",
+    "__v": 0,
+    "cargo": "Administrador",
+    "mustChangePassword": false,
+    "lastPasswordChange": "2026-05-08T10:17:41.652Z"
+  },
+  {
+    "_id": "69fd56f7ec13fa8a027dad5e",
+    "name": "Teste Estabilidade",
+    "username": "teste.estab",
+    "password": "$2b$12$zNOuXz6wdC8hhLhIUO5Kse3n0fwo2bDzhZtzW4inRNyZH3HOGDJTe",
+    "cargo": "Auxiliar",
+    "role": "employee",
+    "active": true,
+    "mustChangePassword": true,
+    "lastPasswordChange": null,
+    "createdAt": "2026-05-08T03:22:31.145Z",
+    "__v": 0
+  }
+]
