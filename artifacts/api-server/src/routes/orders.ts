@@ -96,7 +96,12 @@ router.post("/orders", async (req, res) => {
   try {
     const orderNumber = await nextOCNumber();
     const data = { ...parsed.data, vehicle: cleanVehicle(parsed.data.vehicle) };
-    const order = await LoadOrder.create({ ...data, orderNumber });
+    const order = await LoadOrder.create({
+      ...data,
+      orderNumber,
+      createdByName: req.session.userName || undefined,
+      createdById: req.session.userId || undefined,
+    });
     res.status(201).json(fmt(order));
   } catch (err) {
     req.log.error(err, "Failed to create order");

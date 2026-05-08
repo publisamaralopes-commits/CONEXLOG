@@ -918,12 +918,25 @@ async function delOrder(id){
 }
 function printOrderId(id){
   const o=S.orders.find(x=>x.id===id);
-  if(o) window.open(getOCUrl(o.orderNumber)+'?print=1','_blank');
+  if(!o) return;
+  // Open the public OC page — user clicks "Imprimir / PDF" there (safe for unlimited reprints)
+  const a=document.createElement('a');
+  a.href=getOCUrl(o.orderNumber);
+  a.target='_blank';
+  a.rel='noopener noreferrer';
+  a.click();
 }
 function printOC(){
   const num=document.getElementById('of-num').value;
-  if(num){ window.open(getOCUrl(num)+'?print=1','_blank'); return; }
   const id=document.getElementById('of-id').value;
+  if(num){
+    const a=document.createElement('a');
+    a.href=getOCUrl(num);
+    a.target='_blank';
+    a.rel='noopener noreferrer';
+    a.click();
+    return;
+  }
   printOrderId(id);
 }
 function doPrint_UNUSED(o){

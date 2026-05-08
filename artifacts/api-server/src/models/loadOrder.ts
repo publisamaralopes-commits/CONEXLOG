@@ -25,6 +25,8 @@ export interface ILoadOrder extends Document {
     destinatario: string;
     destino: string;
   };
+  createdByName?: string;
+  createdById?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -59,6 +61,8 @@ const LoadOrderSchema = new Schema<ILoadOrder>(
       destinatario: { type: String, required: true },
       destino: { type: String, required: true },
     },
+    createdByName: { type: String },
+    createdById: { type: String },
   },
   { timestamps: true },
 );
