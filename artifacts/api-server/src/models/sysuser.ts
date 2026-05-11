@@ -5,6 +5,7 @@ export interface ISysUser extends Document {
   username: string;
   password: string;
   cargo?: string;
+  phoneNumber?: string;
   role: "admin" | "employee";
   active: boolean;
   mustChangePassword: boolean;
@@ -18,6 +19,7 @@ const SysUserSchema = new Schema<ISysUser>(
     username: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
     cargo: { type: String, default: "" },
+    phoneNumber: { type: String, default: "" },
     role: { type: String, enum: ["admin", "employee"], default: "employee" },
     active: { type: Boolean, default: true },
     mustChangePassword: { type: Boolean, default: false },

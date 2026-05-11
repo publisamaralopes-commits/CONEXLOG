@@ -629,8 +629,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
         <input type="text" id="usr-search" placeholder="Buscar por nome ou usuário…" oninput="renderUsers()">
       </div>
       <div class="tbl-wrap"><table><thead><tr>
-        <th>Nome</th><th>Usuário</th><th>Cargo</th><th>Perfil</th><th>Status</th><th>Senha</th><th>Criado em</th><th>Ações</th>
-      </tr></thead><tbody id="usr-tbody"><tr><td colspan="8" class="tbl-empty">Carregando…</td></tr></tbody></table></div>
+        <th>Nome</th><th>Usuário</th><th>Cargo</th><th>Telefone</th><th>Perfil</th><th>Status</th><th>Senha</th><th>Criado em</th><th>Ações</th>
+      </tr></thead><tbody id="usr-tbody"><tr><td colspan="9" class="tbl-empty">Carregando…</td></tr></tbody></table></div>
     </div>
 
   </div>
@@ -893,6 +893,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
       <div id="uf-pwd-hint" style="font-size:.72rem;color:var(--text-600);margin-top:5px;line-height:1.4">⚠️ O funcionário será obrigado a definir uma senha pessoal no primeiro acesso.</div>
     </div>
     <div class="fg"><label>Cargo / Função</label><input type="text" id="uf-cargo" placeholder="Ex: Motorista, Auxiliar, Despachante"></div>
+    <div class="fg"><label>Telefone *</label><input type="tel" id="uf-phone" placeholder="(62) 99999-9999" oninput="maskPhone(this)" maxlength="15" inputmode="numeric"></div>
     <div class="fg2">
       <div class="fg"><label>Tipo de usuário</label><select id="uf-role">
         <option value="employee">Funcionário</option><option value="admin">Administrador</option>
@@ -1755,13 +1756,14 @@ async function loadUsers(){
 }
 function renderUsers(){
   const q=document.getElementById('usr-search').value.toLowerCase();
-  const list=S.users.filter(u=>!q||(u.name||'').toLowerCase().includes(q)||(u.username||'').toLowerCase().includes(q));
+  const list=S.users.filter(u=>!q||(u.name||'').toLowerCase().includes(q)||(u.username||'').toLowerCase().includes(q)||(u.phoneNumber||'').includes(q));
   const tb=document.getElementById('usr-tbody');
-  if(!list.length){tb.innerHTML=`<tr><td colspan="8" class="tbl-empty">Nenhum funcionário cadastrado.</td></tr>`;return;}
+  if(!list.length){tb.innerHTML=`<tr><td colspan="9" class="tbl-empty">Nenhum funcionário cadastrado.</td></tr>`;return;}
   tb.innerHTML=list.map(u=>`<tr>
     <td><strong style="color:var(--text-100)">${esc(u.name)}</strong></td>
     <td style="font-family:monospace;color:var(--neon)">${esc(u.username)}</td>
     <td style="color:var(--text-300)">${esc(u.cargo||'—')}</td>
+    <td style="color:var(--text-300);white-space:nowrap">${u.phoneNumber?`<a href="tel:${esc(u.phoneNumber.replace(/\D/g,''))}" style="color:inherit;text-decoration:none">📞 ${esc(u.phoneNumber)}</a>`:'<span style="color:var(--text-600)">—</span>'}</td>
     <td>${badge(u.role,roleM)}</td>
     <td><span class="badge ${u.active?'badge-delivered':'badge-cancelled'}">${u.active?'Ativo':'Inativo'}</span></td>
     <td>${u.mustChangePassword
@@ -1803,7 +1805,7 @@ async function confirmAdminAndOpen(){
 }
 function closeUserForm(){document.getElementById('usr-overlay').classList.remove('open');}
 function clearUserForm(){
-  ['uf-id','uf-name','uf-username','uf-password','uf-cargo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['uf-id','uf-name','uf-username','uf-password','uf-cargo','uf-phone'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('uf-role').value='employee';
   document.getElementById('uf-active').value='true';
   document.getElementById('usr-form-title').textContent='Novo Funcionário';
@@ -1820,6 +1822,7 @@ function editUser(id){
   document.getElementById('uf-username').value=u.username||'';
   document.getElementById('uf-password').value='';
   document.getElementById('uf-cargo').value=u.cargo||'';
+  document.getElementById('uf-phone').value=u.phoneNumber||'';
   document.getElementById('uf-role').value=u.role||'employee';
   document.getElementById('uf-active').value=String(u.active!==false);
   // In edit mode: password is optional — hide the "provisória" hint
@@ -1828,14 +1831,29 @@ function editUser(id){
   hideErr('usr-err');
   document.getElementById('usr-overlay').classList.add('open');
 }
+function fmtPhone(v){
+  const d=v.replace(/\D/g,'').slice(0,11);
+  if(!d.length)return '';
+  if(d.length<=2)return `(${d}`;
+  if(d.length<=6)return `(${d.slice(0,2)}) ${d.slice(2)}`;
+  if(d.length<=10)return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+}
+function maskPhone(el){el.value=fmtPhone(el.value);}
+function validPhone(v){return!v||/^\(\d{2}\) \d{4,5}-\d{4}$/.test(v.trim());}
+
 async function saveUser(){
   const id=document.getElementById('uf-id').value;
   const name=document.getElementById('uf-name').value.trim();
   const username=document.getElementById('uf-username').value.trim();
+  const phone=document.getElementById('uf-phone').value.trim();
   if(!name){showErr('usr-err','Nome é obrigatório.');return;}
   if(!username){showErr('usr-err','Usuário (login) é obrigatório.');return;}
+  if(!id&&!phone){showErr('usr-err','Telefone é obrigatório.');return;}
+  if(!validPhone(phone)){showErr('usr-err','Telefone inválido. Use o formato (XX) XXXXX-XXXX.');return;}
   const payload={name,username,
     cargo:document.getElementById('uf-cargo').value.trim(),
+    phoneNumber:phone,
     role:document.getElementById('uf-role').value,
     active:document.getElementById('uf-active').value==='true'};
   const pwd=document.getElementById('uf-password').value;

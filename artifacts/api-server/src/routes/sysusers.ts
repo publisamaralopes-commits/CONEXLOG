@@ -11,6 +11,7 @@ const CreateUserSchema = z.object({
   username: z.string().min(3, "Usuário deve ter no mínimo 3 caracteres"),
   password: z.string().min(6, "Senha provisória deve ter no mínimo 6 caracteres"),
   cargo: z.string().optional(),
+  phoneNumber: z.string().optional(),
   role: z.enum(["admin", "employee"]).optional(),
   active: z.boolean().optional(),
 });
@@ -20,6 +21,7 @@ const UpdateUserSchema = z.object({
   username: z.string().min(3).optional(),
   password: z.string().min(6).optional(),
   cargo: z.string().optional(),
+  phoneNumber: z.string().optional(),
   role: z.enum(["admin", "employee"]).optional(),
   active: z.boolean().optional(),
 });
@@ -35,6 +37,7 @@ function fmt(u: InstanceType<typeof SysUser>) {
     name: o.name,
     username: o.username,
     cargo: o.cargo ?? "",
+    phoneNumber: o.phoneNumber ?? "",
     role: o.role,
     active: o.active,
     mustChangePassword: o.mustChangePassword === true,
