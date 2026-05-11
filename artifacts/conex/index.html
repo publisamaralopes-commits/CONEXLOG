@@ -276,6 +276,41 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
   .toast-container{bottom:12px;right:8px;left:8px;max-width:100%}
 }
 
+/* ═══ PROGRAMAÇÃO FILTER BAR ═══ */
+.sc-filter-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.sc-search-wrap{position:relative;display:flex;align-items:center}
+.sc-search-icon{position:absolute;left:12px;font-size:14px;pointer-events:none;color:var(--text-600);z-index:1;line-height:1}
+#sc-search{width:100%;background:var(--bg-800);border:1px solid var(--border);border-radius:10px;padding:10px 36px 10px 36px;font-size:.88rem;color:var(--text-100);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
+#sc-search::placeholder{color:var(--text-600)}
+#sc-search:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(56,189,248,.08)}
+.sc-search-clear{position:absolute;right:10px;background:none;border:none;color:var(--text-600);cursor:pointer;font-size:13px;padding:4px 6px;border-radius:5px;line-height:1;display:none;transition:color .15s}
+.sc-search-clear.show{display:block}
+.sc-search-clear:hover{color:var(--text-100)}
+.sc-status-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sc-chip{background:var(--bg-800);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.75rem;font-weight:600;color:var(--text-600);cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;white-space:nowrap}
+.sc-chip:hover{border-color:rgba(56,189,248,.3);color:var(--text-400)}
+.sc-chip[data-status=""].active{background:rgba(56,189,248,.1);border-color:var(--neon);color:var(--neon)}
+.sc-chip[data-status="scheduled"].active{background:rgba(56,189,248,.1);border-color:var(--neon);color:var(--neon)}
+.sc-chip[data-status="in_progress"].active{background:rgba(249,115,22,.12);border-color:var(--accent);color:var(--accent)}
+.sc-chip[data-status="completed"].active{background:rgba(16,185,129,.12);border-color:var(--green);color:var(--green)}
+.sc-chip[data-status="cancelled"].active{background:rgba(239,68,68,.12);border-color:var(--red);color:var(--red)}
+.sc-results-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;min-height:20px;padding:0 2px}
+.sc-results-count{font-size:.76rem;color:var(--text-600)}
+.sc-results-count strong{color:var(--neon);font-weight:700}
+.sc-clear-all{background:none;border:none;color:var(--text-600);font-size:.74rem;cursor:pointer;font-family:'Inter',sans-serif;padding:2px 6px;border-radius:4px;transition:color .15s;text-decoration:underline;text-underline-offset:2px}
+.sc-clear-all:hover{color:var(--accent)}
+.sc-match{background:rgba(249,115,22,.22);color:var(--accent);border-radius:3px;padding:0 2px;font-weight:700;font-style:normal}
+.sc-empty-cell{padding:40px 16px!important;text-align:center}
+.sc-empty-icon{font-size:2rem;margin-bottom:10px;opacity:.35;display:block}
+.sc-empty-title{font-size:.88rem;font-weight:600;color:var(--text-400);margin-bottom:5px}
+.sc-empty-sub{font-size:.76rem;color:var(--text-600)}
+@media(max-width:768px){
+  .sc-filter-bar{gap:8px}
+  .sc-status-chips{gap:4px}
+  .sc-chip{padding:4px 10px;font-size:.7rem}
+  #sc-search{font-size:.84rem}
+}
+
 /* ═══ LOGIN SCREEN ═══ */
 #login-screen{position:fixed;inset:0;z-index:9999;background:#06091a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px 16px}
 #login-screen.ls-hidden{display:none!important}
@@ -392,12 +427,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
         <div><h2>Programação</h2><p>Gestão de cargas, coletas e controle de PGR</p></div>
         <button class="btn btn-orange" onclick="openSchedForm()">+ Nova Programação</button>
       </div>
-      <div class="toolbar">
-        <input type="text" id="sc-search" placeholder="Buscar por cliente, produto, PGR…" oninput="renderSchedules()">
-        <select id="sc-sf" onchange="renderSchedules()">
-          <option value="">Todos</option><option value="scheduled">Agendado</option>
-          <option value="in_progress">Em Andamento</option><option value="completed">Concluído</option><option value="cancelled">Cancelado</option>
-        </select>
+      <div class="sc-filter-bar">
+        <div class="sc-search-wrap">
+          <span class="sc-search-icon">🔍</span>
+          <input type="text" id="sc-search" placeholder="Buscar cliente, remetente, destinatário, produto ou PGR…" oninput="renderSchedules()">
+          <button class="sc-search-clear" id="sc-search-clear" onclick="clearScSearch()" title="Limpar busca">✕</button>
+        </div>
+        <div class="sc-status-chips">
+          <button class="sc-chip active" data-status="" onclick="setScStatus('')">Todos</button>
+          <button class="sc-chip" data-status="scheduled" onclick="setScStatus('scheduled')">📅 Agendado</button>
+          <button class="sc-chip" data-status="in_progress" onclick="setScStatus('in_progress')">🔄 Em Andamento</button>
+          <button class="sc-chip" data-status="completed" onclick="setScStatus('completed')">✅ Concluído</button>
+          <button class="sc-chip" data-status="cancelled" onclick="setScStatus('cancelled')">❌ Cancelado</button>
+        </div>
+      </div>
+      <div class="sc-results-bar">
+        <span class="sc-results-count" id="sc-results-count"></span>
+        <button class="sc-clear-all" id="sc-clear-all" onclick="clearAllScFilters()" style="display:none">Limpar filtros</button>
       </div>
       <div class="tbl-wrap"><table><thead><tr>
         <th>Cliente</th><th>Produto</th><th>Nº PGR</th><th>Retirada</th><th>Cidade Ret.</th>
@@ -790,6 +836,7 @@ const API='/api';
 // cross-context scenarios behind Replit's reverse proxy).
 (()=>{const _f=window.fetch.bind(window);window.fetch=(input,init={})=>_f(input,{...init,credentials:init.credentials||'include'});})()
 const S={orders:[],schedules:[],lotes:[],vehicles:[],mural:[],users:[],cnhB64:null,me:null};
+let scStatus='';
 let charts={status:null,clients:null};
 
 const secTitles={orders:'Ordem de Carregamento',schedule:'Programação',position:'Posição — Torre de Controle',vehicles:'Veículos — Painel Operacional',mural:'Mural de Comunicação',reports:'Relatórios',users:'Usuários'};
@@ -1183,22 +1230,93 @@ function doPrint_UNUSED(o){
 }
 
 /* ═══════════ PROGRAMAÇÃO ═══════════ */
+// Normalize string: remove accents, lowercase — enables accent-insensitive search
+function norm(s){return(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+
+// Build regex that matches each char plus its accented variants
+function accentRe(q){
+  const m={a:'[aáàâãä]',e:'[eéèêë]',i:'[iíìîï]',o:'[oóòôõö]',u:'[uúùûü]',c:'[cç]',n:'[nñ]'};
+  return q.toLowerCase().split('').map(c=>m[c]||c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('');
+}
+
+// Highlight matching text with <mark class="sc-match">
+function hl(text,q){
+  if(!q||!text)return esc(text);
+  try{
+    const re=new RegExp(accentRe(q),'gi');
+    const r=esc(text).replace(re,m=>`<mark class="sc-match">${m}</mark>`);
+    // Fallback: if regex didn't match but normalized does, bold the whole cell
+    if(r===esc(text)&&norm(text).includes(norm(q)))return `<strong>${esc(text)}</strong>`;
+    return r;
+  }catch(e){return esc(text);}
+}
+
+function setScStatus(s){
+  scStatus=s;
+  document.querySelectorAll('.sc-chip').forEach(c=>c.classList.toggle('active',c.dataset.status===s));
+  renderSchedules();
+}
+function clearScSearch(){
+  document.getElementById('sc-search').value='';
+  renderSchedules();
+  document.getElementById('sc-search').focus();
+}
+function clearAllScFilters(){
+  document.getElementById('sc-search').value='';
+  scStatus='';
+  document.querySelectorAll('.sc-chip').forEach(c=>c.classList.toggle('active',c.dataset.status===''));
+  renderSchedules();
+}
+
 async function loadSchedules(){
   try{const r=await fetch(API+'/schedules');S.schedules=await r.json();}catch(e){console.error(e);}
   renderSchedules();
 }
 function renderSchedules(){
-  const q=document.getElementById('sc-search').value.toLowerCase();
-  const sf=document.getElementById('sc-sf').value;
-  const list=S.schedules.filter(s=>(!q||(s.cliente||'').toLowerCase().includes(q)||(s.produto||'').toLowerCase().includes(q)||(s.numeroPGR||'').toLowerCase().includes(q))&&(!sf||s.status===sf));
+  const rawQ=document.getElementById('sc-search').value;
+  const q=norm(rawQ);
   const tb=document.getElementById('sc-tbody');
-  if(!list.length){tb.innerHTML=`<tr><td colspan="10" class="tbl-empty">Nenhuma programação.</td></tr>`;return;}
+  const countEl=document.getElementById('sc-results-count');
+  const clearAllBtn=document.getElementById('sc-clear-all');
+  const clearSearchBtn=document.getElementById('sc-search-clear');
+
+  if(clearSearchBtn)clearSearchBtn.classList.toggle('show',rawQ.length>0);
+
+  const fields=['cliente','retirada','destinatario','produto','cidadeRetirada','cidadeDestino','numeroPGR'];
+  const list=S.schedules.filter(s=>{
+    const matchQ=!q||fields.some(f=>norm(s[f]).includes(q));
+    const matchS=!scStatus||s.status===scStatus;
+    return matchQ&&matchS;
+  });
+
+  const total=S.schedules.length;
+  const hasFilters=rawQ||scStatus;
+  if(countEl){
+    if(hasFilters){
+      countEl.innerHTML=`<strong>${list.length}</strong> de ${total} resultado${total!==1?'s':''}`;
+    }else{
+      countEl.innerHTML=total?`<strong>${total}</strong> programação${total!==1?'s':''}` :'';
+    }
+  }
+  if(clearAllBtn)clearAllBtn.style.display=hasFilters?'':'none';
+
+  if(!list.length){
+    const isFiltered=hasFilters;
+    const label=rawQ?`"${esc(rawQ)}"`:schedSM[scStatus]||'';
+    tb.innerHTML=`<tr><td colspan="10" class="sc-empty-cell">
+      <span class="sc-empty-icon">${isFiltered?'🔍':'📋'}</span>
+      <div class="sc-empty-title">${isFiltered?'Nenhum resultado encontrado':'Sem programações cadastradas'}</div>
+      <div class="sc-empty-sub">${isFiltered?`Nenhuma programação corresponde a ${label}`:'Clique em "+ Nova Programação" para começar.'}</div>
+    </td></tr>`;
+    return;
+  }
+
   tb.innerHTML=list.map(s=>`<tr>
-    <td><strong style="color:var(--text-100)">${esc(s.cliente)}</strong></td>
-    <td>${esc(s.produto)}</td>
-    <td><code style="background:rgba(56,189,248,.1);color:var(--neon);padding:2px 7px;border-radius:5px;font-size:.76rem">${esc(s.numeroPGR)}</code></td>
-    <td>${esc(s.retirada)}</td><td>${esc(s.cidadeRetirada)}</td>
-    <td>${esc(s.destinatario)}</td><td>${esc(s.cidadeDestino)}</td>
+    <td><strong style="color:var(--text-100)">${hl(s.cliente,rawQ)}</strong></td>
+    <td>${hl(s.produto,rawQ)}</td>
+    <td><code style="background:rgba(56,189,248,.1);color:var(--neon);padding:2px 7px;border-radius:5px;font-size:.76rem">${hl(s.numeroPGR,rawQ)}</code></td>
+    <td>${hl(s.retirada,rawQ)}</td><td>${hl(s.cidadeRetirada,rawQ)}</td>
+    <td>${hl(s.destinatario,rawQ)}</td><td>${hl(s.cidadeDestino,rawQ)}</td>
     <td>${esc(s.terminal)}</td>
     <td>${badge(s.status,schedSM)}</td>
     <td><div class="td-actions">
