@@ -1,0 +1,103 @@
+CREATE ADVANCED MULTI-FILTER SYSTEM FOR PROGRAMAÇÃO
+
+Upgrade the Programação module to support MULTIPLE FILTERS simultaneously.
+
+==================================================
+MULTI-FILTER REQUIREMENT
+========================
+
+The user must be able to search using 2 or more filters together.
+
+Examples:
+
+Filter by:
+
+* Remetente + Destinatário
+* Cliente + Produto
+* Cidade Origem + Cidade Destino
+* PGR + Cliente
+* Produto + Destino + Remetente
+
+All filters must work together dynamically.
+
+==================================================
+FILTER FIELDS
+=============
+
+Create separate filter inputs for:
+
+* Cliente
+* Remetente
+* Destinatário
+* Produto
+* Cidade Origem
+* Cidade Destino
+* Nº PGR
+
+==================================================
+FILTER LOGIC
+============
+
+Requirements:
+
+* real-time filtering
+* combine all active filters
+* partial text matching
+* ignore uppercase/lowercase
+* ignore accents
+* fast filtering performance
+
+==================================================
+UI/UX
+=====
+
+Create professional operational filter panel with:
+
+* collapsible filters section
+* clean aligned inputs
+* active filter badges
+* clear all filters button
+* filter counter
+
+==================================================
+EXAMPLE
+=======
+
+If user types:
+
+Remetente:
+Transpanorama
+
+AND
+
+Destino:
+Santos
+
+Show ONLY records matching BOTH conditions.
+
+==================================================
+MOBILE VERSION
+==============
+
+Filters must adapt perfectly on:
+
+* desktop
+* mobile
+* tablets
+
+==================================================
+VISUAL DESIGN
+=============
+
+Use CONEX identity:
+
+* dark premium dashboard
+* background #060C1A
+* orange accents #F97316
+* modern enterprise logistics style
+
+==================================================
+FINAL GOAL
+==========
+
+The Programação module must behave like a real professional TMS/ERP filtering system used in logistics operations.

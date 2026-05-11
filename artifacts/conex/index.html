@@ -276,17 +276,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
   .toast-container{bottom:12px;right:8px;left:8px;max-width:100%}
 }
 
-/* ═══ PROGRAMAÇÃO FILTER BAR ═══ */
-.sc-filter-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
-.sc-search-wrap{position:relative;display:flex;align-items:center}
-.sc-search-icon{position:absolute;left:12px;font-size:14px;pointer-events:none;color:var(--text-600);z-index:1;line-height:1}
-#sc-search{width:100%;background:var(--bg-800);border:1px solid var(--border);border-radius:10px;padding:10px 36px 10px 36px;font-size:.88rem;color:var(--text-100);font-family:'Inter',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
-#sc-search::placeholder{color:var(--text-600)}
-#sc-search:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(56,189,248,.08)}
-.sc-search-clear{position:absolute;right:10px;background:none;border:none;color:var(--text-600);cursor:pointer;font-size:13px;padding:4px 6px;border-radius:5px;line-height:1;display:none;transition:color .15s}
-.sc-search-clear.show{display:block}
-.sc-search-clear:hover{color:var(--text-100)}
-.sc-status-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+/* ═══ PROGRAMAÇÃO MULTI-FILTER ═══ */
+.sc-multi-bar{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.sc-top-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sc-toggle-btn{display:flex;align-items:center;gap:6px;background:var(--bg-800);border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--text-400);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.sc-toggle-btn:hover{border-color:rgba(56,189,248,.3);color:var(--text-200)}
+.sc-toggle-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(249,115,22,.05)}
+.sc-active-badge{background:var(--accent);color:#fff;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:700;line-height:1.5}
+.sc-toggle-arrow{font-size:.6rem;transition:transform .22s;display:inline-block}
+.sc-toggle-arrow.open{transform:rotate(180deg)}
+.sc-status-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1}
 .sc-chip{background:var(--bg-800);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.75rem;font-weight:600;color:var(--text-600);cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;white-space:nowrap}
 .sc-chip:hover{border-color:rgba(56,189,248,.3);color:var(--text-400)}
 .sc-chip[data-status=""].active{background:rgba(56,189,248,.1);border-color:var(--neon);color:var(--neon)}
@@ -294,21 +293,46 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
 .sc-chip[data-status="in_progress"].active{background:rgba(249,115,22,.12);border-color:var(--accent);color:var(--accent)}
 .sc-chip[data-status="completed"].active{background:rgba(16,185,129,.12);border-color:var(--green);color:var(--green)}
 .sc-chip[data-status="cancelled"].active{background:rgba(239,68,68,.12);border-color:var(--red);color:var(--red)}
-.sc-results-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;min-height:20px;padding:0 2px}
+.sc-clear-all{background:none;border:none;color:var(--text-600);font-size:.74rem;cursor:pointer;font-family:'Inter',sans-serif;padding:2px 6px;border-radius:4px;transition:color .15s;text-decoration:underline;text-underline-offset:2px;white-space:nowrap;flex-shrink:0}
+.sc-clear-all:hover{color:var(--accent)}
+.sc-panel{background:var(--bg-950);border:1px solid rgba(56,189,248,.08);border-radius:10px;padding:14px 16px;overflow:hidden;max-height:400px;transition:max-height .28s ease,padding .22s,opacity .22s,border-color .22s;opacity:1}
+.sc-panel.closed{max-height:0;padding:0 16px;opacity:0;border-color:transparent;pointer-events:none}
+.sc-fields-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sc-field-label{display:block;font-size:.67rem;font-weight:700;color:var(--text-600);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.sc-field-wrap{position:relative;display:flex;align-items:center}
+.sc-field-input{width:100%;background:var(--bg-800);border:1px solid var(--border);border-radius:8px;padding:8px 26px 8px 10px;font-size:.82rem;color:var(--text-100);font-family:'Inter',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s}
+.sc-field-input::placeholder{color:var(--text-600);font-size:.78rem}
+.sc-field-input:focus{border-color:var(--neon);box-shadow:0 0 0 2px rgba(56,189,248,.08)}
+.sc-field-input.has-value{border-color:rgba(249,115,22,.5);background:rgba(249,115,22,.04)}
+.sc-field-clear{position:absolute;right:7px;background:none;border:none;color:var(--text-600);cursor:pointer;font-size:11px;padding:2px;line-height:1;opacity:0;pointer-events:none;transition:color .15s,opacity .15s;border-radius:3px}
+.sc-field-input.has-value~.sc-field-clear{opacity:1;pointer-events:auto}
+.sc-field-clear:hover{color:var(--accent)}
+.sc-badges-row{display:flex;flex-wrap:wrap;gap:5px;min-height:0}
+.sc-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.28);border-radius:20px;padding:3px 8px 3px 10px;font-size:.72rem;color:var(--text-200);font-weight:500}
+.sc-badge-label{color:var(--accent);font-weight:700;margin-right:1px}
+.sc-badge-x{background:none;border:none;color:var(--text-600);cursor:pointer;font-size:11px;padding:0 1px;line-height:1;margin-left:3px;transition:color .15s}
+.sc-badge-x:hover{color:var(--accent)}
+.sc-results-bar{display:flex;align-items:center;min-height:18px}
 .sc-results-count{font-size:.76rem;color:var(--text-600)}
 .sc-results-count strong{color:var(--neon);font-weight:700}
-.sc-clear-all{background:none;border:none;color:var(--text-600);font-size:.74rem;cursor:pointer;font-family:'Inter',sans-serif;padding:2px 6px;border-radius:4px;transition:color .15s;text-decoration:underline;text-underline-offset:2px}
-.sc-clear-all:hover{color:var(--accent)}
 .sc-match{background:rgba(249,115,22,.22);color:var(--accent);border-radius:3px;padding:0 2px;font-weight:700;font-style:normal}
 .sc-empty-cell{padding:40px 16px!important;text-align:center}
 .sc-empty-icon{font-size:2rem;margin-bottom:10px;opacity:.35;display:block}
 .sc-empty-title{font-size:.88rem;font-weight:600;color:var(--text-400);margin-bottom:5px}
 .sc-empty-sub{font-size:.76rem;color:var(--text-600)}
+@media(max-width:1100px){.sc-fields-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.sc-fields-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:768px){
-  .sc-filter-bar{gap:8px}
+  .sc-top-row{gap:5px}
+  .sc-toggle-btn{padding:6px 10px;font-size:.74rem}
   .sc-status-chips{gap:4px}
   .sc-chip{padding:4px 10px;font-size:.7rem}
-  #sc-search{font-size:.84rem}
+  .sc-panel{padding:10px}
+  .sc-fields-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+}
+@media(max-width:480px){
+  .sc-fields-grid{grid-template-columns:1fr}
+  .sc-status-chips{display:grid;grid-template-columns:1fr 1fr}
 }
 
 /* ═══ LOGIN SCREEN ═══ */
@@ -427,23 +451,79 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
         <div><h2>Programação</h2><p>Gestão de cargas, coletas e controle de PGR</p></div>
         <button class="btn btn-orange" onclick="openSchedForm()">+ Nova Programação</button>
       </div>
-      <div class="sc-filter-bar">
-        <div class="sc-search-wrap">
-          <span class="sc-search-icon">🔍</span>
-          <input type="text" id="sc-search" placeholder="Buscar cliente, remetente, destinatário, produto ou PGR…" oninput="renderSchedules()">
-          <button class="sc-search-clear" id="sc-search-clear" onclick="clearScSearch()" title="Limpar busca">✕</button>
+      <div class="sc-multi-bar">
+        <div class="sc-top-row">
+          <button class="sc-toggle-btn" id="sc-toggle" onclick="toggleScPanel()">
+            <span>⚙️ Filtros</span>
+            <span class="sc-active-badge" id="sc-active-badge" style="display:none">0</span>
+            <span class="sc-toggle-arrow open" id="sc-toggle-arrow">▼</span>
+          </button>
+          <div class="sc-status-chips">
+            <button class="sc-chip active" data-status="" onclick="setScStatus('')">Todos</button>
+            <button class="sc-chip" data-status="scheduled" onclick="setScStatus('scheduled')">📅 Agendado</button>
+            <button class="sc-chip" data-status="in_progress" onclick="setScStatus('in_progress')">🔄 Em Andamento</button>
+            <button class="sc-chip" data-status="completed" onclick="setScStatus('completed')">✅ Concluído</button>
+            <button class="sc-chip" data-status="cancelled" onclick="setScStatus('cancelled')">❌ Cancelado</button>
+          </div>
+          <button class="sc-clear-all" id="sc-clear-all" onclick="clearAllScFilters()" style="display:none">Limpar filtros</button>
         </div>
-        <div class="sc-status-chips">
-          <button class="sc-chip active" data-status="" onclick="setScStatus('')">Todos</button>
-          <button class="sc-chip" data-status="scheduled" onclick="setScStatus('scheduled')">📅 Agendado</button>
-          <button class="sc-chip" data-status="in_progress" onclick="setScStatus('in_progress')">🔄 Em Andamento</button>
-          <button class="sc-chip" data-status="completed" onclick="setScStatus('completed')">✅ Concluído</button>
-          <button class="sc-chip" data-status="cancelled" onclick="setScStatus('cancelled')">❌ Cancelado</button>
+        <div class="sc-panel" id="sc-panel">
+          <div class="sc-fields-grid">
+            <div>
+              <label class="sc-field-label">Cliente</label>
+              <div class="sc-field-wrap">
+                <input type="text" id="scf-cliente" class="sc-field-input" placeholder="Ex: Transpanorama" oninput="onScFilter()">
+                <button class="sc-field-clear" onclick="clearScField('scf-cliente')">✕</button>
+              </div>
+            </div>
+            <div>
+              <label class="sc-field-label">Remetente</label>
+              <div class="sc-field-wrap">
+                <input type="text" id="scf-remetente" class="sc-field-input" placeholder="Ex: Fazenda São João" oninput="onScFilter()">
+                <button class="sc-field-clear" onclick="clearScField('scf-remetente')">✕</button>
+              </div>
+            </div>
+            <div>
+              <label class="sc-field-label">Destinatário</label>
+              <div class="sc-field-wrap">
+                <input type="text" id="scf-destinatario" class="sc-field-input" placeholder="Ex: Porto de Santos" oninput="onScFilter()">
+                <button class="sc-field-clear" onclick="clearScField('scf-destinatario')">✕</button>
+              </div>
+            </div>
+            <div>
+              <label class="sc-field-label">Produto</label>
+              <div class="sc-field-wrap">
+                <input type="text" id="scf-produto" class="sc-field-input" placeholder="Ex: Soja, Milho" oninput="onScFilter()">
+                <button class="sc-field-clear" onclick="clearScField('scf-produto')">✕</button>
+              </div>
+            </div>
+            <div>
+              <label class="sc-field-label">Cidade Origem</label>
+              <div class="sc-field-wrap">
+                <input type="text" id="scf-origem" class="sc-field-input" placeholder="Ex: Rondonópolis" oninput="onScFilter()">
+                <button class="sc-field-clear" onclick="clearScField('scf-origem')">✕</button>
+              </div>
+            </div>
+            <div>
+              <label class="sc-field-label">Cidade Destino</label>
+              <div class="sc-field-wrap">
+                <input type="text" id="scf-destino" class="sc-field-input" placeholder="Ex: Santos, Paranaguá" oninput="onScFilter()">
+                <button class="sc-field-clear" onclick="clearScField('scf-destino')">✕</button>
+              </div>
+            </div>
+            <div>
+              <label class="sc-field-label">Nº PGR</label>
+              <div class="sc-field-wrap">
+                <input type="text" id="scf-pgr" class="sc-field-input" placeholder="Ex: PGR-2024-001" oninput="onScFilter()">
+                <button class="sc-field-clear" onclick="clearScField('scf-pgr')">✕</button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="sc-results-bar">
-        <span class="sc-results-count" id="sc-results-count"></span>
-        <button class="sc-clear-all" id="sc-clear-all" onclick="clearAllScFilters()" style="display:none">Limpar filtros</button>
+        <div class="sc-badges-row" id="sc-badges-row"></div>
+        <div class="sc-results-bar">
+          <span class="sc-results-count" id="sc-results-count"></span>
+        </div>
       </div>
       <div class="tbl-wrap"><table><thead><tr>
         <th>Cliente</th><th>Produto</th><th>Nº PGR</th><th>Retirada</th><th>Cidade Ret.</th>
@@ -1251,21 +1331,46 @@ function hl(text,q){
   }catch(e){return esc(text);}
 }
 
+const scFieldMap=[
+  {id:'scf-cliente',      key:'cliente',        label:'Cliente'},
+  {id:'scf-remetente',    key:'retirada',       label:'Remetente'},
+  {id:'scf-destinatario', key:'destinatario',   label:'Destinatário'},
+  {id:'scf-produto',      key:'produto',        label:'Produto'},
+  {id:'scf-origem',       key:'cidadeRetirada', label:'Cidade Origem'},
+  {id:'scf-destino',      key:'cidadeDestino',  label:'Cidade Destino'},
+  {id:'scf-pgr',          key:'numeroPGR',      label:'Nº PGR'},
+];
+let scPanelOpen=true;
+
+function toggleScPanel(){
+  scPanelOpen=!scPanelOpen;
+  document.getElementById('sc-panel').classList.toggle('closed',!scPanelOpen);
+  const arrow=document.getElementById('sc-toggle-arrow');
+  if(arrow)arrow.classList.toggle('open',scPanelOpen);
+}
 function setScStatus(s){
   scStatus=s;
   document.querySelectorAll('.sc-chip').forEach(c=>c.classList.toggle('active',c.dataset.status===s));
   renderSchedules();
 }
-function clearScSearch(){
-  document.getElementById('sc-search').value='';
+function onScFilter(){
+  scFieldMap.forEach(f=>{const el=document.getElementById(f.id);if(el)el.classList.toggle('has-value',el.value.length>0);});
   renderSchedules();
-  document.getElementById('sc-search').focus();
+}
+function clearScField(id){
+  const el=document.getElementById(id);
+  if(el){el.value='';el.classList.remove('has-value');}
+  renderSchedules();
 }
 function clearAllScFilters(){
-  document.getElementById('sc-search').value='';
+  scFieldMap.forEach(f=>{const el=document.getElementById(f.id);if(el){el.value='';el.classList.remove('has-value');}});
   scStatus='';
   document.querySelectorAll('.sc-chip').forEach(c=>c.classList.toggle('active',c.dataset.status===''));
   renderSchedules();
+}
+function hlField(s,key,inputId){
+  const q=(document.getElementById(inputId)||{}).value||'';
+  return hl(s[key],q);
 }
 
 async function loadSchedules(){
@@ -1273,50 +1378,61 @@ async function loadSchedules(){
   renderSchedules();
 }
 function renderSchedules(){
-  const rawQ=document.getElementById('sc-search').value;
-  const q=norm(rawQ);
   const tb=document.getElementById('sc-tbody');
   const countEl=document.getElementById('sc-results-count');
   const clearAllBtn=document.getElementById('sc-clear-all');
-  const clearSearchBtn=document.getElementById('sc-search-clear');
+  const badgesRow=document.getElementById('sc-badges-row');
+  const toggleBtn=document.getElementById('sc-toggle');
+  const activeBadge=document.getElementById('sc-active-badge');
 
-  if(clearSearchBtn)clearSearchBtn.classList.toggle('show',rawQ.length>0);
+  // Collect active field values
+  const activeFields=scFieldMap.map(f=>({...f,val:(document.getElementById(f.id)||{}).value||''})).filter(f=>f.val);
+  const activeCount=activeFields.length+(scStatus?1:0);
 
-  const fields=['cliente','retirada','destinatario','produto','cidadeRetirada','cidadeDestino','numeroPGR'];
+  // Update toggle button state
+  if(toggleBtn)toggleBtn.classList.toggle('active',activeCount>0);
+  if(activeBadge){activeBadge.textContent=activeCount;activeBadge.style.display=activeCount>0?'':'none';}
+  if(clearAllBtn)clearAllBtn.style.display=activeCount>0?'':'none';
+
+  // Active filter badges row
+  if(badgesRow){
+    const chips=activeFields.map(f=>`<span class="sc-badge"><span class="sc-badge-label">${esc(f.label)}:</span>${esc(f.val)}<button class="sc-badge-x" onclick="clearScField('${f.id}')" title="Remover filtro">✕</button></span>`);
+    if(scStatus)chips.push(`<span class="sc-badge"><span class="sc-badge-label">Status:</span>${esc(schedSM[scStatus]||scStatus)}<button class="sc-badge-x" onclick="setScStatus('')" title="Remover filtro">✕</button></span>`);
+    badgesRow.innerHTML=chips.join('');
+  }
+
+  // AND logic: record must match ALL active field filters + status
   const list=S.schedules.filter(s=>{
-    const matchQ=!q||fields.some(f=>norm(s[f]).includes(q));
     const matchS=!scStatus||s.status===scStatus;
-    return matchQ&&matchS;
+    const matchFields=activeFields.every(f=>norm(s[f.key]).includes(norm(f.val)));
+    return matchS&&matchFields;
   });
 
   const total=S.schedules.length;
-  const hasFilters=rawQ||scStatus;
   if(countEl){
-    if(hasFilters){
+    if(activeCount){
       countEl.innerHTML=`<strong>${list.length}</strong> de ${total} resultado${total!==1?'s':''}`;
     }else{
       countEl.innerHTML=total?`<strong>${total}</strong> programação${total!==1?'s':''}` :'';
     }
   }
-  if(clearAllBtn)clearAllBtn.style.display=hasFilters?'':'none';
 
   if(!list.length){
-    const isFiltered=hasFilters;
-    const label=rawQ?`"${esc(rawQ)}"`:schedSM[scStatus]||'';
+    const hasFilters=activeCount>0;
     tb.innerHTML=`<tr><td colspan="10" class="sc-empty-cell">
-      <span class="sc-empty-icon">${isFiltered?'🔍':'📋'}</span>
-      <div class="sc-empty-title">${isFiltered?'Nenhum resultado encontrado':'Sem programações cadastradas'}</div>
-      <div class="sc-empty-sub">${isFiltered?`Nenhuma programação corresponde a ${label}`:'Clique em "+ Nova Programação" para começar.'}</div>
+      <span class="sc-empty-icon">${hasFilters?'🔍':'📋'}</span>
+      <div class="sc-empty-title">${hasFilters?'Nenhum resultado encontrado':'Sem programações cadastradas'}</div>
+      <div class="sc-empty-sub">${hasFilters?'Nenhuma programação corresponde aos filtros ativos.':'Clique em "+ Nova Programação" para começar.'}</div>
     </td></tr>`;
     return;
   }
 
   tb.innerHTML=list.map(s=>`<tr>
-    <td><strong style="color:var(--text-100)">${hl(s.cliente,rawQ)}</strong></td>
-    <td>${hl(s.produto,rawQ)}</td>
-    <td><code style="background:rgba(56,189,248,.1);color:var(--neon);padding:2px 7px;border-radius:5px;font-size:.76rem">${hl(s.numeroPGR,rawQ)}</code></td>
-    <td>${hl(s.retirada,rawQ)}</td><td>${hl(s.cidadeRetirada,rawQ)}</td>
-    <td>${hl(s.destinatario,rawQ)}</td><td>${hl(s.cidadeDestino,rawQ)}</td>
+    <td><strong style="color:var(--text-100)">${hlField(s,'cliente','scf-cliente')}</strong></td>
+    <td>${hlField(s,'produto','scf-produto')}</td>
+    <td><code style="background:rgba(56,189,248,.1);color:var(--neon);padding:2px 7px;border-radius:5px;font-size:.76rem">${hlField(s,'numeroPGR','scf-pgr')}</code></td>
+    <td>${hlField(s,'retirada','scf-remetente')}</td><td>${hlField(s,'cidadeRetirada','scf-origem')}</td>
+    <td>${hlField(s,'destinatario','scf-destinatario')}</td><td>${hlField(s,'cidadeDestino','scf-destino')}</td>
     <td>${esc(s.terminal)}</td>
     <td>${badge(s.status,schedSM)}</td>
     <td><div class="td-actions">
