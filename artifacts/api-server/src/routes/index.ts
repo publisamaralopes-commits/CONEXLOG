@@ -9,6 +9,8 @@ import schedulesRouter from "./schedules";
 import lotesRouter from "./lotes";
 import muralRouter from "./mural";
 import sysusersRouter from "./sysusers";
+import filiaisRouter from "./filiais";
+import loteHistoryRouter from "./loteHistory";
 
 const router: IRouter = Router();
 
@@ -24,5 +26,7 @@ router.use(schedulesRouter);
 router.use(lotesRouter);
 router.use(muralRouter);
 router.use(sysusersRouter);
+router.use(filiaisRouter);
+router.use(loteHistoryRouter);
 
 export default router;

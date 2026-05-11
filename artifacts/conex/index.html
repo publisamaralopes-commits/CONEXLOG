@@ -335,6 +335,37 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
   .sc-status-chips{display:grid;grid-template-columns:1fr 1fr}
 }
 
+/* ═══ POSIÇÃO — FILIAIS & HISTORY ═══ */
+.sc-chip[data-filial].active{background:rgba(56,189,248,.1);border-color:var(--neon);color:var(--neon)}
+.pos-filial-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.filial-group{margin-bottom:24px}
+.filial-group-header{display:flex;align-items:center;gap:10px;padding:8px 0 10px;border-bottom:1px solid var(--border);margin-bottom:12px;flex-wrap:wrap}
+.filial-group-name{font-family:'Poppins',sans-serif;font-weight:800;font-size:.85rem;color:var(--accent);text-transform:uppercase;letter-spacing:.07em}
+.filial-group-badge{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);border-radius:20px;padding:2px 10px;font-size:.68rem;font-weight:700;color:var(--accent)}
+.filial-group-stats{font-size:.72rem;color:var(--text-600);margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.filial-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.pos-history-panel{border-top:1px solid var(--border);margin-top:24px;padding-top:16px}
+.pos-history-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding:4px 0}
+.pos-history-toggle h4{font-size:.88rem;font-weight:700;color:var(--text-400);margin:0;flex:1}
+.hist-badge{background:var(--accent);color:#fff;border-radius:10px;padding:1px 8px;font-size:.68rem;font-weight:700;line-height:1.5}
+.hist-arrow{font-size:.6rem;color:var(--text-600);transition:transform .22s;display:inline-block}
+.hist-arrow.open{transform:rotate(180deg)}
+.pos-history-body{overflow:hidden;max-height:0;transition:max-height .3s ease,margin-top .2s;margin-top:0}
+.pos-history-body.open{max-height:700px;margin-top:14px}
+.hist-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.hist-filter-sel{background:var(--bg-800);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.78rem;color:var(--text-300);font-family:'Inter',sans-serif;outline:none;min-width:120px}
+.hist-filter-sel:focus{border-color:var(--neon)}
+.nav-notif{background:var(--accent);color:#fff;border-radius:10px;padding:0 6px;font-size:.6rem;font-weight:700;line-height:1.6;margin-left:auto;flex-shrink:0}
+.filial-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;max-height:320px;overflow-y:auto}
+.filial-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg-800);border:1px solid var(--border);border-radius:8px;padding:9px 12px}
+.filial-item-name{font-weight:600;color:var(--text-100);font-size:.86rem}
+.filial-item-inactive .filial-item-name{color:var(--text-600)}
+@media(max-width:768px){
+  .filial-group-stats{display:none}
+  .hist-filters{gap:5px}
+  .hist-filter-sel{font-size:.72rem;padding:5px 7px;min-width:90px}
+}
+
 /* ═══ LOGIN SCREEN ═══ */
 #login-screen{position:fixed;inset:0;z-index:9999;background:#06091a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px 16px}
 #login-screen.ls-hidden{display:none!important}
@@ -384,7 +415,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
   <nav>
     <button class="nav-item active" data-sec="orders" onclick="nav('orders')"><span class="nav-icon">📋</span><span>Ordem de Carregamento</span></button>
     <button class="nav-item" data-sec="schedule" onclick="nav('schedule')"><span class="nav-icon">📅</span><span>Programação</span></button>
-    <button class="nav-item" data-sec="position" onclick="nav('position')"><span class="nav-icon">📍</span><span>Posição</span></button>
+    <button class="nav-item" data-sec="position" onclick="nav('position')"><span class="nav-icon">📍</span><span>Posição</span><span class="nav-notif" id="pos-notif" style="display:none">0</span></button>
     <button class="nav-item" data-sec="vehicles" onclick="nav('vehicles')"><span class="nav-icon">🚚</span><span>Veículos</span></button>
     <button class="nav-item" data-sec="mural" onclick="nav('mural')"><span class="nav-icon">📢</span><span>Mural</span></button>
     <button class="nav-item" data-sec="reports" onclick="nav('reports')"><span class="nav-icon">📊</span><span>Relatórios</span></button>
@@ -534,11 +565,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
     <!-- ═══ POSIÇÃO ═══ -->
     <div class="section" id="sec-position">
       <div class="sec-header">
-        <div><h2>Posição — Torre de Controle</h2><p>Rastreamento de lotes por status operacional</p></div>
-        <button class="btn btn-orange" onclick="openLoteForm()">+ Novo Lote</button>
+        <div><h2>Posição — Torre de Controle</h2><p>Rastreamento de lotes por filial e status operacional</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-ghost" id="btn-filial-mgmt" onclick="openFilialMgmt()" style="display:none">🏢 Filiais</button>
+          <button class="btn btn-orange" onclick="openLoteForm()">+ Novo Lote</button>
+        </div>
       </div>
       <div class="toolbar">
         <input type="text" id="pos-search" placeholder="Buscar por cliente, origem, destino…" oninput="renderLotes()">
+      </div>
+      <div class="pos-filial-chips" id="pos-filial-chips">
+        <button class="sc-chip active" data-filial="" onclick="setPosFilial('')">🏢 Todas as Filiais</button>
       </div>
       <div class="stats-grid">
         <div class="stat-card yellow"><div class="stat-label">Na Porta</div><div class="stat-value" id="ls-porta">0</div></div>
@@ -546,7 +583,27 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
         <div class="stat-card green"><div class="stat-label">Carregados</div><div class="stat-value" id="ls-carregado">0</div></div>
         <div class="stat-card orange"><div class="stat-label">Lotes Ativos</div><div class="stat-value" id="ls-total">0</div></div>
       </div>
-      <div class="lotes-grid" id="lotes-grid"></div>
+      <div id="lotes-container"></div>
+      <!-- History panel -->
+      <div class="pos-history-panel">
+        <div class="pos-history-toggle" onclick="toggleHistoryPanel()">
+          <h4>📋 Histórico de Posições</h4>
+          <span class="hist-badge" id="hist-badge" style="display:none">0</span>
+          <span class="hist-arrow" id="hist-arrow">▼</span>
+        </div>
+        <div class="pos-history-body" id="hist-body">
+          <div class="hist-filters">
+            <select id="hist-fil-filial" class="hist-filter-sel" onchange="loadHistory()"><option value="">Todas as filiais</option></select>
+            <select id="hist-fil-lote" class="hist-filter-sel" onchange="loadHistory()"><option value="">Todos os lotes</option></select>
+            <select id="hist-fil-user" class="hist-filter-sel" onchange="loadHistory()"><option value="">Todos os responsáveis</option></select>
+            <input type="date" id="hist-fil-from" class="hist-filter-sel" onchange="loadHistory()" title="De">
+            <input type="date" id="hist-fil-to" class="hist-filter-sel" onchange="loadHistory()" title="Até">
+          </div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Lote</th><th>Filial</th><th>Cliente</th><th>Campo</th><th>Antes</th><th>Depois</th><th>Responsável</th><th>Data/Hora</th>
+          </tr></thead><tbody id="hist-tbody"><tr><td colspan="8" class="tbl-empty">Abra o histórico para ver os registros.</td></tr></tbody></table></div>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ VEÍCULOS ═══ -->
@@ -734,6 +791,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
   <div class="overlay-head"><h3 id="lt-form-title">Novo Lote</h3><button class="overlay-close" onclick="closeLoteForm()">✕</button></div>
   <div class="overlay-body">
     <input type="hidden" id="lf-id">
+    <div class="fg"><label>Filial</label>
+      <select id="lf-filial" style="background:var(--bg-800);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text-100);font-family:'Inter',sans-serif;font-size:.85rem;width:100%;outline:none">
+        <option value="">— Sem filial —</option>
+      </select>
+    </div>
     <div class="fg"><label>Cliente *</label><input type="text" id="lf-cliente" placeholder="Nome do cliente"></div>
     <div class="fg2">
       <div class="fg"><label>Origem *</label><input type="text" id="lf-origem" placeholder="Local de origem"></div>
@@ -747,6 +809,28 @@ body{font-family:'Inter',sans-serif;background:var(--bg-900);color:var(--text-20
   <div class="overlay-foot">
     <button class="btn btn-ghost" onclick="closeLoteForm()">Cancelar</button>
     <button class="btn btn-primary" onclick="saveLote()">Salvar</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ OVERLAY: FILIAL ═══ -->
+<div class="overlay" id="filial-overlay">
+<div class="overlay-box sm">
+  <div class="overlay-head"><h3>🏢 Gerenciar Filiais</h3><button class="overlay-close" onclick="closeFilialMgmt()">✕</button></div>
+  <div class="overlay-body">
+    <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:4px">
+      <div class="fg" style="flex:1;margin-bottom:0">
+        <label id="fi-form-label">Nova Filial</label>
+        <input type="text" id="fi-name" placeholder="Nome da filial (ex: Anápolis)" oninput="hideErr('fi-err')">
+      </div>
+      <button class="btn btn-orange" onclick="saveFilial()" style="flex-shrink:0;height:38px" id="fi-save-btn">+ Adicionar</button>
+      <button class="btn btn-ghost" onclick="cancelFilialEdit()" id="fi-cancel-btn" style="display:none;flex-shrink:0;height:38px">✕</button>
+    </div>
+    <div class="form-err" id="fi-err" style="margin-bottom:8px"></div>
+    <div class="filial-list" id="filial-list"><div style="text-align:center;color:var(--text-600);padding:16px;font-size:.82rem">Carregando…</div></div>
+  </div>
+  <div class="overlay-foot">
+    <button class="btn btn-ghost" onclick="closeFilialMgmt()">Fechar</button>
   </div>
 </div>
 </div>
@@ -916,8 +1000,9 @@ const API='/api';
 // Ensure all fetch calls send cookies (required for session auth in
 // cross-context scenarios behind Replit's reverse proxy).
 (()=>{const _f=window.fetch.bind(window);window.fetch=(input,init={})=>_f(input,{...init,credentials:init.credentials||'include'});})()
-const S={orders:[],schedules:[],lotes:[],vehicles:[],mural:[],users:[],cnhB64:null,me:null};
+const S={orders:[],schedules:[],lotes:[],vehicles:[],mural:[],users:[],filiais:[],loteHistory:[],cnhB64:null,me:null};
 let scStatus='';
+let posFilial='';
 let charts={status:null,clients:null};
 
 const secTitles={orders:'Ordem de Carregamento',schedule:'Programação',position:'Posição — Torre de Controle',vehicles:'Veículos — Painel Operacional',mural:'Mural de Comunicação',reports:'Relatórios',users:'Usuários'};
@@ -968,8 +1053,8 @@ async function doLoginScreen(e){
     document.getElementById('user-name').textContent=data.name;
     document.getElementById('user-role').textContent=roleM[data.role]||data.role;
     document.getElementById('user-avatar').textContent=data.name[0].toUpperCase();
-    if(data.role==='admin')document.getElementById('nav-users').style.display='';
-    else document.getElementById('nav-users').style.display='none';
+    if(data.role==='admin'){document.getElementById('nav-users').style.display='';document.getElementById('btn-filial-mgmt').style.display='';}
+    else{document.getElementById('nav-users').style.display='none';document.getElementById('btn-filial-mgmt').style.display='none';}
     if(data.mustChangePassword){
       document.getElementById('chpwd-overlay').classList.add('open');
       setTimeout(()=>document.getElementById('cp-current').focus(),150);
@@ -989,7 +1074,7 @@ async function initAuth(){
     document.getElementById('user-name').textContent=S.me.name;
     document.getElementById('user-role').textContent=roleM[S.me.role]||S.me.role;
     document.getElementById('user-avatar').textContent=S.me.name[0].toUpperCase();
-    if(S.me.role==='admin')document.getElementById('nav-users').style.display='';
+    if(S.me.role==='admin'){document.getElementById('nav-users').style.display='';document.getElementById('btn-filial-mgmt').style.display='';}
     if(S.me.mustChangePassword){
       document.getElementById('chpwd-overlay').classList.add('open');
       setTimeout(()=>document.getElementById('cp-current').focus(),150);
@@ -1480,22 +1565,18 @@ async function delSchedule(id){
 
 /* ═══════════ POSIÇÃO / LOTES ═══════════ */
 async function loadLotes(){
-  try{const r=await fetch(API+'/lotes');S.lotes=await r.json();}catch(e){console.error(e);}
+  try{
+    const [rl,rf]=await Promise.all([fetch(API+'/lotes'),fetch(API+'/filiais')]);
+    if(rl.ok)S.lotes=await rl.json();
+    if(rf.ok)S.filiais=await rf.json();
+  }catch(e){console.error(e);}
+  renderFilialChips();
+  populateLoteFilialSelect();
+  populateHistFilters();
   renderLotes();
 }
-function renderLotes(){
-  const q=document.getElementById('pos-search').value.toLowerCase();
-  const list=S.lotes.filter(l=>!q||(l.cliente||'').toLowerCase().includes(q)||(l.cidadeOrigem||'').toLowerCase().includes(q)||(l.cidadeDestino||'').toLowerCase().includes(q));
-  const tp=list.reduce((a,l)=>a+(l.nPorta||0),0);
-  const tt=list.reduce((a,l)=>a+(l.emTransito||0),0);
-  const tc=list.reduce((a,l)=>a+(l.carregado||0),0);
-  document.getElementById('ls-porta').textContent=tp;
-  document.getElementById('ls-transito').textContent=tt;
-  document.getElementById('ls-carregado').textContent=tc;
-  document.getElementById('ls-total').textContent=list.length;
-  const g=document.getElementById('lotes-grid');
-  if(!list.length){g.innerHTML=`<div style="text-align:center;color:var(--text-600);padding:48px;grid-column:1/-1">Nenhum lote cadastrado. Clique em <strong>+ Novo Lote</strong> para começar.</div>`;return;}
-  g.innerHTML=list.map(l=>`<div class="lote-card">
+function renderLoteCard(l){
+  return `<div class="lote-card">
     <div class="lote-card-head">
       <span class="lote-num">📦 ${esc(l.loteNumber)}</span>
       <div class="lote-actions">
@@ -1534,23 +1615,62 @@ function renderLotes(){
         </div>
       </div>
     </div>
-  </div>`).join('');
+  </div>`;
+}
+function renderLotes(){
+  const q=document.getElementById('pos-search').value.toLowerCase();
+  let list=S.lotes.filter(l=>!q||(l.cliente||'').toLowerCase().includes(q)||(l.cidadeOrigem||'').toLowerCase().includes(q)||(l.cidadeDestino||'').toLowerCase().includes(q));
+  if(posFilial==='none') list=list.filter(l=>!l.filialId);
+  else if(posFilial) list=list.filter(l=>l.filialId===posFilial);
+  const tp=S.lotes.reduce((a,l)=>a+(l.nPorta||0),0);
+  const tt=S.lotes.reduce((a,l)=>a+(l.emTransito||0),0);
+  const tc=S.lotes.reduce((a,l)=>a+(l.carregado||0),0);
+  document.getElementById('ls-porta').textContent=tp;
+  document.getElementById('ls-transito').textContent=tt;
+  document.getElementById('ls-carregado').textContent=tc;
+  document.getElementById('ls-total').textContent=S.lotes.length;
+  const container=document.getElementById('lotes-container');
+  if(!list.length){container.innerHTML=`<div style="text-align:center;color:var(--text-600);padding:48px">Nenhum lote encontrado.</div>`;return;}
+  const groups=new Map();
+  list.forEach(l=>{
+    const fid=l.filialId||'';
+    if(!groups.has(fid)) groups.set(fid,{name:fid?(l.filialName||'Filial'):'Sem Filial',lotes:[]});
+    groups.get(fid).lotes.push(l);
+  });
+  const sorted=[...groups.entries()].sort((a,b)=>{if(!a[0])return 1;if(!b[0])return -1;return a[1].name.localeCompare(b[1].name,'pt');});
+  container.innerHTML=sorted.map(([,group])=>`
+    <div class="filial-group">
+      <div class="filial-group-header">
+        <span class="filial-group-name">🏢 ${esc(group.name)}</span>
+        <span class="filial-group-badge">${group.lotes.length} lote${group.lotes.length!==1?'s':''}</span>
+        <span class="filial-group-stats">
+          <span>🚛 Trânsito: <strong style="color:var(--neon)">${group.lotes.reduce((a,l)=>a+(l.emTransito||0),0)}</strong></span>
+          <span>🚪 Porta: <strong style="color:var(--yellow)">${group.lotes.reduce((a,l)=>a+(l.nPorta||0),0)}</strong></span>
+          <span>✅ Carregado: <strong style="color:var(--green)">${group.lotes.reduce((a,l)=>a+(l.carregado||0),0)}</strong></span>
+        </span>
+      </div>
+      <div class="filial-group-grid">${group.lotes.map(l=>renderLoteCard(l)).join('')}</div>
+    </div>
+  `).join('');
 }
 async function counter(loteId,field,delta){
   try{
-    await fetch(`${API}/lotes/${loteId}/counter`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({field,delta})});
-    await loadLotes();
+    const r=await fetch(`${API}/lotes/${loteId}/counter`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({field,delta})});
+    if(r.ok){const updated=await r.json();const idx=S.lotes.findIndex(l=>l.id===loteId);if(idx>=0)S.lotes[idx]=updated;renderLotes();}
+    if(document.getElementById('hist-body')?.classList.contains('open'))loadHistory();
   }catch(e){console.error(e);}
 }
 function openLoteForm(){clearLoteForm();document.getElementById('lt-overlay').classList.add('open');}
 function closeLoteForm(){document.getElementById('lt-overlay').classList.remove('open');}
 function clearLoteForm(){
   ['lf-id','lf-cliente','lf-origem','lf-cidade-orig','lf-destino','lf-cidade-dest','lf-frete'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const fsel=document.getElementById('lf-filial');if(fsel)fsel.value='';
   document.getElementById('lt-form-title').textContent='Novo Lote';hideErr('lt-err');
 }
 function editLote(id){
   const l=S.lotes.find(x=>x.id===id);if(!l)return;
   document.getElementById('lf-id').value=l.id;document.getElementById('lt-form-title').textContent='Editar Lote';
+  const fsel=document.getElementById('lf-filial');if(fsel)fsel.value=l.filialId||'';
   document.getElementById('lf-cliente').value=l.cliente||'';document.getElementById('lf-origem').value=l.origem||'';
   document.getElementById('lf-cidade-orig').value=l.cidadeOrigem||'';document.getElementById('lf-destino').value=l.destino||'';
   document.getElementById('lf-cidade-dest').value=l.cidadeDestino||'';document.getElementById('lf-frete').value=l.valorFrete||'';
@@ -1558,7 +1678,9 @@ function editLote(id){
 }
 async function saveLote(){
   const id=document.getElementById('lf-id').value;
-  const payload={cliente:document.getElementById('lf-cliente').value.trim(),origem:document.getElementById('lf-origem').value.trim(),cidadeOrigem:document.getElementById('lf-cidade-orig').value.trim(),destino:document.getElementById('lf-destino').value.trim(),cidadeDestino:document.getElementById('lf-cidade-dest').value.trim(),valorFrete:document.getElementById('lf-frete').value.trim()||undefined};
+  const filialId=document.getElementById('lf-filial').value;
+  const filial=S.filiais.find(f=>f.id===filialId);
+  const payload={cliente:document.getElementById('lf-cliente').value.trim(),origem:document.getElementById('lf-origem').value.trim(),cidadeOrigem:document.getElementById('lf-cidade-orig').value.trim(),destino:document.getElementById('lf-destino').value.trim(),cidadeDestino:document.getElementById('lf-cidade-dest').value.trim(),valorFrete:document.getElementById('lf-frete').value.trim()||undefined,filialId:filialId||'',filialName:filial?.name||''};
   const btn=document.querySelector('#lt-overlay .btn-primary');
   if(btn){btn.disabled=true;btn.textContent='Salvando…';}
   try{
@@ -1573,6 +1695,153 @@ async function delLote(id){
   await fetch(`${API}/lotes/${id}`,{method:'DELETE'});
   toast('Lote excluído.','t-info');
   await loadLotes();
+}
+
+/* ═══════════ FILIAIS ═══════════ */
+let filialEditId=null;
+function renderFilialChips(){
+  const container=document.getElementById('pos-filial-chips');
+  if(!container)return;
+  const active=S.filiais.filter(f=>f.active);
+  const hasSem=S.lotes.some(l=>!l.filialId);
+  const chips=[
+    `<button class="sc-chip${posFilial===''?' active':''}" data-filial="" onclick="setPosFilial('')">🏢 Todas</button>`,
+    ...active.map(f=>`<button class="sc-chip${posFilial===f.id?' active':''}" data-filial="${f.id}" onclick="setPosFilial('${f.id}')">${esc(f.name)}</button>`),
+    ...(hasSem?[`<button class="sc-chip${posFilial==='none'?' active':''}" data-filial="none" onclick="setPosFilial('none')">Sem Filial</button>`]:[]),
+  ];
+  container.innerHTML=chips.join('');
+}
+function setPosFilial(id){posFilial=id;renderFilialChips();renderLotes();}
+function populateLoteFilialSelect(){
+  const sel=document.getElementById('lf-filial');
+  if(!sel)return;
+  const curr=sel.value;
+  sel.innerHTML='<option value="">— Sem filial —</option>'+S.filiais.filter(f=>f.active).map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('');
+  if(curr)sel.value=curr;
+}
+function populateHistFilters(){
+  const fSel=document.getElementById('hist-fil-filial');
+  if(fSel){const c=fSel.value;fSel.innerHTML='<option value="">Todas as filiais</option>'+S.filiais.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('');if(c)fSel.value=c;}
+  const lSel=document.getElementById('hist-fil-lote');
+  if(lSel){const c=lSel.value;lSel.innerHTML='<option value="">Todos os lotes</option>'+S.lotes.map(l=>`<option value="${l.id}">${esc(l.loteNumber)} — ${esc(l.cliente)}</option>`).join('');if(c)lSel.value=c;}
+  const uSel=document.getElementById('hist-fil-user');
+  if(uSel&&S.users.length){const c=uSel.value;uSel.innerHTML='<option value="">Todos os responsáveis</option>'+S.users.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');if(c)uSel.value=c;}
+}
+function openFilialMgmt(){
+  cancelFilialEdit();hideErr('fi-err');renderFilialList();
+  document.getElementById('filial-overlay').classList.add('open');
+}
+function closeFilialMgmt(){document.getElementById('filial-overlay').classList.remove('open');}
+function startFilialEdit(id){
+  const f=S.filiais.find(x=>x.id===id);if(!f)return;
+  filialEditId=id;
+  document.getElementById('fi-name').value=f.name;
+  document.getElementById('fi-form-label').textContent='Editar Filial';
+  document.getElementById('fi-save-btn').textContent='✔ Salvar';
+  document.getElementById('fi-cancel-btn').style.display='';
+  document.getElementById('fi-name').focus();
+}
+function cancelFilialEdit(){
+  filialEditId=null;
+  document.getElementById('fi-name').value='';
+  document.getElementById('fi-form-label').textContent='Nova Filial';
+  document.getElementById('fi-save-btn').textContent='+ Adicionar';
+  document.getElementById('fi-cancel-btn').style.display='none';
+  hideErr('fi-err');
+}
+async function saveFilial(){
+  const name=document.getElementById('fi-name').value.trim();
+  if(!name){showErr('fi-err','Nome da filial é obrigatório.');return;}
+  const btn=document.getElementById('fi-save-btn');if(btn)btn.disabled=true;
+  try{
+    const url=filialEditId?`${API}/filiais/${filialEditId}`:`${API}/filiais`;
+    const method=filialEditId?'PATCH':'POST';
+    const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+    const d=await r.json();
+    if(!r.ok){showErr('fi-err',d.error||'Erro.');return;}
+    toast(filialEditId?'Filial atualizada!':'Filial criada!');
+    cancelFilialEdit();
+    const rf=await fetch(API+'/filiais');if(rf.ok)S.filiais=await rf.json();
+    renderFilialChips();populateLoteFilialSelect();populateHistFilters();renderFilialList();
+  }catch(e){showErr('fi-err','Erro de rede.');}
+  finally{if(btn)btn.disabled=false;}
+}
+async function toggleFilialActive(id,active){
+  await fetch(`${API}/filiais/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({active})});
+  const rf=await fetch(API+'/filiais');if(rf.ok)S.filiais=await rf.json();
+  renderFilialChips();populateLoteFilialSelect();renderFilialList();
+}
+async function delFilial(id){
+  if(!confirm('Excluir esta filial? Os lotes vinculados ficarão sem filial.'))return;
+  const r=await fetch(`${API}/filiais/${id}`,{method:'DELETE'});
+  if(!r.ok){const d=await r.json();toast(d.error||'Erro.','t-error');return;}
+  toast('Filial excluída.','t-info');
+  const rf=await fetch(API+'/filiais');if(rf.ok)S.filiais=await rf.json();
+  renderFilialChips();populateLoteFilialSelect();renderFilialList();
+}
+function renderFilialList(){
+  const container=document.getElementById('filial-list');
+  if(!container)return;
+  if(!S.filiais.length){container.innerHTML='<div style="text-align:center;color:var(--text-600);padding:16px;font-size:.82rem">Nenhuma filial cadastrada. Adicione a primeira acima.</div>';return;}
+  container.innerHTML=S.filiais.map(f=>`
+    <div class="filial-item${f.active?'':' filial-item-inactive'}">
+      <div>
+        <div class="filial-item-name">${esc(f.name)}</div>
+        <div style="font-size:.7rem;color:var(--text-600)">${S.lotes.filter(l=>l.filialId===f.id).length} lote(s) vinculado(s)</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <span class="badge ${f.active?'badge-delivered':'badge-cancelled'}" style="font-size:.68rem">${f.active?'Ativa':'Inativa'}</span>
+        <button class="btn btn-ghost btn-sm" onclick="startFilialEdit('${f.id}')" title="Editar">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleFilialActive('${f.id}',${!f.active})" title="${f.active?'Desativar':'Ativar'}">${f.active?'🔴':'🟢'}</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="delFilial('${f.id}')" title="Excluir">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════ HISTÓRICO DE POSIÇÕES ═══════════ */
+let histOpen=false;
+function toggleHistoryPanel(){
+  histOpen=!histOpen;
+  document.getElementById('hist-body').classList.toggle('open',histOpen);
+  document.getElementById('hist-arrow').classList.toggle('open',histOpen);
+  if(histOpen)loadHistory();
+}
+async function loadHistory(){
+  const params=new URLSearchParams();
+  const fv=document.getElementById('hist-fil-filial')?.value;if(fv)params.set('filialId',fv);
+  const lv=document.getElementById('hist-fil-lote')?.value;if(lv)params.set('loteId',lv);
+  const uv=document.getElementById('hist-fil-user')?.value;if(uv)params.set('userId',uv);
+  const dfv=document.getElementById('hist-fil-from')?.value;if(dfv)params.set('dateFrom',dfv);
+  const dtv=document.getElementById('hist-fil-to')?.value;if(dtv)params.set('dateTo',dtv);
+  try{
+    const r=await fetch(`${API}/lote-history?${params}`);
+    if(r.ok)S.loteHistory=await r.json();
+  }catch(e){S.loteHistory=[];}
+  renderHistory();updateHistBadge();
+}
+const loteFieldLabels={nPorta:'Na Porta',emTransito:'Em Trânsito',carregado:'Carregado'};
+function renderHistory(){
+  const tb=document.getElementById('hist-tbody');if(!tb)return;
+  if(!S.loteHistory.length){tb.innerHTML='<tr><td colspan="8" class="tbl-empty">Nenhum registro encontrado.</td></tr>';return;}
+  tb.innerHTML=S.loteHistory.map(h=>`<tr>
+    <td><code style="background:rgba(56,189,248,.08);color:var(--neon);padding:2px 6px;border-radius:4px;font-size:.74rem">${esc(h.loteNumber)}</code></td>
+    <td style="color:var(--accent);font-size:.78rem;font-weight:600">${esc(h.filialName||'—')}</td>
+    <td style="color:var(--text-200)">${esc(h.cliente)}</td>
+    <td style="color:var(--text-400);font-size:.78rem">${loteFieldLabels[h.field]||esc(h.field)}</td>
+    <td style="color:var(--text-600)">${h.oldVal}</td>
+    <td><strong style="color:${h.delta>0?'var(--green)':'var(--red)'}">${h.delta>0?'+':''}${h.delta} → ${h.newVal}</strong></td>
+    <td style="color:var(--text-300);font-size:.78rem">${esc(h.updatedByName||'—')}</td>
+    <td style="color:var(--text-600);font-size:.73rem;white-space:nowrap">${fmtDT(h.timestamp)}</td>
+  </tr>`).join('');
+}
+function updateHistBadge(){
+  const today=new Date().toDateString();
+  const count=(S.loteHistory||[]).filter(h=>new Date(h.timestamp).toDateString()===today).length;
+  const badge=document.getElementById('hist-badge');
+  const navBadge=document.getElementById('pos-notif');
+  if(badge){badge.textContent=count;badge.style.display=count?'':'none';}
+  if(navBadge){navBadge.textContent=count;navBadge.style.display=count?'':'none';}
 }
 
 /* ═══════════ VEÍCULOS ═══════════ */

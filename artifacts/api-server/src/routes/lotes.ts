@@ -1,6 +1,8 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { Lote } from "../models/lote";
+import { LoteHistory } from "../models/loteHistory";
+import { SysUser } from "../models/sysuser";
 
 const router: IRouter = Router();
 
@@ -11,6 +13,8 @@ const LoteSchema = z.object({
   destino: z.string().min(1, "Destino é obrigatório"),
   cidadeDestino: z.string().min(1, "Cidade destino é obrigatória"),
   valorFrete: z.string().optional(),
+  filialId: z.string().optional(),
+  filialName: z.string().optional(),
   nPorta: z.number().min(0).optional(),
   emTransito: z.number().min(0).optional(),
   carregado: z.number().min(0).optional(),
@@ -18,7 +22,22 @@ const LoteSchema = z.object({
 
 function fmt(l: InstanceType<typeof Lote>) {
   const o = l.toObject();
-  return { id: l._id.toString(), ...o, _id: undefined, __v: undefined };
+  return {
+    id: l._id.toString(),
+    loteNumber: o.loteNumber,
+    cliente: o.cliente,
+    origem: o.origem,
+    cidadeOrigem: o.cidadeOrigem,
+    destino: o.destino,
+    cidadeDestino: o.cidadeDestino,
+    valorFrete: o.valorFrete ?? "",
+    filialId: o.filialId ?? "",
+    filialName: o.filialName ?? "",
+    nPorta: o.nPorta ?? 0,
+    emTransito: o.emTransito ?? 0,
+    carregado: o.carregado ?? 0,
+    createdAt: o.createdAt,
+  };
 }
 
 router.get("/lotes", async (req, res) => {
@@ -81,8 +100,34 @@ router.patch("/lotes/:id/counter", async (req, res) => {
     if (!lote) { res.status(404).json({ error: "Lote não encontrado" }); return; }
     const current = (lote[field as keyof typeof lote] as number) ?? 0;
     const newVal = Math.max(0, current + delta);
-    await Lote.findByIdAndUpdate(req.params.id, { [field]: newVal });
-    const updated = await Lote.findById(req.params.id);
+    const updated = await Lote.findByIdAndUpdate(req.params.id, { [field]: newVal }, { new: true });
+
+    // Save history entry (non-fatal)
+    try {
+      let updatedByName = "Sistema";
+      const uid = req.session?.userId;
+      if (uid) {
+        const user = await SysUser.findById(uid).select("name").lean();
+        if (user) updatedByName = (user as { name: string }).name;
+      }
+      await LoteHistory.create({
+        loteId: req.params.id,
+        loteNumber: lote.loteNumber,
+        filialId: lote.filialId ?? "",
+        filialName: lote.filialName ?? "",
+        cliente: lote.cliente,
+        field,
+        oldVal: current,
+        newVal,
+        delta,
+        updatedBy: uid ?? "",
+        updatedByName,
+        timestamp: new Date(),
+      });
+    } catch (histErr) {
+      req.log.warn(histErr, "Failed to save lote history (non-fatal)");
+    }
+
     res.json(fmt(updated!));
   } catch (err) {
     req.log.error(err, "Failed to update counter");

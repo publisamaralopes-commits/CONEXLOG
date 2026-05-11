@@ -1,0 +1,158 @@
+UPGRADE POSIÇÃO MODULE WITH FILIAIS + AUTOMATIC POSITION REPORTS
+
+Enhance the Posição module to support FILIAIS and automatic operational notifications.
+
+==================================================
+FILIAL SYSTEM
+=============
+
+Add support for Filiais (Branches).
+
+Examples:
+
+* Anápolis
+* Itumbiara
+* Uberlândia
+* Rondonópolis
+
+==================================================
+CREATE FILIAL FEATURE
+=====================
+
+Administrator must be able to:
+
+* create filial
+* edit filial
+* deactivate filial
+
+==================================================
+LOTES BY FILIAL
+===============
+
+Each lote must belong to ONE filial.
+
+Example:
+Filial:
+Anápolis
+
+Lote:
+Lote 0001
+
+==================================================
+POSIÇÃO SCREEN
+==============
+
+Display lotes separated/grouped by filial.
+
+Example layout:
+
+FILIAL: ANÁPOLIS
+
+* Lote 001
+* Lote 002
+
+FILIAL: ITUMBIARA
+
+* Lote 003
+* Lote 004
+
+==================================================
+LOTE STRUCTURE
+==============
+
+Each lote contains:
+
+* Cliente
+* Origem
+* Cidade Origem
+* Destino
+* Cidade Destino
+* Valor do Frete (optional)
+
+STATUS SUMMARY:
+
+* Veículos em Trânsito
+* Na Porta
+* Carregados
+
+==================================================
+UPDATE POSITION SYSTEM
+======================
+
+When the user updates a lote position:
+
+* update vehicle quantities
+* save timestamp
+* save responsible user
+* register operation history
+
+==================================================
+AUTOMATIC REPORT NOTIFICATION
+=============================
+
+After updating a lote:
+Automatically generate and send a position report to administrators.
+
+Example:
+"Lote 001 atualizado"
+
+Contents:
+
+* filial
+* cliente
+* trânsito
+* porta
+* carregados
+* updated by
+* update date/time
+
+==================================================
+NOTIFICATION METHODS
+====================
+
+Create support for:
+
+* in-system notifications
+* admin alert panel
+* future WhatsApp/email integration ready
+
+==================================================
+REPORT HISTORY
+==============
+
+Store all updates in history log.
+
+Allow administrators to:
+
+* view update history
+* filter by filial
+* filter by lote
+* filter by user
+* filter by date
+
+==================================================
+VISUAL DESIGN
+=============
+
+Maintain CONEX visual identity:
+
+* dark operational dashboard
+* #060C1A background
+* #F97316 highlights
+* professional logistics interface
+
+==================================================
+MOBILE VERSION
+==============
+
+The filial/lote system must work perfectly on:
+
+* desktop
+* mobile
+* tablets
+
+==================================================
+FINAL GOAL
+==========
+
+The Posição module must behave like a real operational logistics control center with branch organization and live position reporting for administrators.

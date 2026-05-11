@@ -8,6 +8,8 @@ export interface ILote extends Document {
   destino: string;
   cidadeDestino: string;
   valorFrete?: string;
+  filialId?: string;
+  filialName?: string;
   nPorta: number;
   emTransito: number;
   carregado: number;
@@ -23,6 +25,8 @@ const LoteSchema = new Schema<ILote>(
     destino: { type: String, required: true },
     cidadeDestino: { type: String, required: true },
     valorFrete: { type: String },
+    filialId: { type: String, default: "" },
+    filialName: { type: String, default: "" },
     nPorta: { type: Number, default: 0, min: 0 },
     emTransito: { type: Number, default: 0, min: 0 },
     carregado: { type: Number, default: 0, min: 0 },
