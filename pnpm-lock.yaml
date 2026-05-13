@@ -176,8 +176,8 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
       connect-mongo:
-        specifier: ^6.0.0
-        version: 6.0.0(express-session@1.19.0)(mongodb@7.2.0)
+        specifier: ^5.1.0
+        version: 5.1.0(express-session@1.19.0)(mongodb@7.2.0)
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
@@ -1888,12 +1888,12 @@ packages:
   compare-versions@6.1.1:
     resolution: {integrity: sha512-4hm4VPpIecmlg59CHXnRDnqGplJFrbLG4aFEl5vl6cK1u76ws3LLvX7ikFnTDl5vo39sjWD6AaDPYodJp/NNHg==}
 
-  connect-mongo@6.0.0:
-    resolution: {integrity: sha512-mHxfnTiWk7ZtxmHdcrFBKlr7fCtgGoFpx/oe9jFW0yb2NinagsxEeuol78nUWMpnWyYK0nnuXMlU9wrgUjTE6g==}
-    engines: {node: '>=20.8.0'}
+  connect-mongo@5.1.0:
+    resolution: {integrity: sha512-xT0vxQLqyqoUTxPLzlP9a/u+vir0zNkhiy9uAdHjSCcUUf7TS5b55Icw8lVyYFxfemP3Mf9gdwUOgeF3cxCAhw==}
+    engines: {node: '>=12.9.0'}
     peerDependencies:
       express-session: ^1.17.1
-      mongodb: '>=5.0.0'
+      mongodb: '>= 5.1.0 < 7'
 
   content-disposition@1.0.1:
     resolution: {integrity: sha512-oIXISMynqSqm241k6kcQ5UwttDILMK4BiurCfGEREw6+X9jkkpEe5T9FZaApyLGGOnFuyMWZpdolTXMtvEJ08Q==}
@@ -4761,7 +4761,7 @@ snapshots:
 
   compare-versions@6.1.1: {}
 
-  connect-mongo@6.0.0(express-session@1.19.0)(mongodb@7.2.0):
+  connect-mongo@5.1.0(express-session@1.19.0)(mongodb@7.2.0):
     dependencies:
       debug: 4.4.3
       express-session: 1.19.0
