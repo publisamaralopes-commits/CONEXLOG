@@ -20,4 +20,11 @@
     "noImplicitAny": false,
     "skipLibCheck": true
   }
+}{
+  "compilerOptions": {
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  }
 }
