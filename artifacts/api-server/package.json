@@ -13,7 +13,7 @@
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
     "bcryptjs": "^3.0.3",
-    "connect-mongo": "^6.0.0",
+    "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2",
     "drizzle-orm": "catalog:",
