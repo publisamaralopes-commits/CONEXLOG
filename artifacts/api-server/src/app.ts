@@ -21,6 +21,12 @@ if (!MONGODB_URI) {
 const IS_PROD = process.env.NODE_ENV === "production";
 
 const app: Express = express();
+app.get("/", (_req, res) => {
+  res.json({
+    status: "online",
+    api: "CONEXLOG"
+  });
+});
 
 // Trust Replit's reverse proxy so rate-limiting, secure cookies, and
 // req.ip all work correctly in production.
